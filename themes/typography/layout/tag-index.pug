@@ -1,0 +1,16 @@
+extends partial/layout
+
+block site_title
+    != __("Tags") + " · " + config.title
+
+block description
+    - var desc = __("Tags")+ ' - ' + config.title;
+    meta(name="description", content=desc)
+
+block content
+    .autopagerize_page_element: .content
+        .archive.animated.fadeInDown
+            p.post-title
+                != __("Tags")
+            include mixins
+            +tagList()

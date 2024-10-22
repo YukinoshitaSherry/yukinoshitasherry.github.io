@@ -1,0 +1,16 @@
+extends partial/layout
+
+block site_title
+    != __("Categories") + " · " + config.title
+
+block description
+    - var desc = __("Categories")+ ' - ' + config.title;
+    meta(name="description", content=desc)
+
+block content
+    .autopagerize_page_element: .content
+        .archive.animated.fadeInDown
+            p.post-title
+                != __("Categories")
+            include mixins
+            +categoryList()
