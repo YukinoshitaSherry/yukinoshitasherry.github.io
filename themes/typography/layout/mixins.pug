@@ -120,12 +120,12 @@ mixin tagList()
 
 mixin categoryList()
     ul.listing
-        - site.categories.each(function (item) {    
-        | <li class="listing-item">
-        .listing-post
-            p.post-title
-                a(href= url_for(item.path), title= item.name)= item.name
-            span.date.meta-item
-                != __('CategoriesCount', item.posts.length)
-        | </li>
-        - })
+        each category in config.categories
+            | <li class="listing-item">
+            .listing-post
+                p.post-title
+                    a(href=url_for(config.category_dir + '/' + category))= category
+                span.date.meta-item
+                    - var count = site.categories.findOne({name: category}) ? site.categories.findOne({name: category}).posts.length : 0
+                    != __('CategoriesCount', count)
+            | </li>

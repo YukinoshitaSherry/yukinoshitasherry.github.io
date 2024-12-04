@@ -12,5 +12,7 @@ block content
         .archive.animated.fadeInDown
             p.post-title
                 != __("Categories")
-            include mixins
-            +categoryList()
+            .category-list
+                each category in config.categories
+                    .category-item
+                        a(href=url_for(config.category_dir + '/' + category))= category
