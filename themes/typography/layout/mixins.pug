@@ -36,6 +36,10 @@ mixin make_post(item, is_detail)
             p.post-abstract!= item.content
         else
             p.post-abstract!= truncate(strip_html(item.content.replace(/<pre(?: |>)[^]*?<\/pre>/gm, ' ')), {length: 160})
+        if item.tags && item.tags.length
+            .post-tags
+                each tag in item.tags.data
+                    span.post-tag= tag.name
 
 mixin make_page_links()
     if site.pages

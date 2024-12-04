@@ -139,3 +139,11 @@ prism_plugin:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ""
+
+# 添加自定义标签
+tags:
+  - 秋月春风吃什么
+  - 秋月春风喝咖啡  
+  - 秋月春风听音乐
+  - 秋月春风去剧院
+  - 秋月春风看展览

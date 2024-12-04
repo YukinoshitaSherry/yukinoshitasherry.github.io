@@ -1,0 +1,30 @@
+.tag-filters {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .tag-filter {
+    margin: 5px;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tag-filter:hover,
+  .tag-filter.active {
+    background: #333;
+    color: #fff;
+  }
+  
+  .post-tag {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 12px;
+    background: #f0f0f0;
+    color: #666;
+  }
