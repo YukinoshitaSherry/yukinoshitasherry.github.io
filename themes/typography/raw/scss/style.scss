@@ -20,7 +20,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: $fontList;
+  font-family: "Times New Roman", "楷体","华文中宋" !important;
   color: $foregroundColor;
 }
 
@@ -46,31 +46,42 @@ html {
 
 h1 {
   font-size: 42px;
+  font-family: "Times New Roman", "华文中宋";
 }
 
 h2 {
   font-size: 36px;
+  font-family: "Times New Roman", "华文中宋";
 }
 
 h3 {
   font-size: 30px;
+  font-family: "Times New Roman", "华文中宋";
 }
 
 h4 {
   font-size: 24px;
+  font-family: "Times New Roman", "华文中宋";
 }
 
 h5 {
   font-size: 18px;
+  font-family: "Times New Roman", "华文中宋";
 }
 
 h6 {
   font-size: 14px;
+  font-family: "Times New Roman", "华文中宋";
+}
+
+p {
+  font-family: "Times New Roman", "楷体";
 }
 
 body {
   font-size: 18px;
   line-height: 1.5em;
+  font-family: "Times New Roman", "楷体";
 
   @if lightness($backgroundColor) >50 {
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACFJREFUeNpiZGBg4GegAsBlCD8TqSYNQg2Mo6FEBAAIMACdPABtrSW/IQAAAABJRU5ErkJggg==");
@@ -725,4 +736,53 @@ figure {
     height: 16px;
     display: inline-block;
     vertical-align: middle;
+}
+
+.content .post-content {
+    font-family: "Times New Roman", "楷体" !important;
+    font-size: 16px !important;
+    line-height: 1.8 !important;
+}
+
+.content .post-title {
+    font-family: "Times New Roman", "华文中宋" !important;
+    font-size: 22px !important;
+    font-weight: bold !important;
+}
+
+.content .post-meta {
+    font-family: "Times New Roman", "华文中宋" !important;
+    font-size: 14px !important;
+}
+
+.post-content {
+  font-family: "Times New Roman", "楷体" !important;
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+}
+
+// 如果上面的不生效，尝试更具体的选择器
+.content .post-content,
+.post-container .post-content,
+article .post-content {
+  font-family: "Times New Roman", "楷体" !important;
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+}
+
+// 针对段落
+.post-content p {
+  font-family: "Times New Roman", "楷体" !important;
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+}
+
+// 修改全局 p 标签样式
+.post-page p,
+.post-container p,
+.content p {
+    font-family: "Times New Roman", "楷体" !important;
+    font-size: 16px !important;
+    line-height: 1.8 !important;
+    margin: 10px 0;
 }

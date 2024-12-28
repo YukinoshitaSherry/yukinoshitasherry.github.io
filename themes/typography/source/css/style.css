@@ -104,10 +104,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Source Sans Pro", "Roboto", "Helvetica", "Helvetica Neue",
-    "Source Han Sans SC", "Source Han Sans TC", "PingFang SC", "PingFang HK",
-    "PingFang TC", sans-serif;
-  color: #2e405b;
+  font-family: "Times New Roman", "楷体","华文中宋";
+  color: #2e405b,#666;
 }
 html {
   background: #fff;
@@ -126,25 +124,33 @@ html {
 }
 h1 {
   font-size: 42px;
+  font-family: "Times New Roman", "华文中宋";
 }
 h2 {
   font-size: 36px;
+  font-family: "Times New Roman", "华文中宋";
 }
 h3 {
   font-size: 30px;
+  font-family: "Times New Roman", "华文中宋";
 }
 h4 {
   font-size: 24px;
+  font-family: "Times New Roman", "华文中宋";
 }
 h5 {
   font-size: 18px;
+  font-family: "Times New Roman", "华文中宋";
 }
 h6 {
   font-size: 14px;
+  font-family: "Times New Roman", "华文中宋";
 }
 body {
   font-size: 18px;
   line-height: 1.5em;
+  font-family: "Times New Roman", "楷体";
+  color: #000;
   background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACFJREFUeNpiZGBg4GegAsBlCD8TqSYNQg2Mo6FEBAAIMACdPABtrSW/IQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
   background-attachment: fixed;
@@ -379,17 +385,22 @@ footer * {
   font-size: 22px;
   font-weight: bold;
   margin: 4px 0;
-  font-family:"Times New Roman","华文中宋"
+  font-family: "Times New Roman", "华文中宋";
 }
 .post-meta {
   font-size: 14px;
   margin: 10px 0;
-  font-family:"Times New Roman","华文中宋"
+  font-family: "Times New Roman", "华文中宋";
 }
 .post-abstract {
   font-size: 16px;
   font-family:"Times New Roman","楷体";
   color: #666;
+}
+.post-content {
+  font-size: 16px;
+  line-height: 1.8;
+  font-family: "Times New Roman", "楷体";
 }
 li {
   margin: 5px 0;

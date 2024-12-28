@@ -1,10 +1,10 @@
 mixin make_post(item, is_detail)
-    div.post-container
-        p.post-title
-            if is_detail
-                a= item.title
+    .post-container
+        div.post-title
+            if !is_detail
+                a(href= url_for(item.path), title= item.title)= item.title
             else
-                a(href= url_for(item.path))= item.title
+                = item.title
         if item.desc && theme.enableExcerpt !== false
             p.post-desc= item.desc
         p.post-meta
