@@ -27,11 +27,13 @@
     border-radius: 12px;
     background: #f0f0f0;
     color: #666;
+    font-family:"Times New Roman","楷体"
   }
   
   .category-list {
     margin: 20px 0;
     text-align: center;
+    font-family:"Times New Roman","楷体"
   }
   
   .category-item {
@@ -41,6 +43,7 @@
     border: 1px solid #ddd;
     border-radius: 20px;
     transition: all 0.3s;
+    font-family:"Times New Roman","楷体"
   }
   
   .category-item:hover {
@@ -51,4 +54,11 @@
   .category-item a {
     color: inherit;
     text-decoration: none;
+  }
+  
+  .post-desc {
+    margin: 10px 0;
+    color: #666;
+    font-size: 0.9em;
+    font-family:"Times New Roman","楷体"
   }

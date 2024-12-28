@@ -5,6 +5,8 @@ mixin make_post(item, is_detail)
                 a= item.title
             else
                 a(href= url_for(item.path))= item.title
+        if item.desc && theme.enableExcerpt !== false
+            p.post-desc= item.desc
         p.post-meta
             span.date.meta-item!=__("posted_at")+"&nbsp;" + date(item.date, 'YYYY-MM-DD')
             if theme.duoshuo || theme.disqus
@@ -34,8 +36,10 @@ mixin make_post(item, is_detail)
                             - });
         if is_detail
             p.post-abstract!= item.content
-        else
-            p.post-abstract!= truncate(strip_html(item.content.replace(/<pre(?: |>)[^]*?<\/pre>/gm, ' ')), {length: 160})
+        else if item.desc
+            p.post-abstract!= item.desc
+        else if theme.enableExcerpt
+            p.post-abstract!= truncate(strip_html(item.content.replace(/<pre(?: |>)[^]*?<\/pre>/gm, ' ')), {length: theme.truncate_len || 160})
         if item.tags && item.tags.length
             .post-tags
                 each tag in item.tags.data
