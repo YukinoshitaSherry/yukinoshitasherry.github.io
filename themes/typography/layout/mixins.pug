@@ -1,11 +1,20 @@
 mixin make_post(item, is_detail)
+    - console.log("is_detail:", is_detail)
     .post-container
         div.post-title
-            = item.title
+            if !is_detail
+                a(href= url_for(item.path), title= item.title)= item.title
+            else
+                = item.title
         if item.desc && theme.enableExcerpt !== false
             p.post-desc= item.desc
         p.post-meta
             span.date.meta-item!=__("posted_at")+"&nbsp;" + date(item.date, 'YYYY-MM-DD')
+            if theme.duoshuo || theme.disqus
+                span.meta-item
+                    i.fa.fa-comment-o
+                    span &nbsp;
+                    a(href= url_for(item.path + "#comments"))= __('Comments')
             if theme.showCategories
                 if item.categories
                     if item.categories.length > 0
