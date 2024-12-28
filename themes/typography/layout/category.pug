@@ -4,17 +4,32 @@ block site_title
     != page.category + " · " + config.title
 
 block description
-    - var desc = __("Categories")+': ' + page.category + ' - ' + config.title;
+    - var desc = page.category + ' - ' + config.title;
     meta(name="description", content=desc)
 
 block content
     .autopagerize_page_element: .content
-        p.post-title
-            != __("Categories")+' ' + page.category
         .archive.animated.fadeInDown
-            ul.list-with-title
+            h1.archive-title
+                = page.category
+                small= ' ' + __('CategoriesCount', page.posts.length)
+            - var year = 0;
+            - var change = false;
+            - var firstYear = true;
+            - page.posts.each(function(item){
+                - var itemYear = date(item.date, 'YYYY') - 0;
+                - change = year !== itemYear;
+                - year = change ? itemYear : year;
+                if change 
+                    if !firstYear
+                        br
+                    - firstYear = false;
+                    h2.archive-year!= year
                 include mixins
-                +postList()
-            .controller
-                include mixins
-                +make_pager(__('prev'), __('next'))
+                - var temp_showCategories = theme.showCategories
+                - theme.showCategories = false
+                +make_post(item, false)
+                - theme.showCategories = temp_showCategories
+            - })
+        include mixins
+        +make_pager(__('prev'), __('next'))
