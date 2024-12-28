@@ -23,3 +23,6 @@ showTags: true
 
 # Color scheme
 themeStyle: light # light/dark
+
+# Show description behind post titles
+enableDesc: true
