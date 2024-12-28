@@ -16,6 +16,7 @@ block content
             - var year = 0;
             - var change = false;
             - var firstYear = true;
+            - page.posts.sort('date', -1)  // 按日期倒序排序
             - page.posts.each(function(item){
                 - var itemYear = date(item.date, 'YYYY') - 0;
                 - change = year !== itemYear;
