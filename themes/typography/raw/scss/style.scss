@@ -786,3 +786,37 @@ article .post-content {
     line-height: 1.8 !important;
     margin: 10px 0;
 }
+
+// 移除所有标题前的下划线
+h1, h2, h3, h4, h5, h6,
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+    &::before {
+        content: none !important;
+    }
+    &::after {
+        content: none !important;
+    }
+    border-left: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+// 确保标题样式正确
+.post-content {
+    h1, h2, h3, h4, h5, h6 {
+        &::before {
+            content: none !important;
+        }
+        &::after {
+            content: none !important;
+        }
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
+}

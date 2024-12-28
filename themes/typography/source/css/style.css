@@ -104,8 +104,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Times New Roman", "楷体","华文中宋";
-  color: #2e405b,#666;
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #2e405b, #666;
 }
 html {
   background: #fff;
@@ -125,32 +125,51 @@ html {
 h1 {
   font-size: 42px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 h2 {
   font-size: 36px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 h3 {
   font-size: 30px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
-h4 {
+h4,
+.h4 {
   font-size: 24px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 h5 {
   font-size: 18px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 h6 {
   font-size: 14px;
   font-family: "Times New Roman", "华文中宋";
+  border-left: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 body {
   font-size: 18px;
   line-height: 1.5em;
   font-family: "Times New Roman", "楷体";
-  color: #000;
+  color: #2e405b;
   background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACFJREFUeNpiZGBg4GegAsBlCD8TqSYNQg2Mo6FEBAAIMACdPABtrSW/IQAAAABJRU5ErkJggg==");
   background-repeat: repeat;
   background-attachment: fixed;
@@ -217,6 +236,8 @@ body {
 .archive ul {
   list-style-type: none;
 }
+
+/* 秋月春风侧边栏 */
 .site-title {
   font-weight: bolder;
   font-style: normal;
@@ -225,7 +246,7 @@ body {
   margin: 0 0 0 -2px;
   text-align: left;
   font-size: 0.5em;
-  padding: 0 0 50px 0;
+  padding: 2px 100 50px 0;
   border-left: solid #2e405b 2px;
   transition: padding 0.8s ease 0s, background 0.8s ease 0s;
 }
@@ -250,9 +271,11 @@ body {
   font-family: "HiraMinProN-W6", "Source Han Serif CN", "Source Han Serif SC",
     "Source Han Serif TC", serif;
 }
+/*bio*/
 .site-title-large {
   font-size: 50px;
   padding-top: 0;
+  margin: 5px;  /* 增加秋月春风与bio的间距 */
 }
 .site-title-small {
   font-size: 30px;
@@ -261,9 +284,9 @@ body {
 .site-title-links {
   font-weight: bold;
   font-style: normal;
-  font-family:"Times New Roman","华文中宋";
+  font-family: "Times New Roman", "华文中宋";
   font-size: 26px;
-  margin: 0;
+  margin: 2px;
   padding: 60px 0;
   text-align: left;
   position: fixed;
@@ -304,7 +327,7 @@ a {
   padding: 3px;
   cursor: pointer;
   cursor: hand;
-  font-family:"Times New Roman","华文中宋";
+  font-family: "Times New Roman", "华文中宋";
 }
 a:hover,
 a:focus {
@@ -379,7 +402,7 @@ footer * {
 .post-container {
   margin: 0 0 20px 0;
   font-weight: normal;
-  font-family:"Times New Roman","华文中宋"
+  font-family: "Times New Roman", "华文中宋";
 }
 .post-title {
   font-size: 22px;
@@ -394,7 +417,7 @@ footer * {
 }
 .post-abstract {
   font-size: 16px;
-  font-family:"Times New Roman","楷体";
+  font-family: "Times New Roman", "楷体";
   color: #666;
 }
 .post-content {
@@ -437,39 +460,40 @@ figure .code pre {
 @media (max-width: 768px) {
   body {
     line-height: normal;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h1 {
     font-size: 40px;
-    font-family:"Times New Roman","华文中宋";
-  } 
+    font-family: "Times New Roman", "华文中宋";
+  }
   h2 {
     font-size: 34px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h3 {
     font-size: 28px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
-  h4 {
+  h4,
+  .h4 {
     font-size: 22px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h5 {
     font-size: 16px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h6 {
     font-size: 14px;
-    font-family:"Times New Roman","华文中宋";
-}
+    font-family: "Times New Roman", "华文中宋";
+  }
   .site-title-large {
     font-size: 38px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-title-small {
     font-size: 22px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .vertical-text {
     -ms-writing-mode: lr-tb;
@@ -563,16 +587,16 @@ figure .code pre {
 @media only screen and (max-height: 860px) {
   .site-title-large {
     font-size: 32px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-title-small {
     font-size: 20px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-title-links ul li {
     font-size: 14px;
     line-height: 1.3;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-nav-footer-br {
     display: none;
@@ -580,12 +604,12 @@ figure .code pre {
   .side-container {
     padding-top: 40px;
     padding-bottom: 20px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .main-container {
     padding-top: 40px;
     padding-bottom: 60px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
 }
 
@@ -593,39 +617,40 @@ figure .code pre {
 @media only screen and (max-height: 600px) {
   body {
     line-height: normal;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h1 {
     font-size: 40px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h2 {
     font-size: 34px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h3 {
     font-size: 28px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
-  h4 {
+  h4,
+  .h4 {
     font-size: 22px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h5 {
     font-size: 16px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   h6 {
     font-size: 14px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-title-large {
     font-size: 38px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .site-title-small {
     font-size: 22px;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .vertical-text {
     -ms-writing-mode: lr-tb;
@@ -693,16 +718,16 @@ figure .code pre {
     font-size: 20px;
     font-weight: bold;
     margin: 3px 0;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .post-meta {
     font-size: 14px;
     margin: 10px 0;
-    font-family:"Times New Roman","华文中宋";
+    font-family: "Times New Roman", "华文中宋";
   }
   .post-abstract {
     font-size: 16px;
-    font-family:"Times New Roman","楷体";
+    font-family: "Times New Roman", "楷体";
   }
   .soc {
     display: block !important;
