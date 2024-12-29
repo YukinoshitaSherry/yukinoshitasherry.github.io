@@ -332,8 +332,8 @@ a {
   -moz-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   -o-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   -webkit-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
-  border-bottom: solid #2e405b 2px;
-  padding: 3px;
+  border-bottom: solid #2e405b 0.5px; /* 横线距离宽度从1px改为0.5px */
+  padding: 4px; /* 将padding从3px改为4.5px */
   cursor: pointer;
   cursor: hand;
   font-family: "Times New Roman", "华文中宋";
@@ -811,4 +811,35 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
     text-align: center;
+}
+
+/* 主页图片样式 */
+.home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -1em;
+  margin-bottom: 3em;
+}
+
+.home-header img {
+  max-width: 1500px;
+  width: 300%;
+  height: auto;
+  display: block;
+  margin-top: -1em;
+  border-radius: 1px;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  -ms-border-radius: 1px;
+  -o-border-radius: 1px;
+}
+
+.home-header .motto {
+  margin-top: 0.5em;
+  color: #888;
+  font-size: 0.9em;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  text-align: center;
 }
