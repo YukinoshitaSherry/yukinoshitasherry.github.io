@@ -44,6 +44,6 @@ $(document).ready(function () {
     }
     $('.site-title').click(function(e) {
         e.preventDefault();
-        window.open($(this).find('a:first').attr('href'), '_blank');
+        window.location.href = $(this).find('a:first').attr('href');
     });
 });
