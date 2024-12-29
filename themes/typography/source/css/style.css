@@ -791,6 +791,7 @@ h1, h2, h3, h4, h5, h6 {
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
     -o-border-radius: 1px;
+    margin-bottom: 0.5em;  /* 增加图片底部间距 */
 }
 
 .about-page .post-content {
@@ -803,7 +804,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 标语样式 */
 .about-page .motto {
-    margin-top: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 4em;  /* 增加标语底部间距 */
     color: #666;
     font-size: 0.9em;
     font-family: 'Times New Roman', Times, serif;
