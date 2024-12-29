@@ -219,7 +219,7 @@ body {
   list-style-type: none;
 }
 
-/* 秋月春风侧边栏 */
+/* 普通页面的侧边栏样式 */
 .site-title {
   font-weight: bolder;
   font-style: normal;
@@ -230,14 +230,43 @@ body {
   font-size: 0.5em;
   padding: 2px 100 50px 0;
   border-left: solid #2e405b 2px;
-  transition: padding 0.8s ease 0s, background 0.8s ease 0s;
+  background: transparent;  /* 默认透明背景 */
+  transition: padding 0.8s ease 0s;
 }
+
+.site-title * {
+  color: #2e405b !important;  /* 默认深色文字 */
+}
+
+/* 普通页面hover效果 */
 .site-title:hover {
   padding: 15px 0 35px 0;
   color: #fff !important;
   background: #2e405b !important;
   border-left: solid #2e405b 2px;
 }
+
+.site-title:hover * {
+  color: #fff !important;
+}
+
+/* 个人主页特殊样式 */
+body.about-page .site-title {
+  background: #2e405b !important;
+}
+
+body.about-page .site-title * {
+  color: #fff !important;
+}
+
+body.about-page .site-title:hover {
+  background: #2e405b !important;
+}
+
+body.about-page .site-title a:hover {
+  color: #fff !important;
+}
+
 .site-title:hover * {
   color: #fff !important;
 }

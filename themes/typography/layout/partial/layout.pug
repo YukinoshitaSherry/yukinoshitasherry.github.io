@@ -3,12 +3,11 @@ html(lang="zh-CN")
     head
         include head
 
-    body
+    body(class=page.path.includes('about/') ? 'about-page' : '')
         div#stage.container
             div.row
                 include sidebar
                 div#main-container.col-sm-9.col-xs-12.main-container.invisible
-
                     block content
                     div.visible-xs.site-bottom-footer
                         include footer
