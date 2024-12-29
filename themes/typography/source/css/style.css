@@ -808,7 +808,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 4em;  /* 增加标语底部间距 */
     color: #666;
     font-size: 0.9em;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Times New Roman';
     font-style: italic;
     text-align: center;
 }
@@ -819,7 +819,7 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   align-items: center;
   margin-top: -1em;
-  margin-bottom: 3em;
+  margin-bottom: 2em;
 }
 
 .home-header img {
@@ -837,9 +837,44 @@ h1, h2, h3, h4, h5, h6 {
 
 .home-header .motto {
   margin-top: 0.5em;
+  margin-bottom: -0.9em;
   color: #888;
   font-size: 0.9em;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: 'Times New Roman';
   font-style: italic;
   text-align: center;
+}
+
+/* 主页intro */
+.custom-content {
+  padding: 2em 0;
+  max-width: 800px;
+  margin: 0 auto;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  font-family: '楷体', 'Times New Roman';
+}
+
+.custom-content p {
+  line-height: 1.8;
+  margin: 0;
+  margin-bottom: 3em;
+  font-family: '楷体', 'Times New Roman';
+  font-size: 0.5em;
+}
+
+.custom-content a {
+  color: #2e405b;
+  text-decoration: none;
+  border-bottom: 1px solid #2e405b;
+  transition: all 0.3s ease;
+  font-size: 1em;
+  font-family: 'Times New Roman', '华文中宋';
+}
+
+.custom-content a:hover {
+  color: #fff;
+  background-color: #2e405b;
+  padding: 2px 5px;
+  font-family: 'Times New Roman', '华文中宋';
 }
