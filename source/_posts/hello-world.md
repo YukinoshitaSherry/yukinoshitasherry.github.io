@@ -1,7 +1,7 @@
 ---
 title: Hello World
 date: 2024-10-28
-categories: 秋月春风碎碎念
+categories: 碎碎念
 ---
 Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 ## 2024.12.04 改序

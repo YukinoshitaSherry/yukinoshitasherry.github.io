@@ -13,6 +13,6 @@ block content
             p.post-title
                 != __("Categories")
             .category-list
-                each category in config.categories
+                each category in site.categories.data
                     .category-item
-                        a(href=url_for(config.category_dir + '/' + category))= category
+                        a(href=url_for(category.path))= category.name

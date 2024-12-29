@@ -9,21 +9,30 @@ block content
 		
 		//- 修改自定义内容区域的样式
 		.custom-content(style="margin: 2em auto; width: 100%; max-width: 700px; text-align: left; padding: 0 20px;")
-			p(style="font-size: 0.98em; color: #2e4050; line-height: 2; font-family: 'Times New Roman', '楷体';")
-				| Welcome! 
-				br
-				| 现在坐标主页，下划可查看全部文章，侧边栏可访问分类、归档与关于页面。
+			p(style="font-size: 0.925em; color: #2e4050; line-height: 2; font-family: 'Times New Roman', '楷体';")
+				| Welcome to my blog! &nbsp; 现在坐标主页，侧边栏可访问分类、归档与关于页面。
 				br
 				| 这里记录着我的浙江大学学习经历：
 				a(href="/categories/上浙大" style="margin: 0 5px;") 上浙大
 				br
-				| 这里记录着我的泛计算机类知识自学笔记：
+				| 这里是我的泛计算机类知识自学笔记：
 				a(href="/categories/学技术" style="margin: 0 5px;") 学技术
+				br
+				| 这里是英语学习笔记：
+				a(href="/categories/学英语" style="margin: 0 5px;") 学英语
+				| &nbsp;小语种与语言学探索：
+				a(href="/categories/学语言" style="margin: 0 5px;") 学语言
+				br
+				| 这里是美食探店分享：
+				a(href="/categories/吃什么" style="margin: 0 5px;") 吃什么
+				a(href="/categories/喝咖啡" style="margin: 0 5px;") 喝咖啡
 				br
 				| 这里是我的诗歌与杂文学习作摘录：
 				a(href="/categories/碎碎念" style="margin: 0 5px;") 碎碎念
+				| &nbsp;剧院/音乐厅repo:
+				a(href="/categories/进剧院" style="margin: 0 5px;") 进剧院
 				br
-				| 分类页面还有一些归类的美食分享与爱好记录,点击对应按钮查看：
+				| 分类页面还有一些按类存放的日常分享与爱好记录,进入后点击对应按钮查看：
 				a(href="/categories" style="margin: 0 5px;") Categories
 				br
 				| 归档页面倒序记录了所有文章，这些被记住的日子构成了我完整的生活：
@@ -32,13 +41,6 @@ block content
 				| 如果你希望了解我与这个博客的初衷，请查看关于页面：
 				a(href="/about" style="margin: 0 5px;") About
 				br
-				| 因缘际会，有幸相识。花径已然缘客扫，蓬门今始为君开。
+				| 因缘际会，有幸相识。花径已然缘客扫，蓬门长久为君开。
 
-		//- 原有的博客文章列表
-		- page.posts.each(function(item){
-			include mixins
-			+make_post(item)
-		- }) 	
 
-		include mixins
-		+make_pager(__('prev'), __('next'))
