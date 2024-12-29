@@ -24,11 +24,11 @@ div#site-nav.site-title-links
             else
                 a(href=config.root + config.tag_dir)= __('Tags')
         - }
-        li
+        li.about-link
             if is_current('about/')
-                a.current(href=url_for("/about/"))= "个人主页"
+                a.current(href=url_for("/about/"))= "About"
             else
-                a(href=url_for("/about/"))= "个人主页"
+                a(href=url_for("/about/"))= "About"
         include ../mixins
         +make_page_links()
         li.soc

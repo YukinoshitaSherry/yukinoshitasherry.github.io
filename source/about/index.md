@@ -1,5 +1,5 @@
 ---
-title: 个人主页
+title: About
 layout: page
 ---
 

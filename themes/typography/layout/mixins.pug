@@ -47,14 +47,17 @@ mixin make_post(item, is_detail)
                     span.post-tag= tag.name
 
 mixin make_page_links()
-    if site.pages
-        - site.pages.each(function (page) {
-            li
-                    if is_current(page.path)
-                        a.current(href=config.root+page.path)= page.title
-                    else
-                        a(href=config.root+page.path)= page.title
-        - });
+    - var pages = site.pages.data
+    - for (var i in pages) {
+    - var p = pages[i]
+    - if (p.title && p.title !== 'About') {
+        li
+            if is_current(p.path)
+                a.current(href=url_for(p.path))= p.title
+            else
+                a(href=url_for(p.path))= p.title
+    - }
+    - }
 
 
 mixin make_pager()
