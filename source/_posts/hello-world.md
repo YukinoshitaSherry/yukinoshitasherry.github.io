@@ -1,12 +1,14 @@
 ---
 title: Hello World
 date: 2024-10-28
-categories: 碎碎念
+categories: 拾光记
 ---
 Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 ## 2024.12.04 改序
-第0条，留着作纪念吧。
+“诛锄荡涤，慨然兴发。”
+自带的第0条，留着作纪念吧。
 
+<br></br>
 ## Quick Start
 
 ### Create a new post
