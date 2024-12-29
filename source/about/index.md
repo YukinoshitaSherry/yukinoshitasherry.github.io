@@ -15,4 +15,5 @@ layout: page
 幸会，我是秋月春风/Yukinoshita Sherry。
 因为不擅长起名，所以这两个几乎是沿用多年的全网统一ID 。
 现为浙江大学22级本科生，主修软件工程，辅修创新创业管理强化班(ITP)。
+She/Her/Hers, 赛博八字为水瓶座、INTJ、拉文克劳。
 
