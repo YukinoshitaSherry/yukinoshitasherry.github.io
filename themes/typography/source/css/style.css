@@ -772,3 +772,41 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #2e405b;
     border-bottom: solid transparent 2px;
 }
+
+/* About页面的样式 */
+.about-page .about-title {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 2.5em;
+    color: #2e405b;
+    margin-bottom: 0.5em;
+}
+
+.about-page img {
+    max-width: 50%;
+    /*将图片缩小%*/
+    height: auto;
+    display: block;
+    border-radius: 1px;
+    -webkit-border-radius: 1px;
+    -moz-border-radius: 1px;
+    -ms-border-radius: 1px;
+    -o-border-radius: 1px;
+}
+
+.about-page .post-content {
+  display: flex;  /* 将内容居中 */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2em;
+}
+
+/* 标语样式 */
+.about-page .motto {
+    margin-top: 1em;
+    color: #666;
+    font-size: 0.9em;
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    text-align: center;
+}
