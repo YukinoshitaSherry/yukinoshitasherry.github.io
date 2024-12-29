@@ -42,7 +42,8 @@ $(document).ready(function () {
         $('#side-bar').removeClass('invisible');
         $('#side-bar').addClass('fadeInRight');
     }
-    $('.site-title').click(function () {
-        $('.site-title a')[0].click();
-    })
+    $('.site-title').click(function(e) {
+        e.preventDefault();
+        window.open($(this).find('a:first').attr('href'), '_blank');
+    });
 });

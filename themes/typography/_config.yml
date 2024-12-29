@@ -1,5 +1,6 @@
 title_primary: "秋月春风" # the bigger text
 title_secondary: "明月守灯寻长梦，梦长寻灯守月明" # the smaller text
+personal_site: "/about/" # 指向新创建的个人主页
 keywords:
 
 twitter: #username
