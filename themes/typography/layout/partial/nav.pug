@@ -33,8 +33,11 @@ div#site-nav.site-title-links
         +make_page_links()
         li.soc
             if theme.github
-                a(href="https://github.com/" + theme.github, target="_blank", rel="noopener noreferrer", aria-label="Github")
-                    i.fa.fa-github &nbsp;
+                a(href="https://github.com/YukinoshitaSherry" target="_blank" rel="noopener noreferrer" aria-label="Github" style="display: inline-block;")
+                    i.fa.fa-github
+            if theme.xiaohongshu
+                a(href="https://www.xiaohongshu.com/user/profile/64f6cb2500000000060318b6" target="_blank" rel="noopener noreferrer" aria-label="Xiaohongshu" style="display: inline-block;")
+                    img.custom-icon(src="/images/xiaohongshu.png" alt="小红书" style="width: 16px; height: 16px; vertical-align: middle;")
             if theme.twitter
                 a(href="https://twitter.com/" + theme.twitter, target="_blank", rel="noopener noreferrer", aria-label="Twitter")
                     i.fa.fa-twitter &nbsp;
@@ -45,8 +48,8 @@ div#site-nav.site-title-links
                 a(href="http://weibo.com/u/" + theme.weibo, target="_blank", rel="noopener noreferrer", aria-label="Sina Weibo")
                     i.fa.fa-weibo &nbsp;
             if theme.rss
-                a(href=config.url + "/" + theme.rss, target="_blank", rel="noopener noreferrer", aria-label="RSS")
-                    i.fa.fa-rss &nbsp;
+                a(href=config.url + "/" + theme.rss target="_blank" rel="noopener noreferrer" aria-label="RSS" style="display: inline-block;")
+                    i.fa.fa-rss
     div.visible-lg.visible-md.visible-sm.site-nav-footer
         br.site-nav-footer-br
         include footer
