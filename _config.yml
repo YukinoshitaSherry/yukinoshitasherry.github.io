@@ -142,7 +142,8 @@ deploy:
 # 添加博客分类
 categories:
   - 上浙大
-  - 学技术
+  - 学CS/SE
+  - 学AI/DS
   - 学英语
   - 学语言
   - 思万物
