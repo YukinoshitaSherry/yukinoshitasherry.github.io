@@ -320,7 +320,7 @@ body.about-page .site-title a:hover {
 .site-title-links ul li a {
   position: relative;
   display: inline-block;
-  padding-bottom: 15px;  /* 增加文字与下划线的距离 */
+  padding-bottom: 5px;  /* 增加文字与下划线的距离 */
 }
 
 .site-title-links ul li a:after {
@@ -348,8 +348,22 @@ body.about-page .site-title a:hover {
   background-color: transparent !important;
 }
 
+.site-title-links a:after {
+  display: none !important;
+}
 /* 移除底部链接的下划线 */
-.site-nav-footer a,
+/* 移除底部社交图标和版权信息的下划线 */
+.soc a, 
+.site-nav-footer a {
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+.soc a:hover,
+.site-nav-footer a:hover {
+  border-bottom: none !important;
+  background: transparent !important;
+}
 .site-bottom-footer a {
   border-bottom: none !important;
   text-decoration: none !important;
