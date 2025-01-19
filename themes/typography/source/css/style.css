@@ -259,6 +259,29 @@ body {
   color: #fff !important;
 }
 
+/* 添加 Giscus 评论系统样式 */
+#giscus-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.giscus-frame {
+  border: none;
+  width: 100%;
+  min-height: 150px;
+}
+
+.giscus {
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
 /* 个人主页特殊样式 */
 body.about-page .site-title {
   background: #2e405b !important;
@@ -1797,6 +1820,16 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #2e405b;
   padding: 2px 5px;
   font-family: 'Times New Roman', '华文中宋';
+}
+
+
+.custom-icon {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.custom-icon:hover {
+  opacity: 0.7;
 }
 
 

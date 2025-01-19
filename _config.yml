@@ -103,7 +103,7 @@ plugin:
   - hexo-asset-image
   - hexo-prism-plugin
   - hexo-toc
-  # ... other plugins you'd like to enable
+# ... other plugins you'd like to enable
 
 # Generate archive page
 archive_generator:
@@ -156,6 +156,11 @@ categories:
   - 读闲书
   - 看影视
   - 做运动
+
+# 在 Site 配置下添加
+security:
+  enable_cross_domain: true
+  enable_mixed_content: true
 
 
  

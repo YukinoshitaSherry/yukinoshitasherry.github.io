@@ -43,4 +43,9 @@ block content
                             != __('next_post')+': ' + page.next.title
                             |&nbsp;
                             i.fa.fa-angle-double-right
-        include partial/comments
+        .post-container
+            article.post-content
+                != page.content
+            
+            if page.comments !== false && theme.giscus.enable
+                include partial/comments.pug
