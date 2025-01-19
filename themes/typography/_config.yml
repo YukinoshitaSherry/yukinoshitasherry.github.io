@@ -12,9 +12,9 @@ xiaohongshu: 秋月春风
 
 # Choose the comment service according to your need.
 # Please do not use the two services at the same time.
-livere: # [data-uid] on livere.com
-disqus: # [short_name] on disqus.com
-dove: # For fun ONLY. Set to true to 'disable' comments on your site.
+# livere: # [data-uid] on livere.com
+# disqus: # [short_name] on disqus.com
+# dove: # For fun ONLY. Set to true to 'disable' comments on your site.
 
 # Set true to show the page indicator.
 showPageCount: true
@@ -30,3 +30,20 @@ themeStyle: light # light/dark
 # Show description behind post titles
 truncate_len: 0
 enableExcerpt: false
+
+# 添加Valine配置
+valine:
+  enable: true
+  appId: '4QaFbIvcIRGX3QoJrqwo80PK-gzGzoHsz' # 从LeanCloud获取的AppID
+  appKey: 'G12EbwXt18glcmgHEZnjYzls' # 从LeanCloud获取的AppKey
+  placeholder: '欢迎评论.....' # 评论框占位提示符
+  avatar: mm # 默认头像样式
+  meta: [nick,mail,link] # 评论者相关信息
+  pageSize: 10 # 评论列表分页，每页条数
+  lang: zh-CN,en # 语言
+  visitor: false # 文章访问量统计
+  highlight: true # 代码高亮
+  avatarForce: false # 每次访问强制拉取最新的评论者头像
+  recordIP: false # 记录评论者IP
+  serverURLs: 'https://yukinoshita.github.io' # 服务器地址
+

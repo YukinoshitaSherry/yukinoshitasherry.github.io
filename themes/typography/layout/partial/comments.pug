@@ -1,3 +1,5 @@
+
+
 if theme.disqus
     a#comments
     #disqus_thread
@@ -60,3 +62,24 @@ if theme.dove
                     br
                     i
                         small 评论一经采用，信函恕不退还，信鸽也不退还，请知悉。
+
+
+if theme.valine.enable
+  #vcomments
+  script(src='//unpkg.com/valine/dist/Valine.min.js')
+  script.
+    new Valine({
+      el: '#vcomments',
+      appId: '#{theme.valine.appId}',
+      appKey: '#{theme.valine.appKey}',
+      placeholder: '#{theme.valine.placeholder}',
+      avatar: '#{theme.valine.avatar}',
+      meta: !{JSON.stringify(theme.valine.meta)},
+      pageSize: #{theme.valine.pageSize},
+      lang: '#{theme.valine.lang}',
+      visitor: #{theme.valine.visitor},
+      highlight: #{theme.valine.highlight},
+      avatarForce: #{theme.valine.avatarForce},
+      recordIP: #{theme.valine.recordIP},
+      serverURLs: '#{theme.valine.serverURLs}'
+    })

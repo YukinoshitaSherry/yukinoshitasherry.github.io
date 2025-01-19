@@ -307,11 +307,58 @@ body.about-page .site-title a:hover {
 }
 .site-title-links ul li {
   display: block;
-  margin: 5px 0;
+  margin: 15px 0;
   font-size: 18px;
 }
+.site-title-links ul li.soc {
+  margin-top: 20px; /* 增加与上方About的距离 */
+}
+
+.site-title-links ul li:not(.soc) {
+  margin-top: -10px; /* 将Home到About部分整体上移 */
+}
+.site-title-links ul li a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 15px;  /* 增加文字与下划线的距离 */
+}
+
+.site-title-links ul li a:after {
+  content: '';
+  position: absolute;
+  bottom: 8px;  /* 调整这个值来控制横线与下一行文字的距离 */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #2e405b;
+}
+.site-title-links ul {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* 调整菜单项之间的间距 */
+}
+/* 移除侧边栏链接的下划线 */
 .site-title-links a {
-  border-bottom: solid #2e405b 2px;
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+.site-title-links a:hover {
+  border-bottom: none !important;
+  background-color: transparent !important;
+}
+
+/* 移除底部链接的下划线 */
+.site-nav-footer a,
+.site-bottom-footer a {
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+.site-nav-footer a:hover,
+.site-bottom-footer a:hover {
+  border-bottom: none !important;
+  background-color: transparent !important;
 }
 .no-margin-left {
   margin-left: 0;
@@ -575,7 +622,7 @@ figure .code pre {
   }
   .site-title-links ul li {
     display: inline;
-    margin: 0 3px;
+    margin: 0px 3px;
     font-size: 16px;
   }
   footer {
@@ -584,6 +631,18 @@ figure .code pre {
   }
   a {
     padding: 0;
+  }
+  .site-title-links ul li.soc {
+    margin-top: 20px; /* 增加与上方About的距离 */
+  }
+  .site-title-links ul li:not(.soc) {
+    margin-top: -10px; /* 将Home到About部分整体上移 */
+  }
+  
+  .site-title-links ul {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* 调整菜单项之间的间距 */
   }
   .post-title {
     font-size: 22px;
