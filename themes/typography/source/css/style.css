@@ -218,6 +218,15 @@ body {
 .archive ul {
   list-style-type: none;
 }
+/* 归档页面标题和年份之间的距离 */
+.archive-title {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+}
+
+.archive-year {
+  margin-top: 30px !important;
+}
 
 /* 普通页面的侧边栏样式 */
 .site-title {
@@ -494,18 +503,61 @@ footer * {
   font-family: "Times New Roman", "华文中宋";
 }
 .post-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
   margin: 4px 0;
+  margin-bottom: -8px !important;  /* 减小标题底部边距 */
   font-family: "Times New Roman", "华文中宋";
+}
+/* 移除文章标题下的横线 */
+.post-title a {
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+.post-title a:hover {
+  border-bottom: none !important;
+  background-color: transparent !important;
 }
 .post-meta {
   font-size: 14px;
-  margin: 10px 0;
+  margin: -10px 0 -10px 0;
   font-family: "Times New Roman", "华文中宋";
+}
+.post-meta a,
+.post-meta a[href^="/categories/"] {
+  border-bottom: solid #2e405b 0.5px !important;
+  text-decoration: none !important;
+}
+
+.post-meta a[href^="/categories/"]:hover {
+  background-color: transparent !important;
+  color: #2e405b !important;
+}
+
+.post-meta a:hover,
+.post-container a:hover {
+  border-bottom: none !important;
+  background-color: transparent !important;
+  color: #2e405b !important;
+}
+
+
+
+/* 移除归档页面的横线 */
+.archive a {
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+.archive a:hover {
+  border-bottom: none !important;
+  background-color: transparent !important;
+  color: #2e405b !important;
 }
 .post-abstract {
   font-size: 16px;
+  margin: -12px 0 30px 0;
   font-family: "Times New Roman", "楷体";
   color: #666;
 }
