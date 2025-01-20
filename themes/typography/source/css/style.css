@@ -170,8 +170,8 @@ body {
 }
 .main-container {
   text-align: left;
-  margin: 0;
-  padding: 80px 40px;
+  margin-left: 150px !important;
+  padding: 0 0;
   overflow: hidden;
   float: left;
 }
@@ -256,7 +256,7 @@ body {
   position: fixed;
   left: 45px;
   top: 80px;
-  width: 280px;
+  width: 275px;
   max-height: 80vh;
   overflow-y: auto;
   padding: 10px;
@@ -290,15 +290,19 @@ body {
 
 /* 响应式处理 */
 @media screen and (max-width: 1400px) {
-  .toc-container {
-    display: none;
+  .post-page .post-content {
+    margin-left: 20px;
+  }
+  
+  .main-container {
+    padding: 80px 20px;
   }
 }
 
 
 /* 普通文章页面的内容样式 */
 .post-page .post-content {
-  margin-left: 320px;
+  margin-left: 280px;
   margin-right: -100px;
   padding: 0 0px;
   max-width: 1400px;
@@ -337,7 +341,7 @@ body {
 
 /* Home页面样式 */
 .home .post-content {
-  margin: 0 auto;
+  margin-left: 100px;
   max-width: 800px;
   padding: 0 20px;
 }
