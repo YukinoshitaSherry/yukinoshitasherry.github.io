@@ -1,4 +1,5 @@
 extends partial/layout
+include mixins
 
 block site_title
     !=  __("Archive") + " · " + config.title
@@ -25,9 +26,7 @@ block content
                         br
                     - firstYear = false;
                     h2.archive-year!= year
-                include mixins
                 +make_post(item, false)
             - })
         if config.archive_generator.per_page
-            include mixins
             +make_pager(__('prev'), __('next'))
