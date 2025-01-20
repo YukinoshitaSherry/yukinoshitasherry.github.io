@@ -190,10 +190,81 @@ body {
   text-align: left;
 }
 
+/*左侧目录大纲样式*/
+/* 目录标题样式 */
+.toc-container::before {
+  content: 'Outline';
+  display: block;
+  font-size: 25px;  /* 放大字体 */
+  font-weight: normal;
+  color: #2e405b;
+  margin-bottom: 20px;
+  font-family: "Times New Roman", "华文中宋";
+}
+
+/* 移除列表项的点 */
+.toc-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc-list li {
+  margin: 8px 0;
+  padding-left: 25px;
+  transition: none !important;
+}
+
+/* 三角形图标样式 */
+.toc-toggle::before {
+  content: '▼';
+  display: inline-block;
+  font-size: 8px;
+  color: #666;
+  margin-right: 8px;
+}
+/* 修改目录容器样式，移除动画 */
+.toc-container {
+  position: fixed;
+  left: 75px;
+  top: 110px;
+  width: 200px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 10px;
+  font-family: "Times New Roman", "楷体";
+  font-size: 14px;
+  opacity: 1;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* 移除目录项的动画 */
+.toc-list li {
+  margin: 8px 0;
+  padding-left: 15px;
+  transition: none !important;
+}
+
+.toc-link {
+  color: #2e405b;
+  font-size: 16px;
+  text-decoration: none;
+  border-bottom: none;
+  transition: none !important;
+}
+
+/* 响应式处理 */
+@media screen and (max-width: 1400px) {
+  .toc-container {
+    display: none;
+  }
+}
+
+
 /* 全局内容区域样式 */
 .content {
-  margin-left: 150px;  /* 左侧留白 */
-  margin-right: -50px; /* 右侧为侧边栏留出空间 */
+  margin-left: 180px;  /* 左侧留白 */
+  margin-right: -80px; /* 右侧为侧边栏留出空间 */
   padding: 0 0;     /* 内容两侧padding */
 }
 
