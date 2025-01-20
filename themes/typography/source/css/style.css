@@ -296,13 +296,14 @@ body {
 }
 
 
-/* 全局内容区域样式 */
-.content {
-  margin-left: 220px;  /* 左侧留白 */
-  margin-right: -100px; /* 右侧为侧边栏留出空间 */
-  padding: 0 0;     /* 内容两侧padding */
-  max-width: 3000px;   /* 限制最大宽度 */
+/* 普通文章页面的内容样式 */
+.post-content {
+  margin-left: 220px;
+  margin-right: -100px;
+  padding: 0 0px;
+  max-width: 1400px;
 }
+
 
 /* 响应式布局调整 */
 @media screen and (max-width: 1400px) {
@@ -1872,6 +1873,9 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: solid transparent 2px;
 }
 
+
+
+/*Home页面的样式&About页面的样式*/
 /* About页面的样式 */
 .about-page .about-title {
     font-family: "Times New Roman", Times, serif;
@@ -1881,10 +1885,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .about-page img {
-    max-width: 50%;
+    max-width: 100%;
     /*将图片缩小%*/
     height: auto;
     display: block;
+    margin-left: -200px;
     border-radius: 1px;
     -webkit-border-radius: 1px;
     -moz-border-radius: 1px;
@@ -1903,10 +1908,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 标语样式 */
 .about-page .motto {
+    margin-left: -150px;
     margin-top: 0.5em;
     margin-bottom: 4em;  /* 增加标语底部间距 */
     color: #666;
-    font-size: 0.9em;
+    font-size: 1.5em;
     font-family: 'Times New Roman';
     font-style: italic;
     text-align: center;
@@ -1922,7 +1928,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home-header img {
-  max-width: 1500px;
+  max-width: 2500px;
   width: 300%;
   height: auto;
   display: block;

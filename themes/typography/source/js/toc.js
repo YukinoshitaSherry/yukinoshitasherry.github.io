@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const container = document.querySelector('.toc-container');
       if (!container) return;
       
+      // 如果是 About 页面,直接隐藏目录
+      if (document.querySelector('.about-page')) {
+        container.style.display = 'none';
+        return;
+      }
+      
       const tocList = document.createElement('ul');
       tocList.className = 'toc-list';
       
