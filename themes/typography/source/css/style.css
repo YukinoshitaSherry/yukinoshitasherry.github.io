@@ -198,7 +198,7 @@ body {
   font-size: 25px;  /* 放大字体 */
   font-weight: normal;
   color: #2e405b;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-family: "Times New Roman", "华文中宋";
 }
 
@@ -232,7 +232,7 @@ body {
   line-height: 20px;
   font-size: 12px;
   color: #666;
-  transition: transform 0.3s;
+  transition: none !important;
 }
 
 .toc-toggle.collapsed {
@@ -255,7 +255,7 @@ body {
 .toc-container {
   position: fixed;
   left: 45px;
-  top: 110px;
+  top: 80px;
   width: 280px;
   max-height: 80vh;
   overflow-y: auto;
@@ -263,18 +263,23 @@ body {
   font-family: "Times New Roman", "楷体";
   font-size: 14px;
   opacity: 1;
-  transform: none !important;
-  transition: none !important;
+  transform: none !important;  /* 移除所有变换 */
+  transition: none !important; /* 移除所有过渡动画 */
+  animation: none !important;  /* 移除所有动画 */
+  -webkit-animation: none !important;
   z-index: 1000;
 }
 
 /* 移除目录项的动画 */
-.toc-list li {
-  margin: 8px 0;
-  padding-left: 15px;
+.toc-container *,
+.toc-list,
+.toc-list li,
+.toc-link {
   transition: none !important;
+  animation: none !important;
+  -webkit-animation: none !important;
+  transform: none !important;
 }
-
 .toc-link {
   color: #2e405b;
   font-size: 16px;
@@ -293,8 +298,8 @@ body {
 
 /* 全局内容区域样式 */
 .content {
-  margin-left: 300px;  /* 左侧留白 */
-  margin-right: -300px; /* 右侧为侧边栏留出空间 */
+  margin-left: 250px;  /* 左侧留白 */
+  margin-right: -250px; /* 右侧为侧边栏留出空间 */
   padding: 0 0;     /* 内容两侧padding */
 }
 
