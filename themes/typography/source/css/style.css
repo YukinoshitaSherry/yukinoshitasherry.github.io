@@ -203,13 +203,13 @@ body {
 
 /* 文章页面时的位置 */
 .post-page .side-container {
-  right: -250px !important;
+  right: -200px !important;
   /*保持使用!important确保优先级*/
 }
 
 /* 添加一个类来控制动画 */
 .side-container.slide-right {
-  right: -250px;
+  right: -200px;
   transition: right 1s ease-out;
 }
 
