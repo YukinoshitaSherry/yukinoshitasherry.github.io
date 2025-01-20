@@ -523,7 +523,7 @@ footer * {
 .post-container {
   margin: 0 0 20px 0;
   font-weight: normal;
-  font-family: "Times New Roman", "华文中宋";
+  font-family: "Times New Roman", "楷体","华文中宋";
 }
 .post-title {
   font-size: 20px;
@@ -585,13 +585,27 @@ footer * {
   color: #666;
 }
 .post-content {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.8;
   font-family: "Times New Roman", "楷体";
 }
-li {
+.post-content p{
+  font-size: 13px;
+}
+.post-content div,
+.post-content ul,
+.post-content ol,
+.post-content li {
+  font-size: 13px;
+  font-family: "Times New Roman", "楷体";
   margin: 5px 0;
 }
+/* 特别针对点号后面的文字 */
+.post-content p::after,
+.post-content li::after {
+  font-family: "楷体";
+}
+
 figure {
   overflow: scroll;
 }
@@ -1679,7 +1693,7 @@ figure .code pre {
   }
   .post-abstract {
     font-size: 16px;
-    font-family: "Times New Roman", "楷体";
+  font-family: "Times New Roman", "楷体";
   }
   .soc {
     display: block !important;

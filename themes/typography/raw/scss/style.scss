@@ -78,6 +78,12 @@ p {
   font-family: "Times New Roman", "楷体";
 }
 
+li,ul,ol {
+  font-family: "Times New Roman", "楷体";
+  font-size: 15px;
+}
+
+
 body {
   font-size: 18px;
   line-height: 1.5em;
@@ -770,11 +776,18 @@ article .post-content {
   line-height: 1.8 !important;
 }
 
-// 针对段落
-.post-content p {
+// 针对段落和列表项
+.post-content p,
+.post-content li {
   font-family: "Times New Roman", "楷体" !important;
   font-size: 16px !important;
   line-height: 1.8 !important;
+}
+
+// 特别针对点号后面的文字
+.post-content p::after,
+.post-content li::after {
+  font-family: "楷体" !important;
 }
 
 // 修改全局 p 标签样式
