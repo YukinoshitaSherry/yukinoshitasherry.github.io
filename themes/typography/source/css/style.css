@@ -547,15 +547,20 @@ footer * {
   font-weight: normal;
   font-family: "Times New Roman", "楷体","华文中宋";
 }
+/* 文章标题样式 */
 .post-title {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: lighter;
+  color: #2e405b;
   margin: 4px 0;
   margin-bottom: -8px !important;  /* 减小标题底部边距 */
   font-family: "Times New Roman", "华文中宋";
 }
 /* 移除文章标题下的横线 */
 .post-title a {
+  color: #2e405b;
+  font-weight: normal;
+  font-size: 21px;
   border-bottom: none !important;
   text-decoration: none !important;
 }
@@ -569,7 +574,7 @@ footer * {
   margin: -10px 0 -10px 0;
   font-family: "Times New Roman", "华文中宋";
 }
-/* 文章页面的时间、类别、标签样式 */
+/* 文章页面的时间、类别、标签样式，下划线 */
 .post-meta a,
 .post-meta a[href^="/categories/"] {
   border-bottom: solid #2e405b 0.5px !important;
