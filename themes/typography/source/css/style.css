@@ -97,15 +97,33 @@
 html,
 body,
 span,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
+p{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #2e405b;
+}
+h1{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #000;
+}
+h2{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #111;
+}
+h3{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #222;
+}
+h4{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #333;
+}
+h5{
+  font-family: "Times New Roman", "楷体", "华文中宋";
+  color: #2e405b;
+}
 h6 {
   font-family: "Times New Roman", "楷体", "华文中宋";
-  color: #2e405b, #666;
+  color: #444;
 }
 html {
   background: #fff;
