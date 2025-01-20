@@ -190,10 +190,25 @@ body {
   text-align: left;
 }
 
+/* 全局内容区域样式 */
+.content {
+  margin-left: 150px;  /* 左侧留白 */
+  margin-right: -50px; /* 右侧为侧边栏留出空间 */
+  padding: 0 0;     /* 内容两侧padding */
+}
+
+/* 响应式布局调整 */
+@media screen and (max-width: 1400px) {
+  .content {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+
 /* 侧边栏位置控制 */
 .side-container {
   position: fixed;
-  right: 20px;
+  right: -150px;
   top: 0;
   width: 250px;
   height: 100vh;
@@ -201,15 +216,10 @@ body {
   z-index: 100;
 }
 
-/* 文章页面时的位置 */
-.post-page .side-container {
-  right: -200px !important;
-  /*保持使用!important确保优先级*/
-}
 
 /* 添加一个类来控制动画 */
 .side-container.slide-right {
-  right: -200px;
+  right: -150px;
   transition: right 1s ease-out;
 }
 
