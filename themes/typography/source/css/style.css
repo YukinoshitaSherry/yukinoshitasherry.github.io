@@ -569,17 +569,26 @@ footer * {
   margin: -10px 0 -10px 0;
   font-family: "Times New Roman", "华文中宋";
 }
+/* 文章页面的时间、类别、标签样式 */
 .post-meta a,
 .post-meta a[href^="/categories/"] {
   border-bottom: solid #2e405b 0.5px !important;
   text-decoration: none !important;
 }
 
-.post-meta a[href^="/categories/"]:hover {
-  background-color: transparent !important;
-  color: #2e405b !important;
+.post-meta a[href^="/tags/"]{
+  border-bottom: solid #2e405b 0.5px !important;
+  text-decoration: none !important;
 }
 
+.post-meta a[href^="/categories/"]:hover {
+  background-color: transparent !important;
+  color: #666 !important;
+}
+.post-meta a[href^="/tags/"]:hover {
+  background-color: transparent !important;
+  color: #666 !important;
+}
 .post-meta a:hover,
 .post-container a:hover {
   border-bottom: none !important;
