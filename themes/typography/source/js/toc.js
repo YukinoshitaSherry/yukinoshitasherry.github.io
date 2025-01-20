@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         // 普通文章页面
         const headings = document.querySelectorAll('h1, h2, h3, h4');
-        // 过滤掉固定标题
         const validHeadings = Array.from(headings).filter(heading => {
           const text = heading.textContent;
           return !text.includes('明月守灯寻长梦') && 
@@ -40,6 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
+        let prevLevel = 0;
+        let currentUL = tocList;
+        const ulStack = [tocList];
+
         validHeadings.forEach(heading => {
           const level = parseInt(heading.tagName.charAt(1));
           const li = document.createElement('li');
@@ -49,19 +52,43 @@ document.addEventListener('DOMContentLoaded', function() {
           link.textContent = heading.textContent;
           link.href = '#' + heading.id;
           link.className = 'toc-link';
-          
-          if (heading.nextElementSibling) {
-            const toggle = document.createElement('span');
-            toggle.className = 'toc-toggle';
-            li.appendChild(toggle);
+
+          // 处理层级关系
+          if (level > prevLevel) {
+            // 创建新的子列表
+            const ul = document.createElement('ul');
+            ul.style.display = 'block'; // 默认展开
+            if (ulStack[ulStack.length - 1].lastElementChild) {
+              ulStack[ulStack.length - 1].lastElementChild.appendChild(ul);
+              ulStack.push(ul);
+              currentUL = ul;
+              
+              // 为父级添加折叠按钮
+              const parentLi = ulStack[ulStack.length - 2].lastElementChild;
+              const toggle = document.createElement('span');
+              toggle.className = 'toc-toggle';
+              toggle.innerHTML = '▼';
+              parentLi.insertBefore(toggle, parentLi.firstChild);
+            } else {
+              currentUL.appendChild(ul);
+              ulStack.push(ul);
+              currentUL = ul;
+            }
+          } else if (level < prevLevel) {
+            // 返回上级
+            for (let i = 0; i < prevLevel - level; i++) {
+              ulStack.pop();
+            }
+            currentUL = ulStack[ulStack.length - 1];
           }
-          
+
           li.appendChild(link);
-          tocList.appendChild(li);
+          currentUL.appendChild(li);
+          prevLevel = level;
         });
       }
-      
-      container.innerHTML = ''; 
+
+      container.innerHTML = '';
       container.appendChild(tocList);
     }
   
@@ -69,9 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('toc-toggle')) {
         e.target.classList.toggle('collapsed');
-        const nextUl = e.target.parentElement.querySelector('ul');
-        if (nextUl) {
-          nextUl.style.display = nextUl.style.display === 'none' ? 'block' : 'none';
+        e.target.innerHTML = e.target.classList.contains('collapsed') ? '▶' : '▼';
+        const ul = e.target.parentElement.querySelector('ul');
+        if (ul) {
+          ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
         }
       }
     });
