@@ -3,7 +3,7 @@ html(lang="zh-CN")
     head
         include head
 
-    body(class=page.path.includes('about/') ? 'about-page' : '')
+    body(class=`${page.path.includes('about/') ? 'about-page' : ''} ${is_post() ? 'post-page' : ''}`)
         div#stage.container
             div.row
                 include sidebar

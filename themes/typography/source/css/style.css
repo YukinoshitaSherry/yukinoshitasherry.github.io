@@ -189,17 +189,39 @@ body {
   line-height: 1;
   text-align: left;
 }
+
+/* 侧边栏位置控制 */
 .side-container {
-  height: 100vh;
   position: fixed;
-  right: 0;
-  font-style: normal;
-  font-size: 1em;
-  margin: 0;
-  transform: rotate(0deg);
-  text-align: left;
-  float: right;
+  right: 20px;
+  top: 0;
+  width: 250px;
+  height: 100vh;
   padding: 80px 20px;
+  z-index: 100;
+}
+
+/* 文章页面时的位置 */
+.post-page .side-container {
+  right: -250px !important;
+  /*保持使用!important确保优先级*/
+}
+
+/* 添加一个类来控制动画 */
+.side-container.slide-right {
+  right: -250px;
+  transition: right 1s ease-out;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 1400px) {
+  .side-container {
+    position: relative;
+    right: auto;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+  }
 }
 .ar-year {
   margin-top: 5px;
@@ -1121,18 +1143,7 @@ body {
   line-height: 1;
   text-align: left;
 }
-.side-container {
-  height: 100vh;
-  position: fixed;
-  right: 0;
-  font-style: normal;
-  font-size: 1em;
-  margin: 0;
-  transform: rotate(0deg);
-  text-align: left;
-  float: right;
-  padding: 80px 20px;
-}
+
 .ar-year {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -1855,3 +1866,4 @@ h1, h2, h3, h4, h5, h6 {
 .custom-icon:hover {
   opacity: 0.7;
 }
+

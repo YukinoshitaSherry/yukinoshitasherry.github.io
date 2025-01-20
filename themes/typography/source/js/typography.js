@@ -46,4 +46,5 @@ $(document).ready(function () {
         e.preventDefault();
         window.location.href = $(this).find('a:first').attr('href');
     });
+    
 });
