@@ -298,9 +298,10 @@ body {
 
 /* 全局内容区域样式 */
 .content {
-  margin-left: 250px;  /* 左侧留白 */
-  margin-right: -250px; /* 右侧为侧边栏留出空间 */
+  margin-left: 220px;  /* 左侧留白 */
+  margin-right: -100px; /* 右侧为侧边栏留出空间 */
   padding: 0 0;     /* 内容两侧padding */
+  max-width: 3000px;   /* 限制最大宽度 */
 }
 
 /* 响应式布局调整 */
@@ -318,7 +319,7 @@ body {
   top: 0;
   width: 250px;
   height: 100vh;
-  padding: 80px 20px;
+  padding: 20px 20px;
   z-index: 100;
 }
 
