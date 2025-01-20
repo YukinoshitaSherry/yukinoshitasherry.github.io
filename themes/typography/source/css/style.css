@@ -297,12 +297,134 @@ body {
 
 
 /* 普通文章页面的内容样式 */
-.post-content {
-  margin-left: 220px;
+.post-page .post-content {
+  margin-left: 320px;
   margin-right: -100px;
   padding: 0 0px;
   max-width: 1400px;
 }
+
+/* About页面样式 */
+.about-page .post-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2em auto;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.about-page .motto {
+  margin-left: -150px;
+  margin-top: 0.5em;
+  margin-bottom: 4em;
+  color: #666;
+  font-size: 1.5em;
+  font-family: 'Times New Roman';
+  font-style: italic;
+  text-align: center;
+}
+
+.about-page img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-left: -200px;
+  border-radius: 1px;
+  margin-bottom: 0.5em;
+}
+
+/* Home页面样式 */
+.home .post-content {
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -1em;
+  margin-bottom: 2em;
+}
+
+.home-header img {
+  max-width: 2500px;
+  width: 300%;
+  height: auto;
+  display: block;
+  margin-top: -1em;
+  border-radius: 1px;
+}
+
+.home-header .motto {
+  margin-top: 0.5em;
+  margin-bottom: -1.35em;
+  color: #888;
+  font-size: 0.9em;
+  font-family: 'Times New Roman';
+  font-style: italic;
+  text-align: center;
+}
+
+.custom-content {
+  padding: 2em 0;
+  max-width: 800px;
+  margin: 0 auto;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  font-family: '楷体', 'Times New Roman';
+}
+
+.custom-content p {
+  line-height: 1.8;
+  margin: 0;
+  margin-bottom: 3em;
+  font-family: '楷体', 'Times New Roman';
+  font-size: 0.5em;
+}
+
+.custom-content a {
+  color: #2e405b;
+  text-decoration: none;
+  border-bottom: 1px solid #2e405b;
+  transition: all 0.3s ease;
+  font-size: 1em;
+  font-family: 'Times New Roman', '华文中宋';
+}
+
+.custom-content a:hover {
+  color: #fff;
+  background-color: #2e405b;
+  padding: 2px 5px;
+  font-family: 'Times New Roman', '华文中宋';
+}
+
+
+.custom-icon {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.custom-icon:hover {
+  opacity: 0.7;
+}
+
+
+.custom-icon {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.custom-icon:hover {
+  opacity: 0.7;
+}
+
+
+
+
 
 
 /* 响应式布局调整 */
@@ -1875,132 +1997,5 @@ h1, h2, h3, h4, h5, h6 {
 
 
 
-/*Home页面的样式&About页面的样式*/
-/* About页面的样式 */
-.about-page .about-title {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 2.5em;
-    color: #2e405b;
-    margin-bottom: 0.5em;
-}
 
-.about-page img {
-    max-width: 100%;
-    /*将图片缩小%*/
-    height: auto;
-    display: block;
-    margin-left: -200px;
-    border-radius: 1px;
-    -webkit-border-radius: 1px;
-    -moz-border-radius: 1px;
-    -ms-border-radius: 1px;
-    -o-border-radius: 1px;
-    margin-bottom: 0.5em;  /* 增加图片底部间距 */
-}
-
-.about-page .post-content {
-  display: flex;  /* 将内容居中 */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2em;
-}
-
-/* 标语样式 */
-.about-page .motto {
-    margin-left: -150px;
-    margin-top: 0.5em;
-    margin-bottom: 4em;  /* 增加标语底部间距 */
-    color: #666;
-    font-size: 1.5em;
-    font-family: 'Times New Roman';
-    font-style: italic;
-    text-align: center;
-}
-
-/* 主页图片样式 */
-.home-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: -1em;
-  margin-bottom: 2em;
-}
-
-.home-header img {
-  max-width: 2500px;
-  width: 300%;
-  height: auto;
-  display: block;
-  margin-top: -1em;
-  border-radius: 1px;
-  -webkit-border-radius: 1px;
-  -moz-border-radius: 1px;
-  -ms-border-radius: 1px;
-  -o-border-radius: 1px;
-}
-
-.home-header .motto {
-  margin-top: 0.5em;
-  margin-bottom: -1.35em; /* 增加标语底部间距 */
-  color: #888;
-  font-size: 0.9em;
-  font-family: 'Times New Roman';
-  font-style: italic;
-  text-align: center;
-}
-
-/* 主页intro */
-.custom-content {
-  padding: 2em 0;
-  max-width: 800px;
-  margin: 0 auto;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  font-family: '楷体', 'Times New Roman';
-}
-
-.custom-content p {
-  line-height: 1.8;
-  margin: 0;
-  margin-bottom: 3em;
-  font-family: '楷体', 'Times New Roman';
-  font-size: 0.5em;
-}
-
-.custom-content a {
-  color: #2e405b;
-  text-decoration: none;
-  border-bottom: 1px solid #2e405b;
-  transition: all 0.3s ease;
-  font-size: 1em;
-  font-family: 'Times New Roman', '华文中宋';
-}
-
-.custom-content a:hover {
-  color: #fff;
-  background-color: #2e405b;
-  padding: 2px 5px;
-  font-family: 'Times New Roman', '华文中宋';
-}
-
-
-.custom-icon {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.custom-icon:hover {
-  opacity: 0.7;
-}
-
-
-.custom-icon {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.custom-icon:hover {
-  opacity: 0.7;
-}
 
