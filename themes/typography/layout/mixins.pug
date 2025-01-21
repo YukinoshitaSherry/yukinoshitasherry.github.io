@@ -41,10 +41,6 @@ mixin make_post(item, is_detail)
             p.post-abstract!= item.desc
         else if theme.enableExcerpt
             p.post-abstract!= truncate(strip_html(item.content.replace(/<pre(?: |>)[^]*?<\/pre>/gm, ' ')), {length: theme.truncate_len || 160})
-        if item.tags && item.tags.length
-            .post-tags
-                each tag in item.tags.data
-                    span.post-tag= tag.name
 
 mixin make_page_links()
     - var pages = site.pages.data

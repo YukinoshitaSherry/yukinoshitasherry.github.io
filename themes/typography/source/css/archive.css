@@ -1,24 +1,31 @@
 .tag-filters {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .tag-filter {
-    margin: 5px;
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  
-  .tag-filter:hover,
-  .tag-filter.active {
-    background: #333;
-    color: #bbb;
-  }
-  
+  margin: 20px 0;
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tag-filter {
+  display: inline-block;
+  padding: 5px 15px;
+  border: 1px solid #666;  /* 使用完整的 border */
+  border-radius: 20px;
+  background: transparent;
+  color: #666;
+  text-decoration: none;
+  transition: all 0.3s;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.tag-filter:hover {
+  background: #2e405b;
+  color: #bbb;
+  border: 1px solid #2e405b;  /* hover 时也保持完整的 border */
+}
+
   .post-tag {
     display: inline-block;
     margin: 0 5px;
