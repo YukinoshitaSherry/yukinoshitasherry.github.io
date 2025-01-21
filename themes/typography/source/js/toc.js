@@ -4,13 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const container = document.querySelector('.toc-container');
       if (!container) return;
       
-      // 如果是 About 页面,直接隐藏目录
-      if (document.querySelector('.about-page')) {
-        container.style.display = 'none';
-        return;
-      }
-      
-      // 检查是否有有效标题
+      // 先检查是否有有效标题
       const headings = document.querySelectorAll('h1, h2, h3, h4');
       const validHeadings = Array.from(headings).filter(heading => {
         const text = heading.textContent;
@@ -20,22 +14,26 @@ document.addEventListener('DOMContentLoaded', function() {
                !text.includes('目录');
       });
       
-      if (validHeadings.length === 0) {
+      // 在生成目录前就决定是否显示
+      if (validHeadings.length === 0 || document.querySelector('.about-page')) {
         container.style.display = 'none';
-        // 无大纲时调整布局
         document.querySelector('.main-container').style.marginLeft = '20px';
         return;
-      } else {
-        // 有大纲时保持原布局
-        document.querySelector('.main-container').style.marginLeft = '170px';
       }
       
-      // 在生成目录前先设置好位置
-      container.style.position = 'fixed';
-      container.style.left = '20px';
-      container.style.top = '80px';
-      container.style.opacity = '1';
-      container.style.transform = 'none';
+      // 有大纲时的样式
+      container.style.cssText = `
+          position: fixed;
+          left: 20px;
+          top: 80px;
+          opacity: 1;
+          transform: none;
+          transition: none;
+          animation: none;
+          -webkit-animation: none;
+          display: block;
+      `;
+      document.querySelector('.main-container').style.marginLeft = '170px';
       
       const tocList = document.createElement('ul');
       tocList.className = 'toc-list';
@@ -140,14 +138,4 @@ document.addEventListener('DOMContentLoaded', function() {
   
     window.addEventListener('scroll', updateActiveLink);
     generateTOC();
-
-    // 监听DOM变化,处理动态添加的大纲
-    const observer = new MutationObserver(function() {
-        updateSidebar();
-    });
-    
-    observer.observe(document.querySelector('.toc-container'), {
-        childList: true,
-        subtree: true
-    });
 });
