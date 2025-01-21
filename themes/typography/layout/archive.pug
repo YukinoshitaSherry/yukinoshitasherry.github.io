@@ -20,34 +20,36 @@ block content
             - var firstYear = true;
             - var firstMonth = true;
             - page.posts = site.posts.sort('date', -1)
-            - page.posts.each(function (item) {
-                - var itemYear = date(item.date, 'YYYY') - 0;
-                - var itemMonth = date(item.date, 'MM') - 0;
-                - change = year !== itemYear;
-                - monthChange = month !== itemMonth || change;
-                - year = change ? itemYear : year;
-                - month = monthChange ? itemMonth : month;
-                
-                if change
-                    if !firstYear
-                        | </div>
-                    - firstYear = false;
-                    .archive-year-section
-                        h2.archive-year(id=`archive-year-${year}`)= year
-                        .archive-year-content
-                
-                if monthChange
-                    if !firstMonth && !change
-                        | </div>
-                    - firstMonth = false;
-                    .archive-month-section
-                        h3.archive-month(id=`archive-month-${year}-${month}`)= month + '月'
-                        .archive-month-content
-                            +make_post(item, false)
-                else
-                    .archive-month-content
+            
+            //- 文章列表
+            .posts-list
+                - page.posts.each(function (item) {
+                    - var itemYear = date(item.date, 'YYYY') - 0;
+                    - var itemMonth = date(item.date, 'MM') - 0;
+                    - change = year !== itemYear;
+                    - monthChange = month !== itemMonth || change;
+                    - year = change ? itemYear : year;
+                    - month = monthChange ? itemMonth : month;
+                    
+                    if change
+                        if !firstYear
+                            | </div>
+                        - firstYear = false
+                        h2.archive-year!= itemYear
+                        .year-container
+                    
+                    if monthChange
+                        if !firstMonth
+                            | </div>
+                        - firstMonth = false
+                        h3.archive-month!= itemMonth + "月"
+                        .month-container
+                    
+                    .post-item-wrapper
                         +make_post(item, false)
-            - })
+                - })
+                if !firstYear
+                    | </div>
 
         if config.archive_generator.per_page
             +make_pager(__('prev'), __('next'))

@@ -27,36 +27,28 @@ $(document).ready(function() {
     
     // 点击月份跳转
     $('.timeline-month').click(function() {
-        const targetDate = $(this).data('date');
-        const targetPost = posts.filter(function() {
-            return $(this).find('.post-meta .date').text().includes(targetDate);
-        }).first();
+        const year = $(this).data('year');
+        const month = $(this).data('month');
         
-        if(targetPost.length) {
+        // 滚动到对应的文章区域
+        const target = $(`.archive-year:contains("${year}")`).next().find(`.archive-month:contains("${month}月")`);
+        if(target.length) {
             $('html, body').animate({
-                scrollTop: targetPost.offset().top - 100
+                scrollTop: target.offset().top - 100
             }, 500);
-            
-            $('.timeline-month').removeClass('active');
-            $(this).addClass('active');
         }
     });
     
     // 滚动时高亮当前月份
     $(window).scroll(function() {
         const scrollTop = $(window).scrollTop();
-        
-        posts.each(function() {
-            const postTop = $(this).offset().top - 120;
-            const postBottom = postTop + $(this).height();
-            
-            if(scrollTop >= postTop && scrollTop < postBottom) {
-                const date = $(this).find('.post-meta .date').text().trim();
-                const [year, month] = date.split('-');
-                
+        $('.archive-month').each(function() {
+            const monthTop = $(this).offset().top;
+            if(monthTop - 150 <= scrollTop) {
+                const month = $(this).text().replace('月', '');
+                const year = $(this).closest('.year-container').prev('.archive-year').text();
                 $('.timeline-month').removeClass('active');
-                $(`.timeline-month[data-date="${year}-${month}"]`).addClass('active');
-                return false;
+                $(`.timeline-month[data-year="${year}"][data-month="${month}"]`).addClass('active');
             }
         });
     });
