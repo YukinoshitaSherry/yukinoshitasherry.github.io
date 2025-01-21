@@ -1561,7 +1561,7 @@ a:hover,
 a:focus {
   text-decoration: none;
 }
-a:hover {
+a:not(.tag-filter):not(.category-item):hover {
   color: #fff !important;
   background-color: #2e405b;
   border-bottom: solid transparent 2px;

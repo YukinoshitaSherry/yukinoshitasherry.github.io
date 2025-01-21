@@ -1,29 +1,28 @@
 .tag-filters {
   margin: 20px 0;
-  text-align: center;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;  /* 改为左对齐 */
   gap: 10px;
+  padding-left: 0;  /* 确保没有左边距 */
 }
 
 .tag-filter {
   display: inline-block;
   padding: 5px 15px;
-  border: 1px solid #666;  /* 使用完整的 border */
+  border: 1px solid #666;
   border-radius: 20px;
   background: transparent;
   color: #666;
   text-decoration: none;
   transition: all 0.3s;
-  white-space: nowrap;
-  margin: 0;
+  border-bottom: 1px solid #666 !important;  /* 强制保持底部边框 */
 }
 
 .tag-filter:hover {
   background: #2e405b;
-  color: #bbb;
-  border: 1px solid #2e405b;  /* hover 时也保持完整的 border */
+  color: #bbb !important;
+  border: 1px solid #2e405b !important;  /* 强制保持hover时的边框 */
 }
 
   .post-tag {
@@ -61,17 +60,16 @@
     display: inline-block;
     margin: 10px;
     padding: 10px 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #ddd !important;  /* 强制保持边框 */
     border-radius: 20px;
     transition: all 0.3s;
-    font-family:"Times New Roman","楷体";
-    border-bottom: none; /* 删除下划线 */
+    font-family: "Times New Roman", "楷体";
   }
-
+  
   .category-item:hover {
-    color: #fff;
+    color: #fff !important;
     background: #2e405b;
-    opacity: 0.9;
+    border: 1px solid #2e405b !important;
   }
   
   .category-item a {
