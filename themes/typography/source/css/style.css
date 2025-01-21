@@ -186,9 +186,10 @@ body {
 .full-width-container {
   width: 100vw;
 }
+/* 主容器样式,文章位置 */
 .main-container {
   text-align: left;
-  margin-left: 150px !important;
+  margin-left: 170px !important;
   padding: 0 0;
   overflow: hidden;
   float: left;
@@ -216,6 +217,7 @@ body {
   font-size: 25px;  /* 放大字体 */
   font-weight: normal;
   color: #2e405b;
+  margin-left: 40px;
   margin-bottom: 10px;
   font-family: "Times New Roman", "华文中宋";
 }
@@ -272,7 +274,7 @@ body {
 /* 修改目录容器样式，移除动画 */
 .toc-container {
   position: fixed;
-  left: 45px;
+  left: 20px;
   top: 80px;
   width: 275px;
   max-height: 80vh;
@@ -320,10 +322,10 @@ body {
 
 /* 普通文章页面的内容样式 */
 .post-page .post-content {
-  margin-left: 280px;
+  margin-left: 300px;
   margin-right: -100px;
   padding: 0 0px;
-  max-width: 1400px;
+  max-width: 1800px;
 }
 
 /* About页面样式 */
@@ -418,7 +420,7 @@ body {
 }
 
 .custom-content a:hover {
-  color: #bbb;
+  color:#fff;
   background-color: #2e405b;
   padding: 2px 5px;
   font-family: 'Times New Roman', '华文中宋';
@@ -460,7 +462,7 @@ body {
 /* 侧边栏位置控制 */
 .side-container {
   position: fixed;
-  right: -150px;
+  right: -180px;
   top: 0;
   width: 250px;
   height: 100vh;
@@ -534,13 +536,13 @@ body {
 /* 普通页面hover效果 */
 .site-title:hover {
   padding: 15px 0 35px 0;
-  color: #bbb !important;
+  color: #fff !important;
   background: #2e405b !important;
   border-left: solid #2e405b 2px;
 }
 
 .site-title:hover * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 /* 添加 Giscus 评论系统样式 */
@@ -572,7 +574,7 @@ body.about-page .site-title {
 }
 
 body.about-page .site-title * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 body.about-page .site-title:hover {
@@ -580,11 +582,11 @@ body.about-page .site-title:hover {
 }
 
 body.about-page .site-title a:hover {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 .site-title:hover * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 .site-title :first-child {
   margin-right: 10px;
@@ -720,7 +722,7 @@ a:focus {
   text-decoration: none;
 }
 a:hover {
-  color: #bbb !important;
+  color: #fff !important;
   background-color: #2e405b;
   border-bottom: solid transparent 2px;
 }
@@ -1466,7 +1468,7 @@ body {
 }
 
 .site-title:hover * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 /* 个人主页特殊样式 */
@@ -1475,7 +1477,7 @@ body.about-page .site-title {
 }
 
 body.about-page .site-title * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 body.about-page .site-title:hover {
@@ -1483,11 +1485,11 @@ body.about-page .site-title:hover {
 }
 
 body.about-page .site-title a:hover {
-  color: #bbb !important;
+  color: #fff !important;
 }
 
 .site-title:hover * {
-  color: #bbb !important;
+  color: #fff !important;
 }
 .site-title :first-child {
   margin-right: 10px;
@@ -2012,7 +2014,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .post-title a:hover {
-    color: #bbb !important;
+    color: #fff !important;
     background-color: #2e405b;
     border-bottom: solid transparent 2px;
 }
