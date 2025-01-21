@@ -418,7 +418,7 @@ body {
 }
 
 .custom-content a:hover {
-  color: #fff;
+  color: #bbb;
   background-color: #2e405b;
   padding: 2px 5px;
   font-family: 'Times New Roman', '华文中宋';
@@ -534,13 +534,13 @@ body {
 /* 普通页面hover效果 */
 .site-title:hover {
   padding: 15px 0 35px 0;
-  color: #fff !important;
+  color: #bbb !important;
   background: #2e405b !important;
   border-left: solid #2e405b 2px;
 }
 
 .site-title:hover * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 /* 添加 Giscus 评论系统样式 */
@@ -572,7 +572,7 @@ body.about-page .site-title {
 }
 
 body.about-page .site-title * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 body.about-page .site-title:hover {
@@ -580,11 +580,11 @@ body.about-page .site-title:hover {
 }
 
 body.about-page .site-title a:hover {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 .site-title:hover * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 .site-title :first-child {
   margin-right: 10px;
@@ -720,7 +720,7 @@ a:focus {
   text-decoration: none;
 }
 a:hover {
-  color: #fff !important;
+  color: #bbb !important;
   background-color: #2e405b;
   border-bottom: solid transparent 2px;
 }
@@ -1466,7 +1466,7 @@ body {
 }
 
 .site-title:hover * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 /* 个人主页特殊样式 */
@@ -1475,7 +1475,7 @@ body.about-page .site-title {
 }
 
 body.about-page .site-title * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 body.about-page .site-title:hover {
@@ -1483,11 +1483,11 @@ body.about-page .site-title:hover {
 }
 
 body.about-page .site-title a:hover {
-  color: #fff !important;
+  color: #bbb !important;
 }
 
 .site-title:hover * {
-  color: #fff !important;
+  color: #bbb !important;
 }
 .site-title :first-child {
   margin-right: 10px;
@@ -2012,10 +2012,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .post-title a:hover {
-    color: #fff !important;
+    color: #bbb !important;
     background-color: #2e405b;
     border-bottom: solid transparent 2px;
 }
+
+
 
 
 

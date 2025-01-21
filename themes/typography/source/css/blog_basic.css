@@ -374,7 +374,7 @@ dl dt {
 **/
 
 .toc {
-  border: 1px solid #f0f0f0;
+  border: 1px solid #bbb;
   margin-bottom: 20px;
   padding: 10px 30px; }
 
@@ -397,7 +397,7 @@ dl dt {
                 position: relative;
                 padding: 25px 0;
                 border-bottom: 1px solid rgba(150, 150, 150, 0.2);
-                *border-bottom: 1px solid #f0f0f0; }
+                *border-bottom: 1px solid #bbb; }
                 #fb_comments_container #fb_comments .comment .avatar {
                   position: absolute;
                   top: 25px;
