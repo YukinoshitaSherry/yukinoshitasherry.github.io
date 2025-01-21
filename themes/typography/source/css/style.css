@@ -293,6 +293,37 @@ body {
   transition: none !important;
   -webkit-transition: none !important;
   z-index: 1000;
+  scrollbar-width: thin;  /* Firefox */
+}
+
+/* 自定义滚动条样式 */
+.toc-container::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.toc-container::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.toc-container::-webkit-scrollbar-thumb {
+  background-color: #999 !important;  /* 半透明的浅灰色 */
+  border-radius: 3px !important;
+}
+
+/* 只在实际拖拽时改变颜色 */
+.toc-container::-webkit-scrollbar-thumb:active {
+  background-color: #314a6f !important;  /* 藏青色 */
+}
+
+/* Firefox 滚动条样式 */
+.toc-container {
+  scrollbar-width: thin !important;
+  scrollbar-color: #999 transparent !important;
+}
+
+/* Firefox 拖拽状态 */
+.toc-container:active {
+  scrollbar-color: #314a6f transparent !important;
 }
 
 /* 移除目录项的动画 */
