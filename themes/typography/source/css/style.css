@@ -71,6 +71,7 @@
     transform: translateY(20%);
   }
 }
+
 .invisible {
   opacity: 0;
 }
@@ -193,6 +194,9 @@ body {
   padding: 0 0;
   overflow: hidden;
   float: left;
+  opacity: 1;  /* 确保内容始终可见 */
+  transform: none !important;  /* 防止位置偏移 */
+  transition: none !important; /* 移除过渡动画 */
 }
 .main-container :nth-child(1) {
   margin-top: 0;
@@ -282,11 +286,12 @@ body {
   padding: 10px;
   font-family: "Times New Roman", "楷体";
   font-size: 14px;
-  opacity: 1;
-  transform: none !important;  /* 移除所有变换 */
-  transition: none !important; /* 移除所有过渡动画 */
-  animation: none !important;  /* 移除所有动画 */
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
   -webkit-animation: none !important;
+  transition: none !important;
+  -webkit-transition: none !important;
   z-index: 1000;
 }
 
@@ -295,9 +300,10 @@ body {
 .toc-list,
 .toc-list li,
 .toc-link {
-  transition: none !important;
   animation: none !important;
   -webkit-animation: none !important;
+  transition: none !important;
+  -webkit-transition: none !important;
   transform: none !important;
 }
 .toc-link {

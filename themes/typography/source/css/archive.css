@@ -9,14 +9,13 @@
 
 .tag-filter {
   display: inline-block;
-  padding: 5px 15px;
-  border: 1px solid #999;  /* 只保留这一个border定义 */
-  border-radius: 20px;
+  padding: 5px 10px;
+  border: 1px solid #999;
+  border-radius: 18px;
   background: transparent;
   color: #999;
   text-decoration: none;
   transition: all 0.3s;
-  /* 删除 border-bottom 相关的样式使椭圆完整 */
 }
 
 .tag-filter:hover {
@@ -28,14 +27,14 @@
   .post-tag {
     display: inline-block;
     margin: 0 5px;
-    padding: 2px 8px;
+    padding: 2px 2px;
     font-size: 12px;
     border-radius: 12px;
     background: #999;
     color: #666;
     font-family:"Times New Roman","楷体";
     border-bottom: 0.5px solid #2e405b;
-  }
+}
   .a-tag {
     color: inherit;
     text-decoration: none;

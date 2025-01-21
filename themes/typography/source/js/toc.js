@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // 在生成目录前先设置好位置
+      container.style.position = 'fixed';
+      container.style.left = '20px';
+      container.style.top = '80px';
+      container.style.opacity = '1';
+      container.style.transform = 'none';
+      
       const tocList = document.createElement('ul');
       tocList.className = 'toc-list';
       

@@ -1,3 +1,6 @@
+/**
+ * 侧边栏动画
+ */
 var stage;
 var siteNavShown = true;
 
@@ -33,18 +36,21 @@ $(document).ready(function () {
         updateSidebar();
     });
     updateSidebar();
+    
+    // 移除主容器和侧边栏的invisible类
     $('#main-container').removeClass('invisible');
-    $('#main-container').addClass('fadeInTop');
-    if (window.innerWidth <= 768) {
-        $('#side-bar').removeClass('invisible');
-        $('#side-bar').addClass('fadeInTop');
-    }else{
-        $('#side-bar').removeClass('invisible');
-        $('#side-bar').addClass('fadeInRight');
-    }
+    $('#side-bar').removeClass('invisible').addClass('fadeInRight'); // 先移除invisible再添加动画
+    
+    // 为大纲容器设置样式，确保没有动画
+    $('.toc-container').css({
+        'opacity': '1',
+        'transform': 'none',
+        'animation': 'none',
+        '-webkit-animation': 'none'
+    });
+    
     $('.site-title').click(function(e) {
         e.preventDefault();
         window.location.href = $(this).find('a:first').attr('href');
     });
-    
 });
