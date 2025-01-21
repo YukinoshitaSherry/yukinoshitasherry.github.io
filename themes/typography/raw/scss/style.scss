@@ -861,3 +861,63 @@ h1, h2, h3, h4, h5, h6,
         margin-left: 0 !important;
     }
 }
+
+// Archive styles
+.archive {
+    padding-left: 20px;
+}
+
+.archive-year {
+    cursor: pointer;
+    color: #2e405b;
+    font-family: "Times New Roman", "华文中宋";
+    font-size: 1.8em;
+    margin: 30px 0 20px 0;
+    padding-left: 0;
+    
+    &::before {
+        content: "▼";
+        display: inline-block;
+        margin-right: 10px;
+        font-size: 0.8em;
+        transition: transform 0.3s;
+    }
+    
+    &.collapsed::before {
+        transform: rotate(-90deg);
+    }
+}
+
+.archive-month {
+    color: #666;
+    font-family: "Times New Roman", "楷体";
+    font-size: 1.4em;
+    margin: 20px 0 15px 20px;
+    cursor: pointer;
+    
+    &::before {
+        content: "▼";
+        display: inline-block;
+        margin-right: 10px;
+        font-size: 0.8em;
+        transition: transform 0.3s;
+    }
+    
+    &.collapsed::before {
+        transform: rotate(-90deg);
+    }
+}
+
+.archive-year-content {
+    margin-left: 20px;
+}
+
+.archive-month-content {
+    margin-left: 40px;
+}
+
+// 隐藏状态的样式
+.archive-year.collapsed + .archive-year-content,
+.archive-month.collapsed + .archive-month-content {
+    display: none;
+}
