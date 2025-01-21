@@ -8,11 +8,15 @@ html(lang="zh-CN")
             div.row
                 include sidebar
                 div#main-container.col-sm-9.col-xs-12.main-container
+                    if page.archive
+                        .archive-timeline
+                            .timeline-content
                     block content
                     div.visible-xs.site-bottom-footer
                         include footer
-                    .toc-container
-                        .toc-content
+                    if is_post()
+                        .toc-container
+                            .toc-content
 
 
         script(src= url_for('js/jquery-3.1.0.min.js'))
@@ -21,5 +25,8 @@ html(lang="zh-CN")
         script(src= url_for('js/jquery.appear.js'))
         script(src= url_for('js/google-analytics.js'))
         script(src= url_for('js/typography.js'))
-        script(src= url_for('js/toc.js'))
+        if is_post()
+            script(src= url_for('js/toc.js'))
+        if page.archive
+            script(src= url_for('js/archive-timeline.js'))
 
