@@ -15,19 +15,22 @@ function triggerSiteNav() {
     }
 }
 function updateSidebar() {
+    const hasToc = $('.toc-container').children().length > 0 && 
+                   $('.toc-container').css('display') !== 'none';
+                   
     if (window.innerWidth <= 768 || window.innerHeight <= 600) {
         $('#side-bar').innerWidth($('#stage').width());
         $('#main-container').removeClass('col-sm-9');
-        //$('#site-nav').hide();
-        //siteNavShown = false;
     } else {
-        //$('#site-nav').show();
-        //siteNavShown = true;
-        var sidebarW =
-            stage.width() - $('#main-container').outerWidth() + (window.innerWidth - stage.innerWidth()) / 2;
+        var sidebarW = stage.width() - $('#main-container').outerWidth() + 
+                      (window.innerWidth - stage.innerWidth()) / 2;
         $('#side-bar').outerWidth(sidebarW);
-        console.log("sidebarW=" + sidebarW);
         $('#main-container').addClass('col-sm-9');
+        
+        // 只在无大纲时调整左边距
+        if (!hasToc) {
+            $('.main-container').css('margin-left', '20px');
+        }
     }
 }
 $(document).ready(function () {
@@ -37,14 +40,21 @@ $(document).ready(function () {
     });
     updateSidebar();
     
-    // 移除主容器和侧边栏的invisible类
-    $('#main-container').removeClass('invisible');
-    $('#side-bar').removeClass('invisible').addClass('fadeInRight'); // 先移除invisible再添加动画
+    // 移除主容器的invisible类，并且不添加任何动画
+    $('#main-container').removeClass('invisible').css({
+        'opacity': '1',
+        'transform': 'none',
+        'transition': 'none'
+    });
     
-    // 为大纲容器设置样式，确保没有动画
+    // 只给侧边栏添加动画
+    $('#side-bar').removeClass('invisible').addClass('fadeInRight');
+    
+    // 移除目录容器的所有动画
     $('.toc-container').css({
         'opacity': '1',
         'transform': 'none',
+        'transition': 'none',
         'animation': 'none',
         '-webkit-animation': 'none'
     });

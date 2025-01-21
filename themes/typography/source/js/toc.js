@@ -10,6 +10,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // 检查是否有有效标题
+      const headings = document.querySelectorAll('h1, h2, h3, h4');
+      const validHeadings = Array.from(headings).filter(heading => {
+        const text = heading.textContent;
+        return !text.includes('明月守灯寻长梦') && 
+               !text.includes('梦长寻灯守月明') && 
+               !text.includes('秋月春风') &&
+               !text.includes('目录');
+      });
+      
+      if (validHeadings.length === 0) {
+        container.style.display = 'none';
+        // 无大纲时调整布局
+        document.querySelector('.main-container').style.marginLeft = '20px';
+        return;
+      } else {
+        // 有大纲时保持原布局
+        document.querySelector('.main-container').style.marginLeft = '170px';
+      }
+      
       // 在生成目录前先设置好位置
       container.style.position = 'fixed';
       container.style.left = '20px';
@@ -38,20 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       } else {
         // 普通文章页面
-        const headings = document.querySelectorAll('h1, h2, h3, h4');
-        const validHeadings = Array.from(headings).filter(heading => {
-          const text = heading.textContent;
-          return !text.includes('明月守灯寻长梦') && 
-                 !text.includes('梦长寻灯守月明') && 
-                 !text.includes('秋月春风') &&
-                 !text.includes('目录');
-        });
-        
-        if (validHeadings.length === 0) {
-          container.style.display = 'none';
-          return;
-        }
-
         let prevLevel = 0;
         let currentUL = tocList;
         const ulStack = [tocList];
@@ -134,4 +140,14 @@ document.addEventListener('DOMContentLoaded', function() {
   
     window.addEventListener('scroll', updateActiveLink);
     generateTOC();
-  });
+
+    // 监听DOM变化,处理动态添加的大纲
+    const observer = new MutationObserver(function() {
+        updateSidebar();
+    });
+    
+    observer.observe(document.querySelector('.toc-container'), {
+        childList: true,
+        subtree: true
+    });
+});
