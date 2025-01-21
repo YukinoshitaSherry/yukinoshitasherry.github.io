@@ -40,23 +40,17 @@ $(document).ready(function () {
     });
     updateSidebar();
     
-    // 移除主容器的invisible类，并且不添加任何动画
+    // 主容器只使用透明度动画
     $('#main-container').removeClass('invisible').css({
-        'opacity': '1',
-        'transform': 'none',
-        'transition': 'none'
+        'animation': 'fadeIn 0.8s ease-out forwards'
     });
     
-    // 只给侧边栏添加动画
+    // 侧边栏保持原有动画
     $('#side-bar').removeClass('invisible').addClass('fadeInRight');
     
-    // 移除目录容器的所有动画
-    $('.toc-container').css({
-        'opacity': '1',
-        'transform': 'none',
-        'transition': 'none',
-        'animation': 'none',
-        '-webkit-animation': 'none'
+    // 大纲容器只使用透明度动画
+    $('.toc-container').removeClass('invisible').css({
+        'animation': 'fadeIn 0.8s ease-out forwards'
     });
     
     $('.site-title').click(function(e) {

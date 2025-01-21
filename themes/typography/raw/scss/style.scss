@@ -108,6 +108,32 @@ body {
   padding: 0;
   position: relative;
 }
+// 在这里添加新的动画定义
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
+.full-width-container {
+  width: 100vw;
+}
 
 .full-width-container {
   width: 100vw;

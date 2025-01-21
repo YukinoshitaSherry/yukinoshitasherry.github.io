@@ -2,79 +2,88 @@ extends partial/layout
 
 block content
 	.autopagerize_page_element: .content
-		.home-header(style="display: flex; flex-direction: column; align-items: center; margin-top: 0.2em;")
+		.home-header(style="display: flex; flex-direction: column; align-items: center; margin-top: 0.1em;")
 			img(src="/images/Home.jpg" alt="Home Image" style="max-width: 700px; width: 135%; height: auto; border-radius: 4px;")
 			.motto(style="margin-top: 0.5em; color: #888; font-size: 0.9em; font-family: 'Times New Roman'; font-style: italic;")
 				| Per aspera ad astra
 		
 		//- 修改自定义内容区域的样式
-		.custom-content(style="margin: 2em auto; width: 100%; max-width: 700px; text-align: left; padding: 0 20px;")
+		.custom-content(style="margin: 1.5em auto; width: 100%; max-width: 700px; text-align: left; padding: 0 20px;")
 			p(style="font-size: 0.92em; color: #2e4050; line-height: 2; font-family: 'Times New Roman', '楷体';")
-				| 『Quo fata ferunt? Veritas vos liberabit. Tempus omnia revēlat.』
-				br 
+				| 『 Quo fata ferunt? 』
+				br
 				| 本博客用于记录
-				a(href="/about" style="margin: 0 5px;") 秋月春风
-				| 的学习与生活，请下滑阅读本导览的全部内容。
+				a(href="/about" style="margin: 0px 2px;") 秋月春风
+				| 的学习与生活，现在坐标主页导览区。
 				br
-				| 现在坐标主页，欢迎在底部评论区留言，或通过右下方侧边栏的账号与我联系。
-				br
-				| 花径已然缘客扫，蓬门长久为君开。
+				| 欢迎在底部评论区留言，或通过右下方侧边栏的账号与我联系。
 				br
 				br
 				span(style="font-family: 'STZhongsong', '华文中宋', serif; font-size: 1.2em;") 章句日新:&nbsp;学习篇
 				br
+				| 『 Veritas vos liberabit. 』
+				br
 				| 浙江大学课程学习：
-				a(href="/categories/上浙大" style="margin: 0 5px;") 上浙大
+				a(href="/categories/上浙大" style="margin: 0 4px;") 上浙大
 				br
 				| 泛计算机类知识自学笔记：
-				a(href="/categories/学CS/SE" style="margin: 0 5px;") 学CS/SE &nbsp;
-				a(href="/categories/学AI/DS" style="margin: 0 5px;") 学AI/DS
+				a(href="/categories/学CS/SE" style="margin: 0 4px;") 学CS/SE &nbsp;
+				a(href="/categories/学AI/DS" style="margin: 0 4px;") 学AI/DS
+				| &nbsp;泛商科知识学习：
+				a(href="/categories/学商科" style="margin: 0 4px;") 学商科
 				br
 				| 英语学习笔记：
-				a(href="/categories/学英语" style="margin: 0 5px;") 学英语
+				a(href="/categories/学英语" style="margin: 0 4px;") 学英语
 				| &nbsp;小语种与语言学探索：
-				a(href="/categories/学语言" style="margin: 0 5px;") 学语言
+				a(href="/categories/学语言" style="margin: 0 4px;") 学语言
+				| &nbsp;(日/德/法/拉丁...)
 				br
 				| 纯业余泛社科/理学学习与随想：
-				a(href="/categories/思万物" style="margin: 0 5px;") 思万物
+				a(href="/categories/思万物" style="margin: 0 4px;") 思万物
 				| &nbsp;&nbsp;(哲学/心理/经济/天文/地理/历史...)
 				br
 				br
 				span(style="font-family: 'STZhongsong', '华文中宋', serif; font-size: 1.2em;") 飞鸿踏雪:&nbsp;生活篇
 				br
-				| 美食探店分享：
-				a(href="/categories/吃什么" style="margin: 0 5px;") 吃什么
-				a(href="/categories/喝咖啡" style="margin: 0 5px;") 喝咖啡
+				|『 Tempus omnia revēlat. 』
 				br
-				| 诗歌与杂文写作摘录：
-				a(href="/categories/拾光记" style="margin: 0 5px;") 拾光记
-				br
-				| 读书笔记 & 番剧/影视观后感:
-				a(href="/categories/读闲书" style="margin: 0 5px;") 读闲书
-				a(href="/categories/看影视" style="margin: 0 5px;") 看影视
-				br
-				| 散步/旅行游记 & 飞机/铁道：
-				a(href="/categories/去旅行" style="margin: 0 5px;") 去旅行
-				| &nbsp;体育锻炼：
-				a(href="/categories/做运动" style="margin: 0 5px;") 做运动
+				| 诗歌与杂文写作摘录:
+				a(href="/categories/拾光记" style="margin: 0 4px;") 拾光记
 				br
 				| 剧院/音乐厅repo & 古典音乐:
-				a(href="/categories/进剧院" style="margin: 0 5px;") 进剧院
-				| &nbsp;博物馆观展/集章 & 美术/文物:
-				a(href="/categories/观展览" style="margin: 0 5px;") 观展览
+				a(href="/categories/进剧院" style="margin: 0 4px;") 进剧院
+				| &nbsp;&nbsp;&nbsp;博物馆观展/集章 & 美术/文物:
+				a(href="/categories/观展览" style="margin: 0 4px;") 观展览
 				br
+				| 读书笔记:
+				a(href="/categories/读闲书" style="margin: 0 4px;") 读闲书
+				| &nbsp;&nbsp;&nbsp;&nbsp;番剧/影视观后感:
+				a(href="/categories/析影视" style="margin: 0 4px;") 析影视
+				| &nbsp;&nbsp;&nbsp;&nbsp;散步/旅行游记:
+				a(href="/categories/踏旅程" style="margin: 0 4px;") 踏旅程
+				br
+				| 美食探店分享 & 餐饮杂学:
+				a(href="/categories/吃什么" style="margin: 0 4px;") 吃什么
+				a(href="/categories/喝咖啡" style="margin: 0 4px;") 喝咖啡
+				| &nbsp;&nbsp;&nbsp;&nbsp;体育锻炼:
+				a(href="/categories/做运动" style="margin: 0 4px;") 做运动
 				br
 				br
 				| 如果希望查看所有分类，请进入分类页面，点击对应类别按钮进入该类别：
-				a(href="/categories" style="margin: 0 5px;") Categories
+				a(href="/categories" style="margin: 0 4px;") Categories
 				br
 				| 归档页面倒序记录了所有文章，这些被记住的日子构成了我完整的生活：
-				a(href="/archives" style="margin: 0 5px;") Archive
+				a(href="/archives" style="margin: 0 4px;") Archive
 				br
 				| 如果你希望更多了解我，请查看关于页面：
-				a(href="/about" style="margin: 0 5px;") About
+				a(href="/about" style="margin: 0 4px;") About
 				|,本博客有诸多途径进入它
 				br
+				br
+				| 花径已然缘客扫，蓬门长久为君开。
+				br
+				| 『 Hinc itur ad astra. 』
+
 				
 				#giscus-container
 				script(
