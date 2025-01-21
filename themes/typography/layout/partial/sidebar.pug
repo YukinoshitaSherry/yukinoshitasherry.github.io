@@ -5,4 +5,5 @@ div#side-bar.col-sm-3.col-xs-12.side-container.invisible
         h1.site-title-large(tabindex="-1")
             a.a-title(href=theme.personal_site)= theme.title_primary
     br.visible-lg.visible-md.visible-sm
-    include nav
+    if !is_archive()
+        include nav

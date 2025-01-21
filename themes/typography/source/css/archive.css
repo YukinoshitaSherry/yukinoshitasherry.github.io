@@ -115,4 +115,65 @@
     font-family:"Times New Roman","楷体"
   }
 
+  .archive-month {
+    color: #666;
+    font-size: 1.2em;
+    margin: 8px 0;
+    padding-left: 0;  /* 移除左边距,与年份对齐 */
+    font-family: "Times New Roman","楷体";
+    display: block;  /* 确保块级显示 */
+}
 
+.archive-year {
+    color: #444;
+    font-size: 1.6em;
+    margin: 15px 0;
+    font-family: "Times New Roman","楷体";
+    display: block;
+}
+
+/* 调整文章列表的缩进 */
+.archive .post-title {
+    padding-left: 20px;  /* 文章标题缩进 */
+}
+
+/* 左侧大纲 */
+.archive-outline {
+  position: fixed;
+  left: 20px;
+  top: 100px;
+  width: 200px;
+  font-family: "Times New Roman","楷体";
+  padding-right: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+
+.outline-year {
+  margin: 10px 0;
+}
+
+.outline-months {
+  margin-left: 15px;
+}
+
+.outline-months a {
+  display: block;
+  color: #666;
+  text-decoration: none;
+  padding: 2px 0;
+}
+
+.archive {
+  margin-left: 0;  /* 移除左边距 */
+  padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+  .archive-outline {
+    display: none;
+  }
+  .archive {
+    padding: 0 10px;
+  }
+}

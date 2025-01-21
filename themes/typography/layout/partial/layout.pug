@@ -6,13 +6,15 @@ html(lang="zh-CN")
     body(class=`${page.path.includes('about/') ? 'about-page' : ''} ${is_post() ? 'post-page' : ''} ${page.path === 'index.html' ? 'home' : ''}`)
         div#stage.container
             div.row
-                include sidebar
-                div#main-container.col-sm-9.col-xs-12.main-container
+                if !is_archive()
+                    include sidebar
+                div#main-container(class=is_archive() ? 'col-sm-12 col-xs-12' : 'col-sm-9 col-xs-12').main-container
                     block content
                     div.visible-xs.site-bottom-footer
                         include footer
-                    .toc-container
-                        .toc-content
+                    if !is_archive()
+                        .toc-container
+                            .toc-content
 
 
         script(src= url_for('js/jquery-3.1.0.min.js'))

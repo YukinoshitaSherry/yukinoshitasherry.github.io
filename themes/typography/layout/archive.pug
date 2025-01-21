@@ -10,8 +10,24 @@ block description
 
 block content
     .autopagerize_page_element: .content
-        p.post-title
-            != __("Archive") + ' ' + __('ArchiveCount', site.posts.length)
+        // 左侧大纲
+        .archive-outline
+            h2 Outline
+            - var years = {}
+            - page.posts.each(function(post) {
+                - var year = date(post.date, 'YYYY')
+                - var month = date(post.date, 'MM')
+                - if (!years[year]) years[year] = new Set()
+                - years[year].add(month)
+            - })
+            each months, year in years
+                .outline-year
+                    a(href=`#year-${year}`)= year
+                    .outline-months
+                        each month in Array.from(months).sort((a,b) => b-a)
+                            a(href=`#month-${year}${month}`)= month + "月"
+        
+        // 右侧文章列表(移除了原有的 Outline 标题)
         .archive.animated.fadeInDown
             - var year = 0;
             - var change = false;
@@ -19,14 +35,17 @@ block content
             - page.posts = site.posts.sort('date', -1)
             - page.posts.each(function (item) {
                 - var itemYear = date(item.date, 'YYYY') - 0;
+                - var itemMonth = date(item.date, 'MM') - 0;
                 - change = year !== itemYear;
                 - year = change ? itemYear : year;
                 if change 
                     if !firstYear
                         br
                     - firstYear = false;
-                    h2.archive-year!= year
+                    h2.archive-year(id=`year-${itemYear}`)!= itemYear
+                h3.archive-month(id=`month-${itemYear}${itemMonth}`)!= itemMonth + "月"
                 +make_post(item, false)
             - })
+            
         if config.archive_generator.per_page
             +make_pager(__('prev'), __('next'))
