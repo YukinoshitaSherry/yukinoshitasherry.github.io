@@ -58,11 +58,13 @@
   .category-item {
     display: inline-block;
     margin: 10px;
-    padding: 10px 20px;
+    padding: 5px 10px;
     border: 1px solid #999 !important;  /* 强制保持边框 */
     border-radius: 20px;
     transition: all 0.3s;
     font-family: "Times New Roman", "楷体";
+    min-width: 80px;  /* 添加最小宽度 */
+    text-align: center; /* 确保文字居中 */
   }
   
   .category-item:hover {
@@ -71,10 +73,19 @@
     border: 1px solid #2e405b !important;
   }
 
+  .category-item:first-child {
+    padding: 5px 10px !important;  /* 确保第一个元素和其他元素padding一致 */
+    min-width: 80px !important;     /* 确保第一个元素和其他元素宽度一致 */
+    text-align: center !important; /* 确保文字居中 */
+  }
+
   .category-item a {
     color: inherit;
     text-decoration: none;
     border-bottom: none;
+    display: block;  /* 让链接占满整个区域 */
+    width: 100%;    /* 确保链接宽度100% */
+    text-align: center;  /* 确保链接文字居中 */
   }
 
   .category-item a:hover {
@@ -83,6 +94,7 @@
     opacity: 0.9;
   }
 
+  
 
   .post-desc {
     margin: 10px 0;
