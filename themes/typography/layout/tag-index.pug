@@ -14,6 +14,8 @@ block content
             p.post-title
                 != __("Tags")
             #tagCloud(style="width: 100%; height: 500px; margin: 20px auto;")
+            .tag-cloud-desc(style="text-align: center; color: #2e405b; font-size: 16px; margin-top: -20px; margin-bottom: 30px; font-family: '楷体';")
+                | 这是标签词云图，点击词语前往对应标签合集页面
 
             //- 直接从 Hexo 获取标签数据并转换为数组
             - var tagData = []
@@ -46,7 +48,7 @@ block content
                                 fontFamily: 'Times New Roman, 楷体',
                                 fontWeight: 'bold',
                                 color: function() {
-                                    return ['#2e405b', '#4a5568', '#1a85d3','#114393','#34c0e4','#718096', '#4299e1', '#3490dc', '#2b6cb0', '#3677e0','#1f3753', '#666'][Math.floor(Math.random() * 8)];
+                                    return ['#2e405b', '#4a5568', '#1a85d3','#114393','#34c0e4','#718096', '#4299e1', '#3490dc', '#2b6cb0', '#3677e0','#1f3753', '#aaa','#666'][Math.floor(Math.random() * 8)];
                                 }
                             },
                             data: tags
