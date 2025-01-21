@@ -215,10 +215,10 @@ body {
 
 /*左侧目录大纲样式*/
 /* 目录标题样式 */
-.toc-container::before {
+.toc-container.has-toc::before {
   content: 'Outline';
   display: block;
-  font-size: 25px;  /* 放大字体 */
+  font-size: 25px;
   font-weight: normal;
   color: #2e405b;
   margin-left: 40px;

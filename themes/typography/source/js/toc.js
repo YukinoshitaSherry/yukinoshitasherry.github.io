@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // 有目录时添加 has-toc 类
+      container.classList.add('has-toc');
+      
       // 有大纲时的样式
       container.style.cssText = `
           position: fixed;
