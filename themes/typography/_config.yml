@@ -59,7 +59,11 @@ friends:
     url: https://memoryoffish.github.io
     avatar: /images/friends/memory of fish.jpg
     desc: 一只躺平的小丑鱼
-  - name: 另一个博客4
+  - name: 示例博客
+    url: https://another-example.com
+    avatar: https://another-example.com/avatar.jpg 
+    desc: 这是另一个示例博客
+  - name: 示例博客
     url: https://another-example.com
     avatar: https://another-example.com/avatar.jpg 
     desc: 这是另一个示例博客
@@ -67,6 +71,9 @@ friends:
     url: https://mem.ac
     avatar: /images/friends/mem.png
     desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
-
+  - name: 示例博客
+    url: https://another-example.com
+    avatar: https://another-example.com/avatar.jpg 
+    desc: 这是另一个示例博客
 
 

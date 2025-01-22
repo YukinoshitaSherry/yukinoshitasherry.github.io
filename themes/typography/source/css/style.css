@@ -979,6 +979,8 @@ figure .code pre {
   body {
     line-height: normal;
     font-family: "Times New Roman", "华文中宋";
+    font-size: 16px;
+    padding: 0 15px;
   }
   h1 {
     font-size: 40px;
@@ -1033,6 +1035,7 @@ figure .code pre {
     text-align: center;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    padding: 10px 0;
   }
   .site-title:hover {
     color: #2e405b !important;
@@ -1045,10 +1048,11 @@ figure .code pre {
     background: transparent !important;
   }
   .main-container {
+    width: 100%;
     text-align: left;
     height: auto;
     margin: 0;
-    padding: 20px 30px;
+    padding: 20px 15px;
     overflow: auto;
   }
   .side-container {
@@ -1916,15 +1920,15 @@ figure .code pre {
     font-family: "Times New Roman", "华文中宋";
   }
   h1 {
-    font-size: 40px;
+    font-size: 38px;
     font-family: "Times New Roman", "华文中宋";
   }
   h2 {
-    font-size: 34px;
+    font-size: 30px;
     font-family: "Times New Roman", "华文中宋";
   }
   h3 {
-    font-size: 28px;
+    font-size: 26px;
     font-family: "Times New Roman", "华文中宋";
   }
   h4,
@@ -1941,11 +1945,11 @@ figure .code pre {
     font-family: "Times New Roman", "华文中宋";
   }
   .site-title-large {
-    font-size: 38px;
+    font-size: 34px;
     font-family: "Times New Roman", "华文中宋";
   }
   .site-title-small {
-    font-size: 22px;
+    font-size: 20px;
     font-family: "Times New Roman", "华文中宋";
   }
   .vertical-text {
