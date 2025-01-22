@@ -39,6 +39,22 @@ figure.highlight .code pre {
 	margin: 0!important
 }
 
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  line-height: 1.6;
+  color: #2e405b;
+  background: #fff;
+}
+
 figure.highlight.html .code:after,figure.highlight.js .code:after,figure.highlight.bash .code:after,figure.highlight.css .code:after,figure.highlight.scss .code:after,figure.highlight.diff .code:after,figure.highlight.java .code:after,figure.highlight.xml .code:after,figure.highlight.python .code:after,figure.highlight.json .code:after,figure.highlight.swift .code:after,figure.highlight.ruby .code:after,figure.highlight.perl .code:after,figure.highlight.php .code:after,figure.highlight.c .code:after,figure.highlight.cpp .code:after {
 	position: absolute!important;
 	top: 0!important;

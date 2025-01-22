@@ -18,7 +18,7 @@
 @keyframes fadein-right {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -28,7 +28,7 @@
 @-webkit-keyframes fadein-right {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -349,10 +349,22 @@ body {
 @media screen and (max-width: 1400px) {
   .post-page .post-content {
     margin-left: 20px;
+    margin-right: 20px;
   }
   
   .main-container {
-    padding: 80px 20px;
+    padding: 60px 20px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .post-page .post-content {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+  
+  .main-container {
+    padding: 40px 15px;
   }
 }
 
@@ -533,23 +545,18 @@ body {
   }
 }
 
-/* 侧边栏位置控制 */
+/* 右侧边栏秋月春风位置控制 */
 .side-container {
   position: fixed;
   right: -180px;
-  top: 0;
+  top: 0px;
   width: 250px;
-  height: 100vh;
+  height: 75vh;
   padding: 20px 20px;
   z-index: 100;
 }
 
 
-/* 添加一个类来控制动画 */
-.side-container.slide-right {
-  right: -150px;
-  transition: right 1s ease-out;
-}
 
 /* 响应式布局 */
 @media screen and (max-width: 1400px) {
@@ -706,7 +713,7 @@ body.about-page .site-title a:hover {
   font-size: 18px;
 }
 .site-title-links ul li.soc {
-  margin-top: 20px; /* 增加与上方About的距离 */
+  margin-top: 8px; /* 增加与上方About的距离 */
 }
 
 .site-title-links ul li:not(.soc) {
@@ -1331,7 +1338,7 @@ figure .code pre {
 @keyframes fadein-right {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -1341,7 +1348,7 @@ figure .code pre {
 @-webkit-keyframes fadein-right {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -1628,7 +1635,7 @@ body.about-page .site-title a:hover {
   margin-bottom: 0;
 }
 /* HOME页面标签 */
-/* 右边栏秋月春风样式 */
+/* 右边栏home~about样式 */
 a {
   color: #2e405b;
   transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
@@ -1636,7 +1643,8 @@ a {
   -o-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   -webkit-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   border-bottom: solid #2e405b 0.5px; /* 横线距离宽度从1px改为0.5px */
-  padding: 0; /* 侧栏高度 */
+  padding: 0px; /* Home~about的padding */
+  margin-bottom: 0px;/*Home~about间距*/
   cursor: pointer;
   cursor: hand;
   font-family: "Times New Roman", "华文中宋";
