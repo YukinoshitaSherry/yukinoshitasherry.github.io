@@ -3,7 +3,7 @@ title: About
 layout: page
 ---
 
-<div style="margin-left: 8.5em; margin-top: -4.5em; text-align: center;">
+<div style="margin-left: 24em; margin-top: -4.5em;margin-bottom: 4em; text-align: center;">
     <img src="/images/about.jpg" alt="About Image" style="max-width: 500px; height: auto;">
     <div style="margin-top: 0.5em; color: #888; font-size: 0.9em; font-family: 'Times New Roman', Times, serif; font-style: italic;">
         Per aspera ad astra
@@ -12,11 +12,15 @@ layout: page
 
 <!-- 这里可以添加你的个人介绍内容 -->
 
-<br></br>
+『 天堂应该是图书馆的模样 / 写作是为了光阴流逝使我心安 』
+<div class="quote-author">—— 博尔赫斯</div>        
+
 我是秋月春风/Yukinoshita Sherry。
 因为不擅长起名，所以这两个几乎是沿用多年的全网统一ID。分别取自杨慎《临江仙·滚滚长江东逝水》中的"白发渔樵江渚上，惯看秋月春风"，与我喜欢的二次元角色灰原哀、雪之下雪乃。
-Asexuality, She/Her/Hers,。赛博八字为水瓶座、INTJ、拉文克劳。
-现为浙江大学计算机科学与技术学院22级本科生，主修软件工程，辅修创新创业管理强化班(ITP)。
+Asexuality, She/Her/Hers。赛博八字为水瓶座、INTJ、拉文克劳。向往科技与艺术的结合。
+现为ZJU计算机科学与技术学院22级本科生，主修软件工程，辅修创新创业管理强化班(ITP)。
+
+                     
 <br></br>
 
 

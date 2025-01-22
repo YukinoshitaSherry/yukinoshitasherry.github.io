@@ -376,8 +376,24 @@ body {
   padding: 0 20px;
 }
 
+/* 添加 About 标题特定样式 */
+.about-page .post-content h1:first-child {
+  align-self: flex-start;  /* 确保标题左对齐 */
+  margin-left: -20px;  /* 向左移动 */
+  font-size: 48px;
+  margin-bottom: 30px;
+}
+
+/* 增大正文字体 */
+.about-page .post-content p {
+  font-size: 18px;
+  line-height: 1.8;
+  margin-bottom: 1.5em;
+  font-family: "Times New Roman", "楷体";
+}
+/* 图片下面字*/
 .about-page .motto {
-  margin-left: -150px;
+  margin-left: 100px !important;
   margin-top: 0.5em;
   margin-bottom: 4em;
   color: #666;
@@ -385,6 +401,18 @@ body {
   font-family: 'Times New Roman';
   font-style: italic;
   text-align: center;
+}
+
+/* About页面引用署名样式 */
+.about-page .quote-author {
+  text-align: right;
+  display: block;
+  margin-top: -40px;
+  margin-bottom: 25px;
+  margin-left: 500px;
+  font-family: "Times New Roman", "楷体";
+  font-size: 18px;
+  color: #666;
 }
 
 .about-page img {
