@@ -54,11 +54,6 @@ mixin make_page_links()
                 a(href=url_for(p.path))= p.title
     - }
     - }
-    li
-        if is_current('friends/')
-            a.current(href=url_for("/friends/"))= __('Friends')
-        else
-            a(href=url_for("/friends/"))= __('Friends')
 
 
 mixin make_pager()
