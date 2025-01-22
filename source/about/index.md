@@ -3,12 +3,10 @@ title: About
 layout: page
 ---
 
-<div style="margin-left: 24em; margin-top: -4.5em;margin-bottom: 4em; text-align: center;">
-    <img src="/images/about.jpg" alt="About Image" style="max-width: 500px; height: auto;">
-    <div style="margin-top: 0.5em; color: #888; font-size: 0.9em; font-family: 'Times New Roman', Times, serif; font-style: italic;">
-        Per aspera ad astra
-    </div>
+<div class="image-container">
+  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/about.png" alt="About Image">
 </div>
+<div class="motto">Per aspera ad astra</div>
 
 <!-- 这里可以添加你的个人介绍内容 -->
 

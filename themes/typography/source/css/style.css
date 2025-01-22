@@ -369,8 +369,7 @@ body {
 .about-page .post-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;  /* 改为左对齐 */
   margin: 2em auto;
   max-width: 800px;
   padding: 0 20px;
@@ -391,23 +390,13 @@ body {
   margin-bottom: 1.5em;
   font-family: "Times New Roman", "楷体";
 }
-/* 图片下面字*/
-.about-page .motto {
-  margin-left: 100px !important;
-  margin-top: 0.5em;
-  margin-bottom: 4em;
-  color: #666;
-  font-size: 1.5em;
-  font-family: 'Times New Roman';
-  font-style: italic;
-  text-align: center;
-}
+
 
 /* About页面引用署名样式 */
 .about-page .quote-author {
   text-align: right;
   display: block;
-  margin-top: -40px;
+  margin-top: -20px;
   margin-bottom: 25px;
   margin-left: 500px;
   font-family: "Times New Roman", "楷体";
@@ -415,14 +404,34 @@ body {
   color: #666;
 }
 
+/* About页面图片容器 */
+.about-page .image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* About页面图片样式 */
 .about-page img {
-  max-width: 100%;
+  max-width: 800px;  /* 与 Home 页面保持一致 */
+  width: 100%;
   height: auto;
   display: block;
-  margin-left: -200px;
-  border-radius: 1px;
-  margin-bottom: 0.5em;
+  margin: 0 auto;
 }
+
+/* 图片下面的 motto */
+.about-page .motto {
+  width: 100%;
+  text-align: center;
+  margin: 10px 0 40px 0;
+  color: #666;
+  font-size: 1em;
+  font-family: 'Times New Roman';
+  font-style: italic;
+}
+
 
 /* Home页面样式 */
 .home .post-content {
