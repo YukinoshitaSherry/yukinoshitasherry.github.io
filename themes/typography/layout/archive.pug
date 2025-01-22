@@ -10,8 +10,6 @@ block description
 
 block content
     .autopagerize_page_element: .content
-        p.post-title
-            != __("Archive") + ' ' + __('ArchiveCount', site.posts.length)
         .archive.animated.fadeInDown
             - var year = 0;
             - var month = 0;
@@ -35,15 +33,16 @@ block content
                         if !firstYear
                             | </div>
                         - firstYear = false
-                        h2.archive-year!= itemYear
-                        .year-container
+                        .year-section
+                            h2.archive-year!= itemYear
                     
                     if monthChange
                         if !firstMonth
                             | </div>
                         - firstMonth = false
-                        h3.archive-month!= itemMonth + "月"
-                        .month-container
+                        .month-section
+                            h3.archive-month(style="margin-left: 0;")!= itemMonth + "月"
+                            .month-container
                     
                     .post-item-wrapper
                         +make_post(item, false)

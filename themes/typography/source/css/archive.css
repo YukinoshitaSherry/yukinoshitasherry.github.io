@@ -1,16 +1,18 @@
   /* tag标签样式 */
   .tag-filter {
     display: inline-block;
-    padding: 5px 10px;
+    padding: 3px 15px;  /* 增加水平方向的padding */
+    margin: 1px;        /* 添加外边距 */
     border: 1px solid #999;
-    border-radius: 18px;
+    border-radius: 20px; /* 增加圆角半径 */
     background: transparent;
     color: #999;
     text-decoration: none;
     transition: all 0.3s;
     position: relative;
-    z-index: 1;  /* 添加z-index确保链接可点击 */
-  }
+    z-index: 1;
+    line-height: 1.5;  /* 添加行高 */
+}
   
   .tag-filter::after {
     content: '';
@@ -206,11 +208,13 @@
     font-family: "Times New Roman", "楷体";
 }
 
+
+/* 月份标题样式 */
 .archive-month {
-    font-size: 1.4em;
-    color: #666;
-    margin: 20px 0 15px;
-    font-family: "Times New Roman", "楷体";
+  font-size: 1.4em;
+  color: #666;
+  margin-left: 10px;
+  font-family: "Times New Roman", "楷体";
 }
 
 
