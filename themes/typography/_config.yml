@@ -55,17 +55,18 @@ friends:
     url: https://aboatwithflow.top
     avatar: /images/friends/aboat.jpg
     desc: Aboat's 的小舟
-  - name: mem的小站
-    url: https://mem.ac
-    avatar: /images/friends/mem.png
-    desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
-  - name: 另一个博客3
-    url: https://another-example.com
-    avatar: https://another-example.com/avatar.jpg 
-    desc: 这是另一个示例博客
+  - name: Memory Of Fish
+    url: https://memoryoffish.github.io
+    avatar: /images/friends/memory of fish.jpg
+    desc: 一只躺平的小丑鱼
   - name: 另一个博客4
     url: https://another-example.com
     avatar: https://another-example.com/avatar.jpg 
     desc: 这是另一个示例博客
+  - name: mem的小站
+    url: https://mem.ac
+    avatar: /images/friends/mem.png
+    desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
+
 
 

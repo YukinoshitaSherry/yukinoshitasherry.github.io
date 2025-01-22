@@ -1595,7 +1595,7 @@ a {
   -o-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   -webkit-transition: color 0.3s ease 0s, background-color 0.3s ease 0s;
   border-bottom: solid #2e405b 0.5px; /* 横线距离宽度从1px改为0.5px */
-  padding: 4px; /* 将padding从3px改为4.5px */
+  padding: 0; /* 侧栏高度 */
   cursor: pointer;
   cursor: hand;
   font-family: "Times New Roman", "华文中宋";
