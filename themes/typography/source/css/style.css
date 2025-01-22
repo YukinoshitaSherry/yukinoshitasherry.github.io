@@ -2062,7 +2062,6 @@ h1, h2, h3, h4, h5, h6 {
 
 
 /* 友链样式 */
-/* 友链样式 */
 .friends-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 一行3列 */
@@ -2089,6 +2088,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 15px;
   text-decoration: none;
   border-bottom: none !important;
+  justify-content: flex-end; /* 将内容靠右对齐 */
+  align-items: center; /* 垂直居中 */
 }
 
 .friend-link:hover {
@@ -2099,13 +2100,15 @@ h1, h2, h3, h4, h5, h6 {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  margin-right: 15px;
+  margin-left: 10px; /* 左边距 */
+  margin-right: 10px; /* 右边距 */
   object-fit: cover;
 }
 
 .friend-info {
   flex: 1;
   overflow: hidden; /* 防止文字溢出 */
+  order: 1; /* 将文字信息放到前面 */
 }
 
 .friend-name {
