@@ -53,23 +53,23 @@ giscus:
 friends:
   - name: Aboat Withflow
     url: https://aboatwithflow.top
-    avatar: /images/friends/aboat.jpg
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/aboat.jpg
     desc: Aboat's 的小舟
   - name: Memory Of Fish
     url: https://memoryoffish.github.io
-    avatar: /images/friends/memory of fish.jpg
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/memory%20of%20fish.jpg
     desc: 一只躺平的小丑鱼
-  - name: 示例博客
-    url: https://another-example.com
-    avatar: https://another-example.com/avatar.jpg 
-    desc: 这是另一个示例博客
+  - name: LJY的学术笔记
+    url: https://luo-jiayi.github.io/github-pages
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/ljy.png
+    desc: 自用学术资料
   - name: 示例博客
     url: https://another-example.com
     avatar: https://another-example.com/avatar.jpg 
     desc: 这是另一个示例博客
   - name: mem的小站
     url: https://mem.ac
-    avatar: /images/friends/mem.png
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/mem.png
     desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
   - name: 示例博客
     url: https://another-example.com
