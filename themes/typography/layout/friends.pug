@@ -1,0 +1,26 @@
+extends partial/layout
+
+block site_title
+    != __("Friends") + " · " + config.title
+
+block description
+    - var desc = __("Friends")+ ' - ' + config.title;
+    meta(name="description", content=desc)
+
+block content
+    .autopagerize_page_element: .content
+        .archive.animated.fadeInDown
+            h2.archive-title
+                != __("Friends")
+            .friends-container
+                if theme && theme.friends && theme.friends.length > 0
+                    each friend in theme.friends
+                        .friend-card
+                            a.friend-link(href=friend.url, target="_blank", rel="noopener")
+                                if friend.avatar
+                                    img.friend-avatar(src=friend.avatar, alt=friend.name)
+                                .friend-info
+                                    h3.friend-name= friend.name
+                                    p.friend-desc= friend.desc
+                else
+                    p.no-friends 暂无友链

@@ -46,7 +46,7 @@ mixin make_page_links()
     - var pages = site.pages.data
     - for (var i in pages) {
     - var p = pages[i]
-    - if (p.title && p.title !== 'About') {
+    - if (p.title && p.title !== 'About' && p.title !== 'Friends') {
         li
             if is_current(p.path)
                 a.current(href=url_for(p.path))= p.title
@@ -54,6 +54,11 @@ mixin make_page_links()
                 a(href=url_for(p.path))= p.title
     - }
     - }
+    li
+        if is_current('friends/')
+            a.current(href=url_for("/friends/"))= __('Friends')
+        else
+            a(href=url_for("/friends/"))= __('Friends')
 
 
 mixin make_pager()

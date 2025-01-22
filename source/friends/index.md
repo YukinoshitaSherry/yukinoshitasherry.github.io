@@ -1,0 +1,4 @@
+---
+title: Friends
+layout: friends
+---

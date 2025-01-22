@@ -158,10 +158,12 @@ categories:
   - 析影视
   - 做运动
 
+
 # 在 Site 配置下添加
 security:
   enable_cross_domain: true
   enable_mixed_content: true
+
 
 
  

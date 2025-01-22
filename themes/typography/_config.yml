@@ -49,4 +49,23 @@ giscus:
   loading: "lazy"
   crossorigin: "anonymous"
 
+# Friends友链
+friends:
+  - name: 示例博客
+    url: https://example.com
+    avatar: https://example.com/avatar.jpg
+    desc: 这是一个示例博客
+  - name: 另一个博客
+    url: https://another-example.com
+    avatar: https://another-example.com/avatar.jpg 
+    desc: 这是另一个示例博客
+  - name: 示例博客3
+    url: https://example.com
+    avatar: https://example.com/avatar.jpg
+    desc: 这是一个示例博客啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+  - name: 另一个博客4
+    url: https://another-example.com
+    avatar: https://another-example.com/avatar.jpg 
+    desc: 这是另一个示例博客
+
 
