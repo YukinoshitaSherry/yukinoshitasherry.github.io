@@ -63,6 +63,18 @@ friends:
     url: https://memoryoffish.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/memory%20of%20fish.jpg
     desc: 一只躺平的小丑鱼
+  - name: 咸鱼暄
+    url: https://xuan-insr.github.io
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/xyx.png
+    desc: 咸鱼暄的代码空间！
+  - name: DARSTIB
+    url: https://darstib.github.io/myworld/
+    avatar: https://darstib.github.io/myworld/img/avatar.jpg
+    desc: The only true wisdom is in knowing you know nothing.
+  - name: CYRUS
+    url: https://cyrus28214.top
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/cyrus.png
+    desc: Think twice,code once.
   - name: Arrietty's Universe
     url: https://arriettych.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Arrietty's%20Universe.jjpg.png
@@ -75,17 +87,7 @@ friends:
     url: https://gldym.github.io
     avatar: https://gldym.github.io/img/icon.png
     desc: 猫猫很可爱
-  - name: DARSTIB
-    url: https://darstib.github.io/myworld/
-    avatar: https://darstib.github.io/myworld/img/avatar.jpg
-    desc: The only true wisdom is in knowing you know nothing.
-  - name: 示例博客
-    url: https://another-example.com
-    avatar: https://another-example.com/avatar.jpg 
-    desc: 这是另一个示例博客
-  - name: 示例博客
-    url: https://another-example.com
-    avatar: https://another-example.com/avatar.jpg 
-    desc: 这是另一个示例博客
+
+
 
 
