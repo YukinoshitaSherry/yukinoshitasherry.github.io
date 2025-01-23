@@ -41,12 +41,10 @@ $(document).ready(function () {
     updateSidebar();
     
     // 主容器只使用透明度动画
-    $('#main-container').removeClass('invisible').css({
-        'animation': 'fadeIn 0.8s ease-out forwards'
-    });
+    $('#main-container').removeClass('invisible');
     
     // 侧边栏保持原有动画
-    $('#side-bar').removeClass('invisible').addClass('fadeInRight');
+    $('#side-bar').removeClass('invisible');
     
     // 大纲容器只使用透明度动画
     $('.toc-container').removeClass('invisible').css({
