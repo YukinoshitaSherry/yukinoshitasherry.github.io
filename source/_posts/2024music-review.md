@@ -136,3 +136,7 @@ desc: 总计40场。六月底七月初连打7天8场的壮举可能是今生唯�
 8. 古典音乐-柏林爱乐十二把大提琴
 9. 古典音乐-达尔贝托莫二十x卡斯普契克x杭爱布九
 10. 音乐剧-伊丽莎白con
+<br></br>
+<div align="center">
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/24repo.jpg" alt="24repo" style="width: 80%; height: auto;">
+</div>
