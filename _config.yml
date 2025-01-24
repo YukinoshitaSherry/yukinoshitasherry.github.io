@@ -164,6 +164,29 @@ security:
   enable_cross_domain: true
   enable_mixed_content: true
 
+# Security
+encrypt:
+  enable: true
+  default_template: |
+    <link rel="stylesheet" href="/css/hexo-encrypt.css">
+    <script>
+      (function(){
+        function decryptAjax(pwd) {
+          const blogId = window.location.pathname;
+          localStorage.removeItem('hexo-blog-encrypt:' + blogId); // 强制清除密码缓存
+        }
+        window.onload = function() {
+          decryptAjax();
+        }
+      })();
+    </script>
+    <div id="hexo-blog-encrypt" style="position: relative;">
+      <div class="hbe-input-container">
+        <input class="hbe-input" type="password" id="hbePass">
+        <label class="hbe-input-label">{{message}}</label>
+      </div>
+    </div>
+
 
 
  
