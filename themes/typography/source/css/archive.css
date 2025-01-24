@@ -171,33 +171,31 @@
     background: #555;
 }
 
+/* 归档页面整体容器 */
+.archive.animated.fadeInDown {
+    margin-left: 50px;
+    padding-left: 20px;
+    width: calc(100% - 50px);  /* 确保内容区域宽度正确 */
+}
+
+/* 年份区域容器 */
+.year-section {
+    width: 100%;
+    clear: both;  /* 确保年份不会浮动 */
+    margin-bottom: 30px;
+}
+
+/* 月份区域容器 */
+.month-section {
+    width: 100%;
+    clear: both;
+    margin-left: 20px;
+}
+
 /* 文章列表容器 */
 .posts-list {
-    margin-left: 40px;  /* 整体右移 */
-}
-
-/* 文章项包装器 */
-.post-item-wrapper {
-    margin: 15px 0;
-    padding-left: 20px;
-    transition: all 0.3s ease;
-}
-
-.post-item-wrapper:hover {
-    transform: translateX(10px);
-}
-
-/* 年份和月份容器 */
-.year-container {
-    margin-left: 20px;
-    padding-left: 20px;
-    border-left: 2px solid #eee;
-}
-
-.month-container {
-    margin-left: 20px;
-    padding-left: 20px;
-    border-left: 1px solid #eee;
+    margin: 0;
+    padding: 0;
 }
 
 /* 标题样式 */
@@ -205,16 +203,30 @@
     font-size: 1.8em;
     color: #2e405b;
     margin: 30px 0 20px;
+    padding: 0;
     font-family: "Times New Roman", "楷体";
 }
 
-
 /* 月份标题样式 */
 .archive-month {
-  font-size: 1.4em;
-  color: #666;
-  margin-left: 10px;
-  font-family: "Times New Roman", "楷体";
+    font-size: 1.4em;
+    color: #666;
+    margin: 10px 0;
+    padding: 0;
+    font-family: "Times New Roman", "楷体";
+}
+
+/* 月份内容容器 */
+.month-container {
+    margin-left: 20px;
+    padding-left: 20px;
+    border-left: 1px solid #eee;
+}
+
+/* 文章列表样式 */
+.post-container {
+    margin-left: 0;
+    padding-left: 0;
 }
 
 

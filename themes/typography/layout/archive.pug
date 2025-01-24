@@ -17,38 +17,45 @@ block content
             - var monthChange = false;
             - var firstYear = true;
             - var firstMonth = true;
-            - page.posts = site.posts.sort('date', -1)
+            - page.posts = site.posts.sort('date', -1)  // 确保按日期降序排序
             
             //- 文章列表
             .posts-list
-                - page.posts.each(function (item) {
-                    - var itemYear = date(item.date, 'YYYY') - 0;
-                    - var itemMonth = date(item.date, 'MM') - 0;
-                    - change = year !== itemYear;
-                    - monthChange = month !== itemMonth || change;
-                    - year = change ? itemYear : year;
-                    - month = monthChange ? itemMonth : month;
-                    
-                    if change
-                        if !firstYear
-                            | </div>
-                        - firstYear = false
-                        .year-section
-                            h2.archive-year!= itemYear
-                    
-                    if monthChange
-                        if !firstMonth
-                            | </div>
-                        - firstMonth = false
-                        .month-section
-                            h3.archive-month(style="margin-left: 0;")!= itemMonth + "月"
-                            .month-container
-                    
-                    .post-item-wrapper
-                        +make_post(item, false)
+                - var currentYear = null;
+                - var posts = page.posts.toArray()
+                - var years = {}
+                
+                //- 首先按年份分组所有文章
+                - posts.forEach(function(post) {
+                -     var year = date(post.date, 'YYYY')
+                -     if (!years[year]) years[year] = []
+                -     years[year].push(post)
                 - })
-                if !firstYear
-                    | </div>
+                
+                //- 然后按年份降序输出
+                - Object.keys(years).sort((a, b) => b - a).forEach(function(year) {
+                    .year-section
+                        h2.archive-year!= year
+                        - var monthPosts = {}
+                        
+                        //- 按月份分组当年的文章
+                        - years[year].forEach(function(post) {
+                        -     var month = date(post.date, 'MM')
+                        -     if (!monthPosts[month]) monthPosts[month] = []
+                        -     monthPosts[month].push(post)
+                        - })
+                        
+                        //- 按月份降序输出
+                        - Object.keys(monthPosts).sort((a, b) => b - a).forEach(function(month) {
+                            .month-section
+                                h3.archive-month!= month + "月"
+                                .month-container
+                                    - monthPosts[month].forEach(function(post) {
+                                        .post-item-wrapper
+                                            +make_post(post, false)
+                                    - })
+                        - })
+                - })
 
         if config.archive_generator.per_page
             +make_pager(__('prev'), __('next'))

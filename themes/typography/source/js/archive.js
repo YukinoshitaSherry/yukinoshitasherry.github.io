@@ -27,6 +27,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // 为时间轴月份添加点击事件
+    document.querySelectorAll('.timeline-month').forEach(month => {
+        month.addEventListener('click', function() {
+            const date = this.getAttribute('data-date');
+            const [year, month] = date.split('-');
+            
+            // 查找对应的月份标题
+            const monthHeader = document.querySelector(`.archive-month:contains("${month}月")`);
+            if(monthHeader) {
+                window.scrollTo({
+                    top: monthHeader.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
     // 生成目录
     generateToc();
 });

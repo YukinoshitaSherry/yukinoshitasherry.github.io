@@ -7,20 +7,19 @@ $(document).ready(function() {
     let currentMonth = '';
     let timelineHtml = '';
     
-    // 生成时间轴
-    posts.each(function() {
-        const date = $(this).find('.post-meta .date').text().trim();
-        const [year, month] = date.split('-');
+    // 从文档中获取所有年份和月份
+    $('.year-section').each(function() {
+        const year = $(this).find('.archive-year').text().trim();
         
         if(year !== currentYear) {
             timelineHtml += `<div class="timeline-year">${year}</div>`;
             currentYear = year;
         }
         
-        if(`${year}-${month}` !== currentMonth) {
-            timelineHtml += `<div class="timeline-month" data-date="${year}-${month}">${month}月</div>`;
-            currentMonth = `${year}-${month}`;
-        }
+        $(this).find('.archive-month').each(function() {
+            const month = $(this).text().replace('月','');
+            timelineHtml += `<div class="timeline-month" data-year="${year}" data-month="${month}">${month}月</div>`;
+        });
     });
     
     timeline.html(timelineHtml);
@@ -30,8 +29,18 @@ $(document).ready(function() {
         const year = $(this).data('year');
         const month = $(this).data('month');
         
-        // 滚动到对应的文章区域
-        const target = $(`.archive-year:contains("${year}")`).next().find(`.archive-month:contains("${month}月")`);
+        const target = $(`.archive-year:contains("${year}")`).parent().find(`.archive-month:contains("${month}月")`);
+        if(target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 100
+            }, 500);
+        }
+    });
+
+    // 点击年份跳转
+    $('.timeline-year').click(function() {
+        const year = $(this).text();
+        const target = $(`.archive-year:contains("${year}")`);
         if(target.length) {
             $('html, body').animate({
                 scrollTop: target.offset().top - 100
