@@ -136,17 +136,14 @@ desc: 总计40场。六月底七月初连打7天8场的壮举可能是今生唯�
 8. 古典音乐-柏林爱乐十二把大提琴
 9. 古典音乐-达尔贝托莫二十x卡斯普契克x杭爱布九
 10. 音乐剧-伊丽莎白con
-<br></br>
-<div align="center">
-<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/24repo.jpg" alt="24repo" style="width: 80%; height: auto;">
-</div>
+
 
 ### 布鲁克那年总榜
 此生只有一次的逢百诞辰布鲁克纳年，实现杭爱布交九场全勤。借此机会复习了九部布交，也在其相似性与差异性间更深地领悟到布交宛如建筑的恢宏之美与宗教性、人生哲学上的严谨性。
 
 岁月如梭，精彩的一年转瞬即逝，留下了诸多美好的回忆。敬佩杭爱的野心与努力，也感激所有艺术家的最终呈现。虽然有时会有优秀录音先入为主的“干扰”，但交响乐现场的震撼无以复加。
 
-【叠甲】以下按主观个人向排序。级别内基本降序排列，但同一级别内差距不太大。详见当时发的repo。
+【叠甲】以下按主观个人向排序。级别内基本降序排列，但同一级别内差距不太大。详见当时xhs发的repo。
 
 S
 
@@ -187,3 +184,8 @@ D
 【完全不喜欢，浪费时间，想退票】
 
 无
+
+<br></br>
+<div align="center">
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/24repo.jpg" alt="24repo" style="width: 80%; height: auto;">
+</div>

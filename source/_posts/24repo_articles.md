@@ -150,6 +150,7 @@ BPO末场，期待了很久，果然没有让我失望。好的乐团能冲破�
 世事难料、人生无常，就像最好的演出未必是期待最高的或者最贵的一样。但惊喜也正是因为那些不确定性才能存在的，它会存在于在某一个变奏或和弦，在某一处灯光明灭——在台前幕后的任何地方，也在这个并不会给所有人幸福的世界的任何地方。
 而艺术与命运的表达终究是场一生一世的跋涉。
 
+(其实这两场都略失望，但连打还是值得纪念的，以及第二天去的俄安娜挺惊喜的)
 <div align="center">
 <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/mlsj.jpg" alt="paris" style="width:95%;height:auto;">
 </div>
