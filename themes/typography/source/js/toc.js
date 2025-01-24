@@ -4,8 +4,41 @@ document.addEventListener('DOMContentLoaded', function() {
       const container = document.querySelector('.toc-container');
       if (!container) return;
       
-      // 先检查是否有有效标题
+      // 检查是否是加密页面
+      const encryptContainer = document.querySelector('#hexo-blog-encrypt');
+      if (encryptContainer) {
+        // 使用 MutationObserver 监听加密容器的变化
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            // 当加密内容被解密后，会添加新的节点
+            if (mutation.addedNodes.length > 0) {
+              // 检查是否包含标题元素
+              const headings = document.querySelectorAll('h1, h2, h3, h4');
+              if (headings.length > 0) {
+                // 重新生成目录
+                generateTOCContent(headings, container);
+                // 停止观察
+                observer.disconnect();
+              }
+            }
+          });
+        });
+
+        // 配置观察选项
+        const config = { childList: true, subtree: true };
+        // 开始观察
+        observer.observe(encryptContainer, config);
+        return;
+      }
+      
+      // 非加密页面的原有逻辑
       const headings = document.querySelectorAll('h1, h2, h3, h4');
+      generateTOCContent(headings, container);
+    }
+  
+    // 将原有的目录生成逻辑抽取为单独的函数
+    function generateTOCContent(headings, container) {
+      // 先检查是否有有效标题
       const validHeadings = Array.from(headings).filter(heading => {
         const text = heading.textContent;
         return !text.includes('明月守灯寻长梦') && 

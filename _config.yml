@@ -159,7 +159,7 @@ categories:
   - 做运动
 
 
-# 在 Site 配置下添加
+# 加密文章
 security:
   enable_cross_domain: true
   enable_mixed_content: true
@@ -168,24 +168,55 @@ security:
 encrypt:
   enable: true
   default_template: |
-    <link rel="stylesheet" href="/css/hexo-encrypt.css">
-    <script>
-      (function(){
-        function decryptAjax(pwd) {
-          const blogId = window.location.pathname;
-          localStorage.removeItem('hexo-blog-encrypt:' + blogId); // 强制清除密码缓存
-        }
-        window.onload = function() {
-          decryptAjax();
-        }
-      })();
-    </script>
-    <div id="hexo-blog-encrypt" style="position: relative;">
-      <div class="hbe-input-container">
-        <input class="hbe-input" type="password" id="hbePass">
-        <label class="hbe-input-label">{{message}}</label>
-      </div>
-    </div>
+    <style>
+      /* 保持原有样式 */
+      .hbe.hbe-container {
+        width: 80%;
+        max-width: 800px;
+        margin: 60px auto;
+        text-align: center;
+      }
+      
+      /* 输入框 */
+      .hbe.hbe-input-field {
+        font-size: 12px !important;
+        font-family: "Times New Roman", "楷体" !important;
+        width: 50% !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid #999 !important;
+        outline: none !important;
+        padding: 10px 0 !important;
+        margin: 20px 0 !important;
+        color: #bbb !important;
+      }
+      
+      /* 提示文字 */
+      .hbe.hbe-input-label-content {
+        font-size: 10px !important;
+        color: #999 !important;
+        font-family: "Times New Roman", "楷体" !important;
+      }
+      
+      /* 聚焦时的样式 */
+      .hbe.hbe-input-field:focus {
+        border-bottom: 1px solid #2e405b !important;
+      }
+      
+      /* 确保加密内容容器不影响目录显示 */
+      #hexo-blog-encrypt {
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* 调整目录容器样式 */
+      .toc-container {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 2;
+      }
+    </style>
 
 
 
