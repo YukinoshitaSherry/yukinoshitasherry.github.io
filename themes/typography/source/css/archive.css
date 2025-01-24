@@ -173,9 +173,9 @@
 
 /* 归档页面整体容器 */
 .archive.animated.fadeInDown {
-    margin-left: 50px;
+    margin-left: 75px;
     padding-left: 20px;
-    width: calc(100% - 50px);  /* 确保内容区域宽度正确 */
+    width: calc(100% - 75px);  /* 确保内容区域宽度正确 */
 }
 
 /* 年份区域容器 */
