@@ -103,6 +103,7 @@ plugin:
   - hexo-asset-image
   - hexo-prism-plugin
   - hexo-toc
+  - hexo-blog-encrypt
 # ... other plugins you'd like to enable
 
 # Generate archive page
@@ -169,52 +170,46 @@ encrypt:
   enable: true
   default_template: |
     <style>
-      /* 保持原有样式 */
-      .hbe.hbe-container {
-        width: 80%;
-        max-width: 800px;
-        margin: 60px auto;
-        text-align: center;
+      /* 移除所有默认样式和背景 */
+      #hexo-blog-encrypt {
+        background: transparent !important;
+      }
+      
+      /* 输入框容器 */
+      .hbe.hbe-input.hbe-input-default {
+        border: none !important;
+        border-bottom: 1px solid #999 !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
       }
       
       /* 输入框 */
-      .hbe.hbe-input-field {
-        font-size: 12px !important;
+      .hbe.hbe-input-field.hbe-input-field-default {
+        font-size: 10px !important;
         font-family: "Times New Roman", "楷体" !important;
-        width: 50% !important;
+        width: 200px !important;
         background: transparent !important;
         border: none !important;
-        border-bottom: 1px solid #999 !important;
         outline: none !important;
-        padding: 10px 0 !important;
-        margin: 20px 0 !important;
-        color: #bbb !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 20px !important;
+        line-height: 20px !important;
+        color: #333 !important;
       }
       
       /* 提示文字 */
-      .hbe.hbe-input-label-content {
-        font-size: 10px !important;
-        color: #999 !important;
-        font-family: "Times New Roman", "楷体" !important;
+      .hbe.hbe-input-label-content.hbe-input-label-content-default {
+        display: none !important;
       }
       
-      /* 聚焦时的样式 */
-      .hbe.hbe-input-field:focus {
-        border-bottom: 1px solid #2e405b !important;
-      }
-      
-      /* 确保加密内容容器不影响目录显示 */
-      #hexo-blog-encrypt {
-        position: relative;
-        z-index: 1;
-      }
-      
-      /* 调整目录容器样式 */
-      .toc-container {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        z-index: 2;
+      /* 眼睛图标容器 */
+      .hbe-button-container {
+        margin-left: 5px !important;
       }
     </style>
 

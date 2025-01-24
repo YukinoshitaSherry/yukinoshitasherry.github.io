@@ -2192,3 +2192,75 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr; /* 手机上一行1列 */
   }
 }
+
+/* 加密输入框覆盖样式 */
+/* 加密输入框覆盖样式 */
+.hbe.hbe-input.hbe-input-default {
+  position: relative !important;
+  display: inline-block !important;
+  width: auto !important;
+  background: transparent !important;
+}
+
+/* 加密输入框覆盖样式 */
+.hbe.hbe-input-field.hbe-input-field-default {
+  width: 500px !important;
+  height: 50px !important;
+  padding: 2 5px !important;
+  font-size: 18px !important;
+  border: none !important;
+  border-bottom: 1px solid #2e405b !important;
+  color: #333 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.hbe.hbe-input-field.hbe-input-field-default:focus {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 横线下方提示语 */
+.hbe.hbe-input-label-content.hbe-input-label-content-default {
+  font-size: 18px !important;
+  background: transparent !important;
+}
+
+
+
+/* 移除灰色背景 */
+/* 移除灰色背景，保持底部线条固定 */
+.hbe-input-label-default::before {
+  display: none !important; /* 完全移除before伪元素 */
+}
+
+.hbe-input-label-default::after {
+  background: transparent !important;
+  border-bottom: 1px solid #2e405b !important;
+  transform: none !important; /* 禁止变换 */
+  transition: none !important; /* 禁止过渡效果 */
+  opacity: 1 !important; /* 保持可见 */
+}
+
+
+/* 容器样式优化 */
+#hexo-blog-encrypt {
+  background: transparent !important;
+  padding: 5px 0 !important;
+  margin: 5px 0 !important;
+}
+
+.hbe.hbe-container {
+  background: transparent !important;
+  padding: 10px !important;
+  margin: 0 !important;
+}
+
+/* 密码提示文字样式 */
+.hbe.hbe-input-label.hbe-input-label-default {
+  font-size: 18px !important;
+  color: #666 !important;
+  margin-top: -8px !important;  /* 通过负margin调整位置 */
+}
