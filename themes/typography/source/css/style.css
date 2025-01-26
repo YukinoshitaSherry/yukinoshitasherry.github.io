@@ -377,6 +377,19 @@ body {
   max-width: 1800px;
 }
 
+/* 普通页面图片容器样式 */
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* About页面样式 */
 .about-page .post-content {
   display: flex;
