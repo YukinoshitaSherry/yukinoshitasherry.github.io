@@ -213,6 +213,11 @@ encrypt:
       }
     </style>
 
+# 在 _config.yml 中添加
+aplayer:
+  meting: true  # 开启 meting
+  asset_inject: true  # 自动插入 js 和 css
+
 
 
  
