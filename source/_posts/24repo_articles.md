@@ -111,7 +111,7 @@ BPO末场，期待了很久，果然没有让我失望。好的乐团能冲破�
 抽象的线自有其定义，而现实中不那么完美的“线”倒是大多有圆形横截面。换个角度看，线与圆在某种程度上全然一体，一如溯之线与望之圆，是月在时间更迭中循环的两极。
 于是抬头仰望，世事如风，月轮圆融，不必纵身而下，于世间行路亦是回归天空。
 
-<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/99e37dd4f91f6daf53be15ba6ec54a5.png" alt="16" style="width:60%;height:auto;">
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/99e37dd4f91f6daf53be15ba6ec54a5.png" alt="16" style="width:100%;height:auto;">
 <br></br>
 
 
