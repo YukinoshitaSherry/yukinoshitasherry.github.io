@@ -218,10 +218,6 @@ aplayer:
   meting: true  # 开启 meting
   asset_inject: true  # 自动插入 js 和 css
 
-menu:
-  Book:
-    url: /book
-    icon: fas fa-book
 
 # 数学公式 Latex 支持
 math:
