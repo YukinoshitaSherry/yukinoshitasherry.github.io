@@ -227,6 +227,26 @@ math:
   mathjax:
     cdn: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML
 
+markdown:
+  render:
+    html: true
+    xhtmlOut: false
+    breaks: true
+    linkify: true
+    typographer: true
+  plugins:
+    - markdown-it-footnote
+    - markdown-it-sup
+    - markdown-it-sub
+    - markdown-it-abbr
+    - markdown-it-emoji
+pandoc:
+  extra:
+    - no-highlight
+    - from=markdown+autolink_bare_uris
+
+
+
 
 
  
