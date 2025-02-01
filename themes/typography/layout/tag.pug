@@ -12,9 +12,12 @@ block content
         p.post-title(style="margin-bottom: 40px;")
             != __("Tags")+' ' + page.tag
         .archive.animated.fadeInDown
-            ul.list-with-title
+            //- 按日期降序排序文章
+            - page.posts.sort('date', -1)
+            - page.posts.each(function(item){
                 include mixins
-                +postList()
+                +make_post(item, false)
+            - })
             .controller
                 include mixins
                 +make_pager(__('prev'), __('next'))
