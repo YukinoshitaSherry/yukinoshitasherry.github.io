@@ -38,11 +38,17 @@ div#site-nav.site-title-links
         +make_page_links()
         li.soc
             if theme.github
-                a(href="https://github.com/YukinoshitaSherry" target="_blank" rel="noopener noreferrer" aria-label="Github" style="display: inline-block;")
+                a(href="https://github.com/YukinoshitaSherry" target="_blank" rel="noopener noreferrer" aria-label="Github")
                     i.fa.fa-github
             if theme.xiaohongshu
                 a(href="https://www.xiaohongshu.com/user/profile/64f6cb2500000000060318b6" target="_blank" rel="noopener noreferrer" aria-label="Xiaohongshu")
                     img.custom-icon(src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/小红书账号.png" alt="小红书" style="width: 16px; height: 16px; vertical-align: middle;")
+            if theme.bilibili
+                a(href="https://space.bilibili.com/88403421/bangumi" target="_blank" rel="noopener noreferrer" aria-label="Bilibili")
+                    img.custom-icon(src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/bilibili账号.png" alt="Bilibili" style="width: 16px; height: 16px; vertical-align: middle;")
+            if theme.netease
+                a(href="https://music.163.com/#/user/home?id=1828113045" target="_blank" rel="noopener noreferrer" aria-label="Netease")
+                    img.custom-icon(src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/netease.png" alt="Netease" style="width: 16px; height: 16px; vertical-align: middle;")
             if theme.twitter
                 a(href="https://twitter.com/" + theme.twitter, target="_blank", rel="noopener noreferrer", aria-label="Twitter")
                     i.fa.fa-twitter &nbsp;
