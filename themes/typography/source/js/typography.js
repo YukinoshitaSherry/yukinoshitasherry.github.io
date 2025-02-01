@@ -15,19 +15,22 @@ function triggerSiteNav() {
     }
 }
 function updateSidebar() {
-    const hasToc = $('.toc-container').children().length > 0 && 
+    // 只在PC端检查TOC状态
+    const hasToc = window.innerWidth > 768 && 
+                   $('.toc-container').children().length > 0 && 
                    $('.toc-container').css('display') !== 'none';
                    
-    if (window.innerWidth <= 768 || window.innerHeight <= 600) {
-        $('#side-bar').innerWidth($('#stage').width());
-        $('#main-container').removeClass('col-sm-9');
+    if (window.innerWidth <= 768) {
+        $('#side-bar .site-title').hide(); // 移动端隐藏左侧标题
+        $('#main-container').removeClass('col-sm-9').css('width', '100%');
+        $('.main-container').css('margin-left', '0');
     } else {
+        $('#side-bar .site-title').show(); // PC端显示左侧标题
         var sidebarW = stage.width() - $('#main-container').outerWidth() + 
                       (window.innerWidth - stage.innerWidth()) / 2;
         $('#side-bar').outerWidth(sidebarW);
         $('#main-container').addClass('col-sm-9');
         
-        // 只在无大纲时调整左边距
         if (!hasToc) {
             $('.main-container').css('margin-left', '20px');
         }
