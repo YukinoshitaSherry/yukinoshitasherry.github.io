@@ -2286,10 +2286,7 @@ h1, h2, h3, h4, h5, h6 {
   
   /* 移除左侧边栏的其他样式，保持原有的导航部分 */
   #side-bar {
-    position: relative;
-    width: 100% !important;
-    height: auto !important;
-    padding: 10px !important;
+    display: none !important;
   }
   
   /* 调整主容器样式 */
@@ -2301,11 +2298,7 @@ h1, h2, h3, h4, h5, h6 {
   
   /* 确保右侧"秋月春风"栏目正常显示 */
   .side-container {
-    position: relative;
-    right: auto;
-    width: 100%;
-    height: auto;
-    padding: 20px;
+    display: none !important;
   }
 }
 
@@ -2320,5 +2313,36 @@ h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* 移动端的站点标题样式 */
+  .mobile-site-title {
+    display: block !important;
+    text-align: center;
+    padding: 15px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(46, 64, 91, 0.1);
+  }
+  
+  .mobile-site-title .a-title {
+    color: #2e405b;
+    text-decoration: none;
+    font-family: "Times New Roman", "楷体";
+  }
+  
+  .mobile-site-title .site-title-large {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+  }
+  
+  .mobile-site-title .site-title-small {
+    font-size: 1em;
+  }
+
+  /* 隐藏原来侧边栏的标题 */
+  #side-bar .site-title {
+    display: none !important;
   }
 }

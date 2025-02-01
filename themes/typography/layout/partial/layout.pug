@@ -6,6 +6,11 @@ html(lang="zh-CN")
     body(class=`${page.path.includes('about/') ? 'about-page' : ''} ${is_post() ? 'post-page' : ''} ${page.path === 'index.html' ? 'home' : ''}`)
         div#stage.container
             div.row
+                div.mobile-site-title.visible-xs
+                    h1.site-title-large
+                        a.a-title(href=theme.personal_site)= theme.title_primary
+                    h3.site-title-small
+                        a.a-title(href=theme.personal_site)= theme.title_secondary
                 include sidebar
                 div#main-container.col-sm-9.col-xs-12.main-container
                     if page.archive
