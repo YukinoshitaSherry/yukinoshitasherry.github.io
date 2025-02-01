@@ -218,6 +218,19 @@ aplayer:
   meting: true  # 开启 meting
   asset_inject: true  # 自动插入 js 和 css
 
+menu:
+  Book:
+    url: /book
+    icon: fas fa-book
+
+# 数学公式 Latex 支持
+math:
+  enable: true
+  per_page: false  # 设为 false 则所有页面都加载 MathJax
+  engine: 'mathjax'
+  mathjax:
+    cdn: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML
+
 
 
  

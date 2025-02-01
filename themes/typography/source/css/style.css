@@ -296,6 +296,32 @@ body {
   scrollbar-width: thin;  /* Firefox */
 }
 
+/* 修复大纲目录的字体样式 */
+.toc-container {
+  /* 保持原有样式 */
+}
+
+.toc-container a {
+  font-weight: normal !important;  /* 强制使用正常字重 */
+  font-family: "Times New Roman", "华文中宋" !important;  /* 保持与其他文章一致的字体 */
+  color: #2e405b;
+  text-decoration: none;
+}
+
+/* 确保hover状态也不会变粗 */
+.toc-container a:hover {
+  font-weight: normal !important;
+  color: #2e405b;
+  padding-left: 5px;
+}
+
+/* 修复标题层级样式 */
+.toc-list li {
+  font-weight: normal !important;
+  margin: 8px 0;
+  padding-left: 25px;
+}
+
 /* 自定义滚动条样式 */
 .toc-container::-webkit-scrollbar {
   width: 3px !important;
@@ -2346,3 +2372,5 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
   }
 }
+
+
