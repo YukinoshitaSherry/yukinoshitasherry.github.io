@@ -14,10 +14,11 @@ layout: page
 <div class="quote-author">—— 博尔赫斯</div>        
 
 【关于我】
-秋月春风/Yukinoshita Sherry
-因为不擅长起名，所以这两个几乎是沿用多年的全网统一ID。分别取自杨慎《临江仙·滚滚长江东逝水》中的“白发渔樵江渚上，惯看秋月春风”，与我喜欢的二次元角色灰原哀、雪之下雪乃。
-Asexuality, She/Her/Hers。赛博八字为水瓶座、INTJ、拉文克劳。向往科技与艺术的结合。
-人生信条是『向外探索宇宙的哲学与规律，向内追寻内心的自洽与平和』。
+
+秋月春风/Yukinoshita Sherry <br>
+因为不擅长起名，所以这两个几乎是沿用多年的全网统一ID。分别取自杨慎《临江仙·滚滚长江东逝水》中的“白发渔樵江渚上，惯看秋月春风”，与我喜欢的二次元角色灰原哀、雪之下雪乃。<br>
+Asexuality, She/Her/Hers。赛博八字为水瓶座、INTJ、拉文克劳。向往科技与艺术的结合。<br>
+人生信条是『向外探索宇宙的哲学与规律，向内追寻内心的自洽与平和』。<br>
 现为ZJU计算机科学与技术学院22级本科生，主修软件工程，辅修创新创业管理强化班(ITP)。
 
 主业： novice researcher in &nbsp;AI4S / LLM / NLP &nbsp;&&nbsp;  beginner in Kggle &nbsp;&&nbsp;  mediocre freelance writer &nbsp;&&nbsp;  amateur investment enthusiast......
@@ -33,6 +34,7 @@ Asexuality, She/Her/Hers。赛博八字为水瓶座、INTJ、拉文克劳。向�
 
 
 【关于这个博客】
+
 我见过无数凌晨三点半的夜晚。
 从此前此后无尽的蝇营狗苟与碌碌庸庸间抬起头，霓虹轰鸣，星月熠烁。江声浩荡，车马川流，城市的心脏在灯火通明间持续跳动。
 往往这些时候容易思绪翩跹，关于哲学三问，关于自由独立，关于命运轮回。案前灯花摇落，窗下树影斑驳，思至深处，忽拍案而起，仿佛星辰皆落地而鸣声、天地之间只我一人。蓦然回首，却是寰宇宏阔，惟可寄蜉蝣。
