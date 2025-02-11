@@ -9,6 +9,10 @@ block description
 
 block content
     .autopagerize_page_element: .content
+        //- 添加时间轴容器
+        .archive-timeline
+            .timeline-content
+            
         .archive.animated.fadeInDown
             h2.archive-title.archive-year-wrap
                 = "秋月春风" + page.category
@@ -28,23 +32,30 @@ block content
                         - var tagPath = site.tags.findOne({name: tagName}).path
                         a.tag-filter(href=url_for(tagPath))= tagName
             
-            include mixins
-            - var year = 0;
-            - var change = false;
-            - var firstYear = true;
-            - page.posts.sort('date', -1)  // 按日期倒序排序
-            - page.posts.each(function(item){
-                - var itemYear = date(item.date, 'YYYY') - 0;
-                - change = year !== itemYear;
-                - year = change ? itemYear : year;
-                if change 
-                    if !firstYear
-                        br
-                    - firstYear = false;
+            //- 按年份和月份组织文章
+            - var posts = page.posts.sort('date', -1).toArray()
+            - var years = {}
+            - posts.forEach(function(post) {
+            -   var year = date(post.date, 'YYYY')
+            -   var month = date(post.date, 'MM')
+            -   if (!years[year]) years[year] = {}
+            -   if (!years[year][month]) years[year][month] = []
+            -   years[year][month].push(post)
+            - })
+            
+            //- 输出年份和月份结构
+            - Object.keys(years).sort((a, b) => b - a).forEach(function(year) {
+                .year-section
                     h2.archive-year!= year
-                - var temp_showCategories = theme.showCategories
-                - theme.showCategories = false
-                +make_post(item, false)
-                - theme.showCategories = temp_showCategories
+                    - Object.keys(years[year]).sort((a, b) => b - a).forEach(function(month) {
+                        .month-section
+                            h3.archive-month!= month + "月"
+                            .month-container
+                                - years[year][month].forEach(function(post) {
+                                    .post-item-wrapper
+                                        include mixins
+                                        +make_post(post, false)
+                                - })
+                    - })
             - })
         +make_pager(__('prev'), __('next'))
