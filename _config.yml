@@ -243,6 +243,14 @@ hide_posts:
   blocklist_generators: ['*']
 
 
-
+# DPlayer 视频播放器配置
+dplayer:
+  default:
+    api: https://api.prprpr.me/dplayer/v3/
+    loop: false
+    screenshot: false
+    hotkey: true
+    theme: "#2e405b"  # 使用你博客主题的主色调
+    lang: "zh-cn"
  
 
