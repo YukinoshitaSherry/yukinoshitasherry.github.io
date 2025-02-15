@@ -229,6 +229,18 @@ math:
     cdn: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML
 
 
+# hexo-hide-posts 配置项
+hide_posts:
+  # 是否启用插件
+  enable: true
+  # 前端元数据的关键字，用于标识哪些文章应被隐藏
+  hidden: true
+  # 是否添加 "noindex" 标签以阻止搜索引擎索引隐藏文章
+  noindex: true
+  # 指定哪些生成器可以访问隐藏的文章（空列表表示所有都不允许，需手动指定才能访问）
+  allowlist_generators: []
+  # 指定哪些生成器不能访问隐藏的文章（优先级高于允许列表，设置'*'则屏蔽所有默认生成器对隐藏文章的访问）
+  blocklist_generators: ['*']
 
 
 
