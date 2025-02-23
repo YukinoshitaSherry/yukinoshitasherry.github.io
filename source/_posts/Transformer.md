@@ -431,7 +431,8 @@ $$
 
 <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Pasted%20image%2020250224014228.png" alt="Transformer structure" width="80%">
 <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Pasted%20image%2020250224014343.png" alt="Transformer structure" width="80%">
-如果KQV相等就是Self-Attention，记相等矩阵为X，X\*$W_Q$=Q, $X^T$\*$W_Q$=Q，X\*$W_V$=V
+
+- 如果KQV相等就是Self-Attention，记相等矩阵为X，X\*$W_Q$=Q, $X^T$\*$W_Q$=Q，X\*$W_V$=V
 
 <br>
 
