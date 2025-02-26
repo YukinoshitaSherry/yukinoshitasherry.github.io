@@ -988,6 +988,20 @@ footer * {
   color: #2e405b !important;
 }
 
+/* 表格四周有边线 */
+table {
+  border-collapse: collapse; /* Ensures borders are not doubled */
+  width: 90%; /* Full width of the container */
+  font-size: 0.9em; /* Smaller font size */
+  text-align: center; /* Center align text */
+}
+
+/* 表格顶栏 */
+table th,td {
+  border: 1px solid #000; /* Adds border around each cell */
+  padding: 8px; /* Adds padding for better readability */
+  text-align: center;
+}
 
 
 /* 移除归档页面的横线 */
