@@ -46,7 +46,6 @@ desc: Transformer模型笔记整理，参考资料已附在开头。
 
 Transformer可以进行更多的并行化，训练时间更短但翻译效果更好。
 
-![[Pasted image 20250223233154.png]]
 
 <br>
 
@@ -121,7 +120,7 @@ Transformer 中单词的输入表示 **x**由**单词 Embedding** 和**位置 
 - Word2Vec模型Word2Vec能够有效地捕捉词与词之间的语义关系, 包括两种主要的架构：
 	- CBOW（Continuous Bag of Words）
 		- 通过上下文词汇来预测中心词。
-		- Skip-gram
+	- Skip-gram
 		- 通过中心词来预测上下文词汇。
 ```python
 from gensim.models import Word2Vec
@@ -245,7 +244,10 @@ Transformer 中除了单词的 Embedding，还需要使用位置 Embedding 表�
 位置 Embedding 用 **PE**表示，**PE** 的维度与单词 Embedding 是一样的。PE 可以通过训练得到，也可以使用某种公式计算得到。在 Transformer 中采用了后者，计算公式如下：
 $$
 \begin{align*}
-PE_{(pos,2i)} &= \sin \left( pos / 10000^{2i/d} \right) \\
+PE_{(pos,2i)} &= \sin \left( pos / 10000^{2i/d} \right) 
+
+\\
+
 PE_{(pos,2i+1)} &= \cos \left( pos / 10000^{2i/d} \right)
 \end{align*}
 $$
@@ -486,7 +488,9 @@ $$
 <br>
 
 #### 结构
-	<img src="https://raw.githubusercontent.com/yukinoshitasherry/qycf_picbed/main/img/Pasted%20image%2020250223223107.png" alt="Transformer structure" width="50%">
+
+<img src="https://raw.githubusercontent.com/yukinoshitasherry/qycf_picbed/main/img/Pasted%20image%2020250223223107.png" alt="Transformer structure" width="50%">
+
 Multi-Head Attention 包含多个 Self-Attention 层，首先将输入**X**分别传递到 h 个不同的 Self-Attention 中，计算得到 h 个输出矩阵**Z**。下图是 h=8 时候的情况，此时会得到 8 个输出矩阵**Z**。
 
 得到 8 个输出矩阵 Z1 到 Z8 之后，Multi-Head Attention 将它们拼接在一起 **(Concat)**，然后传入一个**Linear**层进行线性变换，得到 Multi-Head Attention 最终的输出**Z**。
