@@ -8,7 +8,9 @@ tags:
 desc: ZJU朋辈辅学技能拾遗笔记，主要参考了授课人鹤翔万里的ppt
 ---
 
-<a href="https://www.bilibili.com/video/BV1og4y1u7XU/?vd_source=fa4dcf78649ce6604c2727b4c64e76dc">朋辈辅学-b站视频</a>
+## 介绍与用法
+
+参考ZJU鹤翔万里学长的朋辈辅学：<a href="https://www.bilibili.com/video/BV1og4y1u7XU/?vd_source=fa4dcf78649ce6604c2727b4c64e76dc">朋辈辅学-b站视频</a>
 
 <br>
 {% pdf /pdf/Git&GitHub.pdf %}
