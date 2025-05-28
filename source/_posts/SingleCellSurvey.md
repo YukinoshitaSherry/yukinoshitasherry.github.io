@@ -297,6 +297,20 @@ RNA 测序主要通过两种方式进行：对来自目标来源的混合 RNA �
 
 - **10x** 可以产生三个标准文件格式：matrix.mtx、genes.tsv和barcodes.tsv，分别存储了细胞的表达矩阵、基因名称和细胞条形码。这些文件可以使用R语言中的Read10X函数读取，并创建Seurat对象进行后续分析。
 
+使用python:转为adata
+```python
+import scanpy as sc
+import pandas as pd
+import numpy as np
+# 读取10x数据
+adata = sc.read_10x_mtx(
+    'data/',  # # 假设数据在data目录下，包含matrix.mtx、genes.tsv和barcodes.tsv文件
+    var_names='gene_symbols',  # 使用基因符号作为变量名
+    cache=True  # 缓存数据以提高读取速度
+)
+# 保存为h5ad格式
+adata.write('data/processed_data.h5ad')
+```
 
 
 <br>
@@ -371,6 +385,32 @@ RNA 测序主要通过两种方式进行：对来自目标来源的混合 RNA �
 - SoupX和CellBender是两种常用的方法，分别基于“空滴”和贝叶斯模型来估计和去除环境RNA污染。
 	- **SoupX**是一种基于“空滴”的方法，它假设环境RNA在细胞的基因表达数据中表现为噪声，并且这个噪声在不同细胞群体之间是均匀分布的。SoupX通过从每个细胞的基因表达数据中去除这一“空滴”污染，来提高数据的质量。该方法通过计算细胞间的RNA污染程度，消除环境污染对分析结果的干扰。
 	- **CellBender**是另一种去除环境噪声的方法，它采用贝叶斯模型来估计并去除环境RNA的影响。CellBender通过对每个细胞的RNA数据进行建模，并推测出其中的环境噪声成分，再将其从数据中移除。通过这种方式，CellBender能够提高细胞类型的识别准确性，尤其在组织复杂的情况下表现良好。
+
+##### 示例代码
+```python
+# 计算质量控制指标
+sc.pp.calculate_qc_metrics(adata, inplace=True)
+
+# 计算线粒体基因比例
+adata.var['mt'] = adata.var_names.str.startswith('MT-')  # 人类数据
+# 对于小鼠数据使用: adata.var['mt'] = adata.var_names.str.startswith('mt-')
+sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], inplace=True)
+
+# 绘制QC指标分布图
+sc.pl.violin(adata, ['n_genes_by_counts', 'total_counts', 'pct_counts_mt'],
+             jitter=0.4, multi_panel=True)
+
+# 过滤低质量细胞
+# 1. 过滤基因数过少的细胞
+sc.pp.filter_cells(adata, min_genes=200)
+# 2. 过滤UMI数过少的细胞
+sc.pp.filter_cells(adata, min_counts=1000)
+# 3. 过滤线粒体基因比例过高的细胞
+adata = adata[adata.obs.pct_counts_mt < 20, :]
+
+# 过滤低表达基因
+sc.pp.filter_genes(adata, min_cells=3)
+```
 
 ##### 结果
 - 过滤后的干净表达矩阵
@@ -460,6 +500,14 @@ $Pearson残差 = \frac{观测值 - 期望值}{\sqrt{期望值}}$
 - **适用场景**：
     - 主要用于 **PCA、聚类、降维**。
     - 使变换后的数据更加正态化，减少高表达基因的主导效应。
+
+##### 示例代码
+```python
+# 使用CPM标准化
+sc.pp.normalize_total(adata, target_sum=1e6)
+# 对数转换
+sc.pp.log1p(adata)
+```
 
 ##### 结果
 - 标准化后的表达矩阵（如log(CPM+1)）  
@@ -645,6 +693,11 @@ eg:
 Germain等人提出了一种使用偏差进行特征选择的方法，该方法适用于原始计数。
 偏差可以封闭形式计算，用于量化基因是否在细胞中显示出恒定的表达谱。具有高偏差值的基因表明它们不符合零模型（即，它们在细胞中的表达不是恒定的）。根据偏差值，该方法对所有基因进行排名，并选择高度偏差的基因。
 
+##### 示例代码
+```python
+sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+sc.pl.highly_variable_genes(adata)
+```
 
 ##### 结果
 - 保留500-2000个HVGs（如免疫数据中的CD3E、CD79A）
@@ -658,14 +711,29 @@ Germain等人提出了一种使用偏差进行特征选择的方法，该方法�
 高维数据难以可视化/聚类，需压缩至低维保留主要结构。
 
 #### 目标
-降维至2-50维（如PCA的Top 50 PCs）用于后续分析。
+
+1. 降维：从成千上万的基因维度浓缩到几十或更少的主成分（PC）；降维至2-50维（如PCA的Top 50 PCs）用于后续分析。
+2. 捕捉主要的差异：首几个 PC 往往能解释主要的表达变异，后面的 PC 可能主要是噪音；
+3. 加速后续分析：如 t-SNE/UMAP/ 聚类时，直接在 PC 空间构建相似度图，速度更快，且更能集中在关键信号上。
 
 #### 方法
 - 进行**数据缩放**，让各个基因表达呈现在统一尺度。
+  - 对每个基因进行线性变换，让它在所有细胞上的平均表达量变为 0，标准差变为 1。
+- 选定PC数
+  - 选定 PC 数：以 ElbowPlot 或其他方法
+  - 目的：避免盲目使用太多 PC 导致噪音进入；也避免只用过少 PC 可能丢失重要信息；在单细胞中常选取前 10 - 30 个 PC；原文若指定前 10 个 PC，则是作者根据自己数据分布做过考量并发现 10 个 PC 足够。
+  - 原理：PCA 会给出很多 PC（与基因数或细胞数相关），但通常只有前若干个 PC 是真正反映主要生物学差异的。
+  - ElbowPlot（肘部图）通过显示每个 PC 的标准差或方差贡献度，你可以直观地看到 “拐点”（像手肘形状），拐点前的 PC 贡献大，拐点后的 PC 贡献小而可能是噪音。
 - 使用PCA、t-SNE、UMAP等方法进行降维，便于数据可视化和后续分析。
 
+ElbowPlot eg:
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250529044305792.png">
+
 ##### **PCA (Principal Component Analysis)**
-主成分分析（PCA）是一种经典的降维方法，它通过线性变换将数据投影到一个新的坐标系，保留数据的最大方差。PCA 适用于大规模数据的初步降维，能够减少数据的噪音并保留最重要的信息。
+主成分分析（PCA）是一种经典的降维方法，试图寻找数据中方差最大的方向（即主成分，PC1、PC2、PC3...），并将高维的基因表达矩阵投影到这些主成分上。它通过线性变换将数据投影到一个新的坐标系，保留数据的最大方差。
+PCA 适用于大规模数据的初步降维，能够减少数据的噪音并保留最重要的信息。
+具体做法通常是对 “(细胞 × 高变基因)” 矩阵做奇异值分解（SVD），先得到一个协方差矩阵，再提取若干最大的特征值 / 特征向量（主成分）。
+
 
 ##### **t-SNE (t-Distributed Stochastic Neighbor Embedding)**
 t-SNE 是一种非线性降维方法，主要用于数据可视化。t-SNE 通过将相似的点映射到低维空间中的相近位置，适合于展示群体结构。它的缺点是计算速度较慢，且对于大规模数据可能不太适用。
