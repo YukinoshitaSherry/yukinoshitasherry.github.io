@@ -1,20 +1,33 @@
 ---
-title: 机器学习回归分析
+title: 机器学习回归算法
 date: 2023-10-25
 categories:
   - 学AI/DS
 tags:
   - ML
-desc: 线性回归（Linear Regression）、多重线性回归（Multiple Linear Regression）、套索回归（Lasso Regression）、岭回归（Ridge Regression）、逐步回归（Stepwise Regression）、弹性网络回归（Elastic Net Regression）、多项式回归（Polynomial Regression）、分位数回归（Quantile Regression）、决策树回归（Decision Tree Regression）、随机森林回归（Random Forest Regression）、梯度提升回归（Gradient Boosting Regression）、支持向量回归（Support Vector Regression）、XGBoost回归、 LightGBM回归、神经网络回归（Neural Network Regression）、K最近邻回归（K-Nearest Neighbors Regression）。
+desc: 【监督学习】线性回归（Linear Regression）、多重线性回归（Multiple Linear Regression）、套索回归（Lasso Regression）、岭回归（Ridge Regression）、逐步回归（Stepwise Regression）、弹性网络回归（Elastic Net Regression）、多项式回归（Polynomial Regression）、分位数回归（Quantile Regression）、决策树回归（Decision Tree Regression）、随机森林回归（Random Forest Regression）、梯度提升回归（Gradient Boosting Regression）、支持向量回归（Support Vector Regression）、XGBoost回归、 LightGBM回归、神经网络回归（Neural Network Regression）、K最近邻回归（K-Nearest Neighbors Regression）。
 ---
 
-【注意：**逻辑回归（Logistic Regression)**虽然名为回归，但常用于分类。它是一种用于分类的监督学习算法，基于逻辑函数(**Sigmoid**)。参考：[ML分类](../ML分类)。】
+- 参考：
+    - <a href="https://www.showmeai.tech/article-detail/185">`https://www.showmeai.tech/`</a>
+    - <a href="https://www.xiaohongshu.com/explore/67125d6f000000001600ca4b?xsec_token=ABCg_pI9x2Hj1Jyq-_r1feSJ5SH55tRF4WjIJ-H3MH9_k=&xsec_source=pc_user">`小红书 @科研百味`</a>
+
+监督学习（Supervised Learning）：训练集有标记信息，学习方式有分类和**回归**。
+【注意：**逻辑回归（Logistic Regression)** 虽然名为回归，但常用于分类。它是一种用于分类的监督学习算法，基于逻辑函数(**Sigmoid**)。参考：[ML分类](../ML分类)。】
+
 
 
 ### 线性回归
 **Linear Regression**
 
+<div style="display: flex; justify-content: space-between;">
+    <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530023712665.png" style="width:45%">
+    <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024134027.png" style="width:45%">
+</div>
+
 #### 原理 
+通过线性组合说明自变量因变量关系。一般是一个自变量与一个因变量(左图)，多重线性回归就是多个自变量与一个因变量(右图)。
+
 通过最小化残差平方和（RSS）寻找最佳线性拟合：线性回归是最基础的回归方法，用于建立自变量和因变量之间的线性关系模型。它通过最小化预测值与实际值之间的平方误差来找到最佳拟合线。
 
 数学表达：
@@ -24,8 +37,7 @@ $$ y = \beta_0 + \beta_1x_1 + \cdots + \beta_nx_n + \epsilon $$
 - $\beta_1$ 到 $\beta_n$ 是回归系数
 - $\epsilon \sim \mathcal{N}(0, \sigma^2)$ 是误差项，服从正态分布
 
-最小化目标函数：
-$$ \min_{\beta} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{\beta} \sum_{i=1}^n (y_i - \beta_0 - \sum_{j=1}^p \beta_jx_{ij})^2 $$
+最小化目标函数：<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530014805481.png" style="width:50%">
 
 #### 特点 
 - 需满足线性、独立性、正态性、同方差性假设  
@@ -67,6 +79,7 @@ print(f"回归系数: {model.coef_}, 截距: {model.intercept_}")
 
 ### 多项式回归
 **Polynomial Regression**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024625126.png" style="width:30%">
 
 #### 原理  
 通过特征升维拟合非线性关系：多项式回归是对线性回归的扩展，用于处理非线性关系。通过将原始特征转换为多项式特征，可以在保持模型线性性的同时捕捉非线性关系。
@@ -116,8 +129,8 @@ model = LinearRegression().fit(X_poly, y)
 
 
 1. **L1正则化（LASSO）**
-   - 添加系数的绝对值之和作为惩罚项
-   - 数学形式：$\Omega(w) = ||w||_1 = \sum_{j=1}^p |w_j|$
+   - 添加系数的绝对值之和 $\sum |w_j|$ 作为惩罚项
+   - 数学形式：$\Omega(w)$ = $||w||_1$ = $\sum_{j=1}^p |w_j|$
    - 几何意义：
      - 在参数空间中形成一个菱形（二维）或超菱形（高维）的约束区域
      - 最优解倾向于落在约束区域的顶点上
@@ -134,7 +147,7 @@ model = LinearRegression().fit(X_poly, y)
     
 
 2. **L2正则化（岭回归）**
-   - 添加系数的平方和作为惩罚项
+   - 添加系数的平方和 $\sum w_j^2$ 作为惩罚项
    - 数学形式：$\Omega(w) = \frac{1}{2}||w||^2_2 = \frac{1}{2}\sum_{j=1}^p w_j^2$
    - 几何意义：
      - 在参数空间中形成一个圆形（二维）或球形（高维）的约束区域
@@ -154,7 +167,6 @@ model = LinearRegression().fit(X_poly, y)
 3. **正则化效果对比**
    | **特性** | **L1正则化** | **L2正则化** |
    |----------|--------------|--------------|
-   | 惩罚项 | $\sum|w_j|$ | $\sum w_j^2$ |
    | 解的特性 | 稀疏解 | 非稀疏解 |
    | 特征选择 | 支持 | 不支持 |
    | 计算效率 | 较慢 | 较快 |
@@ -167,7 +179,7 @@ model = LinearRegression().fit(X_poly, y)
    - $\alpha$ 参数控制正则化强度
    - 过大的 $\alpha$：
      - L1：过多特征被压缩到0
-     -- L2：所有系数过度收缩
+     - L2：所有系数过度收缩
    - 过小的 $\alpha$：
      - 正则化效果不明显
      - 可能无法解决过拟合
@@ -193,9 +205,10 @@ model = LinearRegression().fit(X_poly, y)
 
 
 #### LASSO回归
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024543750.png" style="width:30%">
 
 ##### 原理  
-L1正则化实现特征选择：LASSO回归通过L1正则化实现特征选择，能够产生稀疏解。当特征数量很多时，LASSO可以帮助识别重要特征。
+L1正则化实现特征选择：LASSO回归通过L1正则化实现特征选择，能够产生稀疏解。当**特征数量很多**时，LASSO可以帮助识别重要特征。
 
 目标函数：
 $$ \text{Loss} = \text{RSS} + \alpha\sum_{j=1}^p|\beta_j| $$
@@ -226,8 +239,10 @@ lasso_model.fit(X, y)
 #### 岭回归
 **Ridge Regression**
 
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024554959.png" style="width:28%">
+
 ##### 原理  
-L2正则化解决多重共线性：岭回归通过引入L2正则化项来解决多重共线性问题。当特征之间存在高度相关性时，普通最小二乘估计可能不稳定，岭回归通过惩罚大的系数值来稳定估计。
+L2正则化解决多重共线性：岭回归通过引入L2正则化项来**解决多重共线性**问题。当特征之间存在高度相关性时，普通最小二乘估计可能不稳定，岭回归通过惩罚大的系数值来稳定估计。
 
 目标函数：
 $$ \text{Loss} = \text{RSS} + \alpha\sum_{j=1}^p\beta_j^2 $$
@@ -263,8 +278,10 @@ ridge_model.fit(X, y)
 #### 弹性网络回归
 **Elastic Net Regression**
 
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024614247.png" style="width:30%">
+
 ##### 原理 
-结合L1/L2正则化：弹性网络结合了L1和L2正则化的优点，特别适合处理高度相关的特征。它既具有LASSO的特征选择能力，又具有岭回归的稳定性。
+结合L1/L2正则化：弹性网络结合了L1和L2正则化的优点，特别适合处理**高度相关的特征**。它既具有LASSO的特征选择能力，又具有岭回归的稳定性。
 
 目标函数：
 $$ \text{Loss} = \text{RSS} + \alpha\rho\sum|\beta_j| + \alpha(1-\rho)\sum\beta_j^2 $$
@@ -304,21 +321,26 @@ elastic_model.fit(X, y)
 
 ### 分位数回归
 **Quantile Regression**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024638132.png" style="width:30%">
 
 #### 原理  
-最小化非对称损失函数：分位数回归是对传统均值回归的扩展，用于估计条件分位数。它不假设误差项服从正态分布，对异常值更稳健。
+通过估计相应变量的条件分位数建模，能够捕捉数据异质性。
+最小化非对称损失函数：分位数回归是对传统均值回归的扩展，用于估计条件分位数。它**不假设误差项服从正态分布**，对异常值更稳健。
 
 目标函数：
 $$ \min_{\beta} \sum_{i=1}^n \rho_\tau(y_i - x_i^T\beta) $$
 其中：
 - $\rho_\tau(u) = u(\tau - I(u<0))$ 是分位数损失函数
 - $\tau$ 是目标分位数（如0.5表示中位数）
-- $I(u<0)$ 是指示函数
+- $I(u<0)$ 是指示函数（当u<0时为1，否则为0）
 
 特点：
 1. 可以估计整个条件分布,估计条件分位数（Conditional Quantiles）
 2. 对异常值鲁棒(不敏感)
 3. 不需要误差项分布假设
+
+传统线性回归关注的是**条件均值（mean）** ，即预测值的平均值。
+分位数回归关注的是**条件分位数（quantile）** ，比如中位数（50%分位数）、25%分位数、75%分位数等。通过估计不同分位数的回归系数，可以更全面地描述因变量的条件分布。
 
 #### 优缺点
 | **优点** | **缺点** |
@@ -328,7 +350,7 @@ $$ \min_{\beta} \sum_{i=1}^n \rho_\tau(y_i - x_i^T\beta) $$
 | 无分布假设 | 需要大样本量 |
 
 #### 应用领域
-经济学（收入不平等研究）、气象学（极端天气预测）
+经济学（收入不平等研究）、气象学（极端天气预测）、金融(风险评估)、医学(药物剂量反应）
 
 #### 代码示例
 ```python
@@ -345,15 +367,22 @@ model = QuantReg(y, X).fit(q=0.85, fit_intercept=True)  # 85%分位数
 **Tree-based Regression**
 
 #### 决策树回归
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024646233.png" style="width:30%">
+
+- 参考：<a href="https://www.showmeai.tech/article-detail/190">`https://www.showmeai.tech/article-detail/190`</a>
 
 ##### 原理  
-递归划分特征空间，叶节点输出均值:决策树回归通过递归地将特征空间划分为不重叠的区域，每个区域对应一个预测值。它能够自动处理非线性关系和特征交互。
 
-分裂准则：
-- 最小化MSE：$ \text{MSE} = \frac{1}{N}\sum(y_i - \bar{y})^2 $
+
+**递归划分特征空间，叶节点输出均值**:决策树回归通过递归地将特征空间划分为不重叠的区域，每个区域对应一个预测值。
+
+
+
+**分裂准则**：
 - 最小化MSE：$ \text{MSE} = \frac{1}{N}\sum(y_i - \bar{y})^2 $
 - 在每个节点选择最优分裂特征和分裂点
 - 递归地构建树直到满足停止条件
+
 
 ##### 代码示例
 ```python
@@ -376,6 +405,7 @@ dt_model.fit(X, y)
 
 #### 随机森林
 **Random Forest**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024656581.png" style="width:30%">
 
 ##### 原理  
 Bootstrap聚合多棵决策树：随机森林通过Bootstrap采样构建多棵决策树，并通过投票或平均得到最终预测。它解决了单棵决策树的高方差问题。
@@ -397,7 +427,7 @@ from sklearn.ensemble import RandomForestRegressor
 # n_jobs: 并行计算的作业数
 rf_model = RandomForestRegressor(
     n_estimators=100,
-    max_depth=None,
+    max_depth=10,
     min_samples_split=2,
     n_jobs=-1
 )
@@ -407,9 +437,10 @@ rf_model.fit(X, y)
 
 #### 梯度提升
 **Gradient Boosting**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024706660.png" style="width:30%">
 
 ##### 原理  
-迭代拟合残差：梯度提升通过迭代地拟合残差来构建强学习器。每一步都训练一个新的弱学习器来拟合当前模型的残差。
+迭代拟合残差：梯度提升通过迭代地拟合残差来构建强学习器。每一步都训练一个新的弱学习器(如决策树)来拟合当前模型的残差,根据前一轮预测误差调整后续学习器权重以改进模型。
 
 迭代公式：
 $$ F_m(x) = F_{m-1}(x) + \gamma_m h_m(x) $$
@@ -450,9 +481,11 @@ gbdt_model.fit(X, y)
 <br>
 
 
-### XGBoost
-#### 原理 
-目标函数加入正则项：XGBoost是对梯度提升的改进，通过引入正则化项和二阶导数信息来提高模型性能。
+#### XGBoost
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024724068.png" style="width:30%">
+
+##### 原理 
+目标函数加入正则项：XGBoost是对梯度提升的改进，通过引入正则化项和二阶导数信息来提高模型性能(防止过拟合&支持并行计算)。
 
 目标函数：
 $$ \text{Obj} = \sum L(y_i,\hat{y}_i) + \sum\Omega(f_k) $$
@@ -467,7 +500,7 @@ $$ \text{Obj} = \sum L(y_i,\hat{y}_i) + \sum\Omega(f_k) $$
 2. 通过正则化控制模型复杂度
 3. 支持并行计算和稀疏特征
 
-#### 代码示例
+##### 代码示例
 ```python
 # XGBoost
 import xgboost as xgb
@@ -490,11 +523,56 @@ params = {
 xgb.train(params, dtrain, num_boost_round=100)
 ```
 
-### LightGBM
+#### LightGBM
 
-#### 优化技术  
-- Gradient-based One-Side Sampling (GOSS)  
-- Exclusive Feature Bundling (EFB)
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024735053.png" style="width:30%">
+
+##### 优化技术  
+
+1. **Gradient-based One-Side Sampling (GOSS)**
+   - 原理：
+     * 基于梯度的单边采样，保留大梯度的样本，随机采样小梯度的样本
+     * 大梯度样本对信息增益贡献大，小梯度样本贡献小
+   - 优势：
+     * 减少数据量，加快训练速度
+     * 保持模型精度
+     * 降低内存使用
+   - 实现方式：
+     * 按梯度绝对值排序
+     * 保留top a%的大梯度样本
+     * 随机采样b%的小梯度样本
+     * 对小梯度样本的权重进行放大(1-a)/b倍
+
+2. **Exclusive Feature Bundling (EFB)**
+   - 原理：
+     * 将互斥特征（不同时取非零值的特征）捆绑在一起
+     * 减少特征数量，降低内存消耗
+   - 优势：
+     * 减少特征数量
+     * 降低内存使用
+     * 加快训练速度
+   - 实现方式：
+     * 构建特征冲突图
+     * 使用贪心算法进行特征捆绑
+     * 将捆绑后的特征视为一个特征
+
+3. **Histogram-based Algorithm**
+   - 原理：
+     * 将连续特征离散化为直方图
+     * 使用直方图进行特征分裂
+   - 优势：
+     * 减少内存使用
+     * 加快训练速度
+     * 提高缓存命中率
+
+4. **Leaf-wise Tree Growth**
+   - 原理：
+     * 每次选择增益最大的叶子节点进行分裂
+     * 不同于传统的level-wise生长方式
+   - 优势：
+     * 更好的精度
+     * 更快的收敛速度
+     * 更少的模型复杂度
 
 **性能对比**
 | **指标** | XGBoost | LightGBM |
@@ -504,7 +582,8 @@ xgb.train(params, dtrain, num_boost_round=100)
 | 准确率 | 高 | 相当 |
 | 类别特征 | 需编码 | 原生支持 |
 
-#### 代码示例
+
+##### 代码示例
 ```python
 # LightGBM
 import lightgbm as lgb
@@ -527,10 +606,13 @@ lgb.train(params, dataset, num_boost_round=100)
 <br>
 
 ### 支持向量回归 
-** Support Vector Regression,SVR**
+**Support Vector Regression,SVR**
+
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024714714.png" style="width:30%">
 
 #### 原理  
-最大化间隔带（$\epsilon$-insensitive tube）：SVR通过构建一个间隔带（$\epsilon$-tube）来拟合数据，只惩罚落在间隔带外的样本。这种方法对异常值具有很好的鲁棒性。
+在特征空间中构建超平面以最小化预测误差，最大化超平面与数据之间的距离。
+最大化间隔带（$\epsilon$-insensitive tube）：SVR通过构建一个间隔带（$\epsilon$-tube）来拟合数据，只惩罚落在间隔带外的样本。这种方法对**高维数据**有效，对异常值具有很好的鲁棒性。
 
 目标函数：
 $$ \min \frac{1}{2}||w||^2 + C\sum(\xi_i+\xi_i^*) $$
@@ -583,8 +665,10 @@ model.fit(X_scaled, y)
 
 ### 神经网络回归
 **Neural Network Regression**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024744315.png" style="width:30%">
 
 #### 原理  
+通过反向传播算法优化模型参数。
 多层感知机（MLP）结构：神经网络回归通过多层非线性变换来学习复杂的函数关系。它能够自动学习特征表示，具有很强的表达能力。
 
 网络结构：
@@ -624,7 +708,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 model = Sequential([
     # 第一层：64个神经元，ReLU激活函数
     Dense(64, activation='relu', input_shape=(X.shape[1],)),
-    # 第二层：32个神经元，ReLU激活函数
+    # 第二层：32个神经元ReLU激活函数
     Dense(32, activation='relu'),
     # 输出层：1个神经元，线性激活函数
     Dense(1)
@@ -665,6 +749,7 @@ model.fit(
 
 ### K最近邻回归
 **KNN Regression**
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530024752274.png" style="width:30%">
 
 #### 原理
 局部加权平均：KNN回归是一种基于实例的学习方法，通过计算待预测样本与训练样本的距离，选择最近的K个样本进行预测。
@@ -718,7 +803,7 @@ model.fit(X_scaled, y)
 
 ---
 
-### 回归模型对比总表
+### 回归模型对比总结
 | **模型类型** | **训练速度** | **可解释性** | **非线性处理** | **特征选择** | **最佳场景** |
 |--------------|--------------|--------------|----------------|--------------|--------------|
 | 线性回归 | S | S | ❌ | ❌ | 线性关系数据 |
@@ -729,14 +814,12 @@ model.fit(X_scaled, y)
 | 随机森林 | C | C | S | ✅ | 通用场景 |
 | 梯度提升 | D | D | S | ✅ | 高精度需求 |
 | SVR | D | ❌ | A | ❌ | 小样本非线性 |
-| 神经网络 | ❌ | ❌ | S | ❌ | 复杂模式识别 |
-| KNN | ❌（预测慢） | D | B | ❌ | 低维相似度分析 |
+| 神经网络 | E | ❌ | S | ❌ | 复杂模式识别 |
+| KNN | E | D | B | ❌ | 低维相似度分析 |
 
 > 符号说明：字母表示能力强度，✅表示支持，❌表示不支持
 
----
-
-### 模型选择指南
+**模型选择指南**：
 1. **数据量小+线性关系** → 线性回归  
 2. **需要解释特征贡献** → 正则化回归  
 3. **异方差/极端值** → 分位数回归  
