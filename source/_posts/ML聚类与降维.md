@@ -5,7 +5,7 @@ categories:
   - 学AI/DS
 tags:
   - ML
-desc:【无监督学习】
+desc: 【无监督学习】
 ---
 
 - 参考：<a href="https://www.showmeai.tech/article-detail/185">`https://www.showmeai.tech/`</a>

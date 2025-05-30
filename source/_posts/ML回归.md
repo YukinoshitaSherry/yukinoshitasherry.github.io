@@ -163,6 +163,7 @@ model = LinearRegression().fit(X_poly, y)
      - 样本数量小于特征数量
      - 需要稳定系数估计
 
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530155341916.png" style="width:75%">
 
 3. **正则化效果对比**
    | **特性** | **L1正则化** | **L2正则化** |
