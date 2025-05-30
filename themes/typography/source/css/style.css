@@ -2139,3 +2139,66 @@ figure .code pre {
     display: block !important;
   }
 }
+
+/* 朋友卡片 */
+.friends-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+}
+
+.friend-card {
+  background: rgba(255, 255, 255, 0.4); /* 半透明白色 */
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(46,64,91,0.06); /* 更柔和的阴影 */
+  padding: 28px 16px 20px 16px;
+  margin-bottom: 20px;
+  flex: 0 0 calc(33.333% - 24px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column; /* 纵向排列 */
+  align-items: center;    /* 居中对齐 */
+  transition: box-shadow 0.2s, background 0.2s;
+  border: 1.5px solid rgba(46,64,91,0.06); /* 柔和边框 */
+}
+.friend-card:hover {
+  box-shadow: 0 4px 16px rgba(46,64,91,0.13);
+  background: rgba(255,255,255,0.92);
+}
+
+.friend-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 18px auto; /* 上下居中 */
+  object-fit: cover;
+  border: 2px solid #eee;
+  display: block;
+}
+
+.friend-info {
+  text-align: center; /* 内容居中 */
+  width: 100%;
+}
+
+.friend-name {
+  font-size: 20px;
+  margin: 0 0 8px 0;
+  color: #2e405b;
+  font-weight: bold;
+  text-align: center;
+}
+
+.friend-desc {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .friend-card {
+    flex: 0 0 100%;
+  }
+}

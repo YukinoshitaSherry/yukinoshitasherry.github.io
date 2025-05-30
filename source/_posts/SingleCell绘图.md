@@ -16,7 +16,8 @@ desc: 理解与绘制：肘部图、PCA、UMAP、tSNE、热图、小提琴图、
 
 
 **参考:**
-- <a href="https://www.xiaohongshu.com/collection/item/660fe3b1b900000000000001?xhsshare=WeixinSession&appuid=64f6cb2500000000060318b6&apptime=1748513951&share_id=d3d42bf052cb43f19480095d758a934c&share_channel=wechat">小红书：文献读图</a>
+- <a href="https://www.xiaohongshu.com/collection/item/660fe3b1b900000000000001?xhsshare=WeixinSession&appuid=64f6cb2500000000060318b6&apptime=1748513951&share_id=d3d42bf052cb43f19480095d758a934c&share_channel=wechat">小红书：@科研百味</a>
+- <a href="https://www.xiaohongshu.com/explore/6836767c000000002100e6af?xsec_token=ABP4CeBpe2LFiXDDFLs6mK5i96rUX-dCkZ_nMsUAB5KGA=&xsec_source=pc_search&source=unknown">小红书：@生信日常</a>
 - <a href="https://zhuanlan.zhihu.com/p/488362896">知乎：单细胞marker基因可视化的补充</a>
 - <a href="https://zhuanlan.zhihu.com/p/376439417">知乎：单细胞分析实录 展示marker基因的4种图形</a>
 
@@ -277,7 +278,13 @@ plt.show()
 
 ### 作用
 
-小提琴图结合了箱线图和核密度估计，可以展示基因表达的分布特征，包括中位数、四分位数范围、分布形状等。
+小提琴图（Violin Plot）是一种结合了箱线图和核密度图特点的数据可视化图表，用于展示数据的分布情况。可以展示基因表达的分布特征.包括中位数、四分位数范围、分布形状等。
+
+小提琴图在基因表达分析、生物统计等领域有广泛应用，用于展示数据的分布特征和统计信息。
+- 数据分布比较/多变量分析：通过观察小提琴图的形状、宽度和长度，比较不同组别或类别的数据分布，直观了解数据密度和范围，发现其中的差异性和相似性。
+- 异常值检测：快速识别数据集中的异常值或离群点，为后续分析处理提供指导。
+- 探索因素影响：研究一个因素对另一个因素的影响。按一个因素分组，观察另一个因素的小提琴图，了解两者之间的关系和影响。
+- 时间序列分析：适用于观察随时间变化的数据分布。通过比较不同时间点的数据分布，识别趋势和模式。
 
 ### 参数
 
@@ -293,7 +300,7 @@ plt.show()
 
 小提琴图的宽度表示基因表达的密度，较宽的部分表示在该表达水平的细胞数量较多。内部的箱线图显示了数据的中位数、四分位数范围和异常值等统计信息。通过比较不同组间的小提琴图，可以了解基因在不同细胞类型或条件下的表达分布差异。
 
-小提琴图在基因表达分析、生物统计等领域有广泛应用，用于展示数据的分布特征和统计信息。
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250530033544604.png">
 
 
 ### 示例代码
@@ -303,14 +310,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-
-# 生成示例数据
-np.random.seed(42)
-data = pd.DataFrame({
-    'Gene_1': np.random.normal(0, 1, 100),
-    'Gene_2': np.random.normal(2, 1, 100),
-    'Cell_Type': np.random.choice(['Type_A', 'Type_B', 'Type_C'], 100)
-})
 
 # 绘制小提琴图
 plt.figure(figsize=(10, 6))
@@ -350,12 +349,6 @@ plt.show()
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 生成示例数据
-x = np.linspace(-5, 5, 100)
-y = np.linspace(-5, 5, 100)
-X, Y = np.meshgrid(x, y)
-Z = np.sin(np.sqrt(X**2 + Y**2))
-
 # 绘制等高线图
 plt.figure(figsize=(8, 6))
 contour = plt.contourf(X, Y, Z, levels=20, cmap='viridis', alpha=0.8)
@@ -393,10 +386,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-
-# 生成示例数据
-np.random.seed(42)
-data = np.random.normal(0, 1, 1000)
 
 # 绘制密度图
 plt.figure(figsize=(8, 6))
@@ -482,12 +471,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-# 生成示例数据
-np.random.seed(42)
-data = pd.DataFrame({
-    'Value': np.concatenate([np.random.normal(0, 1, 300), np.random.normal(2, 1, 300), np.random.normal(4, 1, 300)]),
-    'Group': ['Group A'] * 300 + ['Group B'] * 300 + ['Group C'] * 300
-})
 
 # 绘制山脊图
 plt.figure(figsize=(10, 6))
@@ -555,11 +538,6 @@ plt.show()
 <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250529232736554.png">
 
 
-### 示例代码
-
-```python
-
-```
 
 
 ## GSEA 富集图
@@ -578,6 +556,7 @@ GSEA（Gene Set Enrichment Analysis）富集图用于分析基因集在特定生
 ### 读图
 
 GSEA 富集图通常包括富集分数曲线、基因集的分布位置以及显著性结果等。富集分数曲线显示基因集在排序列表中的富集程度，基因集的分布位置用点表示，显著性结果用 p 值和 FDR 校正值表示。
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250529050621902.png">
 
 ### 示例代码
 
