@@ -1,5 +1,5 @@
 ---
-title: Transformer笔记整理
+title: Transformer论文精读
 date: 2024-03-23
 categories:
     - 学AI/DS

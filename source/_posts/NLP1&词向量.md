@@ -285,13 +285,17 @@ $$
 
 ### Bigram
 
-假设每个词只依赖于前一个词：
+假设每个词只依赖于前一个词(n=2)：
 
 $$
 P(w_1, w_2, \dots, w_n) = P(w_1) \prod_{i=2}^n P(w_i | w_{i-1})
 $$
 
 使用 bigram 都可以带来相对 unigram显著的提升。
+
+### Trigram
+对于trigram模型(n=3)：
+$$P(w_t|w_1, w_2, ..., w_{t-1}) \approx P(w_t|w_{t-2}, w_{t-1})$$
 
 ### n-gram
 
@@ -370,7 +374,7 @@ $$
 ## smoothing
 为了解决零概率问题，可以采用平滑技术。平滑技术的基本思想是通过调整模型的概率估计，使得所有n-gram的概率之和为1，同时确保那些在训练数据中未出现过的n-gram也有一个非零的概率估计。以下是几种常见的平滑技术：
 
-- **加一平滑（Add-One Smoothing）**：
+- **加一平滑（Add-One Smoothing/Laplace Smoothing）**：
     - 对于每个n-gram，其计数**加1**，然后根据这些调整后的计数来计算概率。
     - 公式：$P(w) = \frac{C(w) + 1}{N + V}$​
     - 其中，C(w)是n-gram w在训练数据中的计数，N是训练数据中的总n-gram数，V是词汇表的大小。
