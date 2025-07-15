@@ -1,5 +1,5 @@
 ---
-title: NLP(10)：句法分析与树形递归神经网络
+title: NLP(9)：句法分析与树形递归神经网络
 date: 2024-02-10
 categories:
   - 学AI/DS
