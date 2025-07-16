@@ -15,10 +15,39 @@ block description
 
 block content
     .autopagerize_page_element: .content: .post-page
-        +make_post(page, true)
-        if is_post()
-            .toc-container.toc-mobile.visible-xs
-                .toc-content
+        .post-container
+            div.post-title= page.title
+            if page.desc && theme.enableExcerpt !== false
+                p.post-desc= page.desc
+            p.post-meta
+                span.date.meta-item!=__('posted_at')+"&nbsp;" + date(page.date, 'YYYY-MM-DD')
+                if theme.duoshuo || theme.disqus
+                    span.meta-item
+                        i.fa.fa-comment-o
+                        span &nbsp;
+                        a(href= url_for(page.path + "#comments"))= __('Comments')
+                if theme.showCategories
+                    if page.categories && page.categories.length > 0
+                        span.meta-item
+                            i.fa.fa-folder
+                            span &nbsp;
+                            - page.categories.sort('posts').each(function(item) {
+                            a.a-tag(href=config.root + item.path, title= item.name)= item.name
+                            span &nbsp;
+                            - });
+                if theme.showTags
+                    if page.tags && page.tags.length > 0
+                        span.meta-item
+                            i.fa.fa-tag
+                            span &nbsp;
+                            - page.tags.sort('posts').each(function(item) {
+                            a.a-tag(href=config.root + item.path, title= item.name)= item.name
+                            span &nbsp;
+                            - });
+            if is_post()
+                .toc-container.toc-mobile.visible-xs
+                    .toc-content
+            p.post-abstract!= page.content
         .share(style="display: flex; align-items: center; gap: 10px;")
             span= __('share')
             .soc(style="display: flex; gap: 15px;")
