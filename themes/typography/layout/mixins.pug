@@ -64,19 +64,32 @@ mixin make_pager()
                 p
                     != ' ' + __('PageNumber', page.current) + ' / ' + __('PageCount', page.total) + ' '
                     | &nbsp;
-            p
+            p(style="display: flex; align-items: center; justify-content: center;")
+                // 首页按钮
+                if page.current > 1
+                    span.first.pagbuttons(style="margin-right: 12px;")
+                        i.fa.fa-angle-double-left
+                        | &nbsp
+                        a(href= url_for(page.base || page.path.split('/page/')[0]), aria-label= __('first')) First
+                // 上一页按钮
                 if page.prev
-                span.pre.pagbuttons
-                    i.fa.fa-angle-double-left
-                    | &nbsp;
-                    a(role="navigation",href=url_for(prev),aria-label= __('prev'))= __('prev')
-
+                    span.pre.pagbuttons
+                        i.fa.fa-angle-left
+                        | &nbsp;
+                        a(role="navigation",href=url_for(prev),aria-label= __('prev'))= __('prev')
+                // 下一页按钮
                 if page.next
-                span &nbsp;
-                span.next.pagbuttons
-                    a(role="navigation",href=url_for(next),aria-label=__('next'))= __('next')
-                    | &nbsp;
-                    i.fa.fa-angle-double-right
+                    span.next.pagbuttons(style="margin-right: 12px; margin-left: 12px;")
+                        | &nbsp;
+                        a(role="navigation",href=url_for(next),aria-label=__('next'))= __('next')
+                        | &nbsp;
+                        i.fa.fa-angle-right
+                // 尾页按钮
+                if page.current < page.total
+                    span.last.pagbuttons
+                        a(href= url_for((page.base || page.path.split('/page/')[0]) + '/page/' + page.total + '/'), aria-label= __('last')) Last
+                        | &nbsp;
+                        i.fa.fa-angle-double-right
 
 mixin postList()
     - var year = 0;
