@@ -360,7 +360,7 @@ body {
   }
   
   .main-container {
-    padding: 60px 20px;
+    padding: 50px 20px; /* 减小上下padding从60px到50px */
   }
 }
 
@@ -371,7 +371,7 @@ body {
   }
   
   .main-container {
-    padding: 40px 15px;
+    padding: 35px 15px; /* 减小上下padding从40px到35px */
   }
 }
 
@@ -571,8 +571,8 @@ body {
   right: -180px;
   top: 0px;
   width: 250px;
-  height: 75vh;
-  padding: 20px 20px;
+  height: 60vh; /* 减小高度从75vh到60vh */
+  padding: 15px 20px; /* 减小上下padding从20px到15px */
   z-index: 100;
 }
 
@@ -705,11 +705,11 @@ body.about-page .site-title a:hover {
     "Source Han Serif TC", serif;
 }
 .site-title-large {
-  font-size: 50px;
+  font-size: 40px; /* 减小字体从50px到40px */
   padding-top: 0;
 }
 .site-title-small {
-  font-size: 30px;
+  font-size: 24px; /* 减小字体从30px到24px */
   padding-top: 1px;
 }
 .site-title-links {
@@ -718,7 +718,7 @@ body.about-page .site-title a:hover {
   font-family: "Times New Roman", "华文中宋";
   font-size: 26px;
   margin: 2px;
-  padding: 60px 0;
+  padding: 40px 0; /* 减小padding从60px到40px */
   text-align: left;
   position: fixed;
   bottom: 20px;
@@ -729,7 +729,7 @@ body.about-page .site-title a:hover {
 }
 .site-title-links ul li {
   display: block;
-  margin: 15px 0;
+  margin: 12px 0; /* 减小间距从15px到12px */
   font-size: 18px;
 }
 .site-title-links ul li.soc {
@@ -757,7 +757,7 @@ body.about-page .site-title a:hover {
 .site-title-links ul {
   display: flex;
   flex-direction: column;
-  gap: 5px; /* 调整菜单项之间的间距 */
+  gap: 3px; /* 减小菜单项之间的间距从5px到3px */
 }
 /* 移除侧边栏链接的下划线 */
 .site-title-links a {
@@ -921,7 +921,7 @@ footer * {
   font-weight: lighter;
   color: #2e405b;
   margin: 4px 0;
-  margin-bottom: -8px !important;  /* 减小标题底部边距 */
+  margin-bottom: 8px !important;  /* 恢复原来的标题底部边距 */
   font-family: "Times New Roman", "华文中宋";
 }
 /* 移除文章标题下的横线 */
@@ -939,7 +939,7 @@ footer * {
 }
 .post-meta {
   font-size: 14px;
-  margin: -10px 0 -10px 0;
+  margin: 10px 0 10px 0;  /* 恢复原来的边距 */
   font-family: "Times New Roman", "华文中宋";
 }
 /* 文章页面的时间、类别、标签样式，下划线 */
@@ -1156,16 +1156,16 @@ figure .code pre {
     padding: 0;
   }
   .site-title-links ul li.soc {
-    margin-top: 20px; /* 增加与上方About的距离 */
+    margin-top: 15px; /* 减小与上方About的距离从20px到15px */
   }
   .site-title-links ul li:not(.soc) {
-    margin-top: -10px; /* 将Home到About部分整体上移 */
+    margin-top: -8px; /* 将Home到About部分整体上移，从-10px到-8px */
   }
   
   .site-title-links ul {
     display: flex;
     flex-direction: column;
-    gap: 5px; /* 调整菜单项之间的间距 */
+    gap: 3px; /* 减小菜单项之间的间距从5px到3px */
   }
   .post-title {
     font-size: 22px;
@@ -1196,11 +1196,11 @@ figure .code pre {
 /* 移动端 */
 @media only screen and (max-height: 860px) {
   .site-title-large {
-    font-size: 32px;
+    font-size: 28px; /* 减小字体从32px到28px */
     font-family: "Times New Roman", "华文中宋";
   }
   .site-title-small {
-    font-size: 20px;
+    font-size: 18px; /* 减小字体从20px到18px */
     font-family: "Times New Roman", "华文中宋";
   }
   .site-title-links ul li {
@@ -1217,8 +1217,8 @@ figure .code pre {
     font-family: "Times New Roman", "华文中宋";
   }
   .main-container {
-    padding-top: 40px;
-    padding-bottom: 60px;
+    padding-top: 30px; /* 减小顶部padding从40px到30px */
+    padding-bottom: 50px; /* 减小底部padding从60px到50px */
     font-family: "Times New Roman", "华文中宋";
   }
 }
@@ -1297,7 +1297,7 @@ figure .code pre {
     text-align: left;
     height: auto;
     margin: 0;
-    padding: 20px 30px;
+    padding: 15px 30px; /* 减小上下padding从20px到15px */
     overflow: auto;
   }
   .side-container {
@@ -1510,11 +1510,11 @@ figure .code pre {
   
   /* PC端标题和正文间距 */
   .post-page .post-title {
-    margin-bottom: 20px !important;
+    margin-bottom: 15px !important;  /* 恢复原来的间距 */
   }
   
   .post-page .post-meta {
-    margin-bottom: 30px !important;
+    margin-bottom: 20px !important;  /* 恢复原来的间距 */
   }
 }
 
@@ -1530,7 +1530,7 @@ figure .code pre {
   }
   
   .post-content p {
-    font-size: 16px !important;
+    font-size: 18px !important;
   }
   
   .post-content div,
