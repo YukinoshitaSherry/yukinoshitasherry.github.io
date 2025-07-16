@@ -16,6 +16,9 @@ block description
 block content
     .autopagerize_page_element: .content: .post-page
         +make_post(page, true)
+        if is_post()
+            .toc-container
+                .toc-content
         .share(style="display: flex; align-items: center; gap: 10px;")
             span= __('share')
             .soc(style="display: flex; gap: 15px;")
