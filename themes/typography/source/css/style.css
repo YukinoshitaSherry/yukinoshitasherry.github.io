@@ -1496,3 +1496,24 @@ figure .code pre {
     display: block !important; 
   }
 }
+
+/* PC端正文紧贴目录 */
+@media (min-width: 769px) {
+  .post-page .post-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0;
+    max-width: 1800px;
+    font-size: 20px !important;
+    line-height: 1.8 !important;
+  }
+  
+  /* PC端标题和正文间距 */
+  .post-page .post-title {
+    margin-bottom: 20px !important;
+  }
+  
+  .post-page .post-meta {
+    margin-bottom: 30px !important;
+  }
+}
