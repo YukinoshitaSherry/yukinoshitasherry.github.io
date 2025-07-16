@@ -47,7 +47,7 @@ block content
             if is_post()
                 .toc-container.toc-mobile.visible-xs
                     .toc-content
-            p.post-abstract!= page.content
+            article.post-content!= page.content
         .share(style="display: flex; align-items: center; gap: 10px;")
             span= __('share')
             .soc(style="display: flex; gap: 15px;")
