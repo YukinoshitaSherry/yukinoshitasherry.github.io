@@ -1517,3 +1517,35 @@ figure .code pre {
     margin-bottom: 30px !important;
   }
 }
+
+/* PC端正文字体大小调整 */
+@media (min-width: 769px) {
+  .post-title{
+    font-size: 28px !important;
+  }
+  .post-content {
+    font-size: 20px !important;
+    line-height: 1.8;
+    font-family: "Times New Roman", "楷体";
+  }
+  
+  .post-content p {
+    font-size: 16px !important;
+  }
+  
+  .post-content div,
+  .post-content ul,
+  .post-content ol,
+  .post-content li {
+    font-size: 18px !important;
+    font-family: "Times New Roman", "楷体";
+    margin: 5px 0;
+  }
+}
+
+/* PC端去掉大纲标题前的短横线 */
+@media (min-width: 769px) {
+  blockquote {
+    border-left: none !important;
+  }
+}
