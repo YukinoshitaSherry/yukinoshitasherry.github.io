@@ -1,5 +1,16 @@
   /* tag标签样式 */
+  .tag-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px; /* 行间距、列间距 */
+    margin: 18px 0 24px 0;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    min-height: 40px;
+  }
   .tag-filter {
+    flex: 0 1 auto;
     display: inline-block;
     padding: 3px 15px;  /* 增加水平方向的padding */
     margin: 1px;        /* 添加外边距 */

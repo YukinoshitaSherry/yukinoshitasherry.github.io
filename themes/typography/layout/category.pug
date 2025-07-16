@@ -17,9 +17,10 @@ block content
             h2.archive-title.archive-year-wrap
                 = "秋月春风" + page.category
             
-            //- 添加标签显示区域,只显示当前分类下的标签
+            //- 只显示本分类下所有文章用到的tag（不分页，统计全分类文章）
             - var categoryTags = new Set()
-            - page.posts.each(function(post) {
+            - var allCategoryPosts = site.categories.findOne({name: page.category}) ? site.categories.findOne({name: page.category}).posts.toArray() : []
+            - allCategoryPosts.forEach(function(post) {
             -   if (post.tags && post.tags.length) {
             -     post.tags.forEach(function(tag) {
             -       categoryTags.add(tag.name)
