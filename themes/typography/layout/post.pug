@@ -17,7 +17,7 @@ block content
     .autopagerize_page_element: .content: .post-page
         +make_post(page, true)
         if is_post()
-            .toc-container
+            .toc-container.toc-mobile.visible-xs
                 .toc-content
         .share(style="display: flex; align-items: center; gap: 10px;")
             span= __('share')

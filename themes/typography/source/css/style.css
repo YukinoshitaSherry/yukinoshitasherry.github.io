@@ -2247,3 +2247,11 @@ figure .code pre {
     padding-left: 0;
   }
 }
+
+/* 目录显示控制：PC端与移动端分离 */
+.toc-pc { display: block; }
+.toc-mobile { display: none; }
+@media (max-width: 768px) {
+  .toc-pc { display: none !important; }
+  .toc-mobile { display: block !important; }
+}
