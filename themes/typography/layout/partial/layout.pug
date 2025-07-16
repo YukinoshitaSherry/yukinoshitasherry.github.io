@@ -11,6 +11,9 @@ html(lang="zh-CN")
                         a.a-title(href=theme.personal_site)= theme.title_primary
                     h3.site-title-small
                         a.a-title(href=theme.personal_site)= theme.title_secondary
+                if is_post()
+                    .toc-container
+                        .toc-content
                 include sidebar
                 div#main-container.col-sm-9.col-xs-12.main-container
                     if page.archive
