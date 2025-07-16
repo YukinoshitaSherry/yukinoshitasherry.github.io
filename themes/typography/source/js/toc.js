@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 生成目录
     function generateTOC() {
-      const container = document.querySelector('.toc-container');
-      if (!container) return;
+      const containers = document.querySelectorAll('.toc-container');
+      if (!containers.length) return;
       
       // 检查是否是加密页面
       const encryptContainer = document.querySelector('#hexo-blog-encrypt');
@@ -15,8 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
               // 检查是否包含标题元素
               const headings = document.querySelectorAll('h1, h2, h3, h4');
               if (headings.length > 0) {
-                // 重新生成目录
-                generateTOCContent(headings, container);
+                containers.forEach(container => {
+                  generateTOCContent(headings, container);
+                });
                 // 停止观察
                 observer.disconnect();
               }
@@ -33,7 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // 非加密页面的原有逻辑
       const headings = document.querySelectorAll('h1, h2, h3, h4');
-      generateTOCContent(headings, container);
+      containers.forEach(container => {
+        generateTOCContent(headings, container);
+      });
     }
   
     // 将原有的目录生成逻辑抽取为单独的函数
