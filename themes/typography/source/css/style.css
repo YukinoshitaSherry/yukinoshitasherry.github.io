@@ -1543,9 +1543,20 @@ figure .code pre {
   }
 }
 
-/* PC端去掉大纲标题前的短横线 */
+/* 引用块样式 */
+blockquote {
+  border-left: 4px solid #999 !important;
+  padding-left: 20px !important;
+  margin: 20px 0 !important;
+  background-color: #f9f9f9 !important;
+}
+
+/* PC端引用块样式 */
 @media (min-width: 769px) {
   blockquote {
-    border-left: none !important;
+    border-left: 4px solid #999 !important;
+    padding-left: 20px !important;
+    margin: 20px 0 !important;
+    background-color: #f9f9f9 !important;
   }
 }
