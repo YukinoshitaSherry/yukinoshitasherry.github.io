@@ -126,6 +126,8 @@ CNN早在1998年由Yann LeCun团队发明，用于手写数字识别。结构为
 
 #### 范式与模型评估基础
 
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250721145105751.png" style="width:80%"><br>
+
 ##### L1 距离（曼哈顿距离）
 
 - 比较$32\times32\times3$像素块，将两张图片转为向量$I_1$和$I_2$，计算L1距离：

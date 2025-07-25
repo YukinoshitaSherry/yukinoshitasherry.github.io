@@ -2,9 +2,10 @@
 title: ABtest知识点总结
 date: 2024-01-16
 categories:
-  - 学AI/DS
+  - 学商科
 tags:
   - DS
+  - PM
 desc: ABtest相关知识点，数分/产品岗位面试题。
 ---
 - 参考
