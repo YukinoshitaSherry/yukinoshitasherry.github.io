@@ -138,7 +138,40 @@ http.port: 9200
 discovery.seed_hosts: ["127.0.0.1"]
 cluster.initial_master_nodes: ["node-1"]
 ```
+### Windows
 
+访问官方网站：
+https://www.elastic.co/downloads/elasticsearch
+
+##### 下载
+下载最新 Windows ZIP 版本，例如：`elasticsearch-8.15.0-windows-x86_64.zip`
+解压到安装目录，例如：`D:\elasticsearch-8.15.0`
+
+
+##### 配置环境变量
+将以下路径添加至系统环境变量 `PATH`：`D:\elasticsearch-8.15.0\bin`
+
+
+##### 启动 Elasticsearch
+打开 PowerShell 或 CMD，执行：
+```bash
+cd D:\elasticsearch-8.15.0\bin
+elasticsearch.bat
+```
+首次启动会自动生成：安全认证 token、访问密码、CA 证书文件（位于 config/certs/）
+
+##### 访问验证
+启动完成后，访问：
+`http://localhost:9200`
+若出现包含版本号与节点名的 JSON 输出，则启动成功。
+
+- 基本操作（REST API）：可通过浏览器、Postman 或命令行执行以下 API。
+- 查看集群信息
+```bash
+GET http://localhost:9200
+```
+
+<br>
 
 ## 使用
 Linux
