@@ -4,7 +4,6 @@ date: 2025-10-09
 categories: 
     - 学CS/SE
 tags: 
-    - Spark
     - DS
 desc: 2025~2026秋冬学学期大数据分析与应用课程需要使用Spark，一个基于内存的分布式大数据计算框架，支持批处理、流处理、SQL 查询、机器学习和图计算。
 ---
@@ -46,16 +45,49 @@ desc: 2025~2026秋冬学学期大数据分析与应用课程需要使用Spark，
 
 #### RDD（Resilient Distributed Dataset）
 
-* Spark 的底层抽象，是不可变的分布式数据集合。
-* **特性**：
+##### 概念
+* Spark 的底层抽象，不可变的分布式数据集合。
+简而言之，RDD 就是一个分布在集群中多个节点上的对象集合，你可以在上面执行各种并行计算（比如 map、filter、reduce）。
 
+* **特性**：
   * **弹性（Resilient）**：自动处理节点故障。
   * **分布式（Distributed）**：数据分布在集群节点上。
   * **数据集（Dataset）**：可执行并行操作。
 * **操作类型**：
-
   * **Transformation（转换）**：如 `map`、`filter`、`flatMap`，惰性执行。
   * **Action（行动）**：如 `count`、`collect`，触发计算。
+
+##### RDD对象的组成结构
+
+一个 RDD 对象内部包含以下关键属性：
+| 属性                            | 说明                               |
+| ----------------------------- | -------------------------------- |
+| **分区（Partitions）**            | RDD 被划分为多个分区，每个分区可在不同节点并行处理      |
+| **依赖关系（Dependencies）**        | 记录当前 RDD 是由哪些 RDD 转换而来（用于容错恢复）   |
+| **计算函数（Compute Function）**    | 每个分区的数据如何被计算（map/filter 等）       |
+| **分区器（Partitioner）**          | 可选，用于决定键值对 RDD 的分区规则             |
+| **存储位置（Preferred Locations）** | 提示 Spark 哪些节点已有数据副本（提高 locality） |
+
+
+##### RDD创建方式
+1️⃣ 从外部数据创建
+
+```
+# 例子：从本地或HDFS文件中创建
+rdd = spark.sparkContext.textFile("hdfs://path/data.txt")
+```
+
+2️⃣ 从集合创建
+```
+data = [1, 2, 3, 4, 5]
+rdd = spark.sparkContext.parallelize(data)
+```
+
+```
+3️⃣ 从其他 RDD 转换得到
+rdd2 = rdd.map(lambda x: x * 2)
+rdd3 = rdd2.filter(lambda x: x > 5)
+```
 
 #### DataFrame 与 Dataset
 
@@ -151,9 +183,7 @@ desc: 2025~2026秋冬学学期大数据分析与应用课程需要使用Spark，
 <img src="https://pic1.zhimg.com/v2-70c9f2c758e31aca524394ba69c27504_r.jpg" style="width:90%"><br>
 <img src="https://img2.baidu.com/it/u=3994114859,2070865283&fm=253&fmt=auto&app=138&f=JPEG?w=813&h=500" style="width:80%"><br>
 
-好的，我帮你整理 Apache Spark 的 **工作原理与逻辑流程**，把核心概念、数据流、任务调度和执行过程系统化讲清楚。
 
----
 
 #### 工作原理
 

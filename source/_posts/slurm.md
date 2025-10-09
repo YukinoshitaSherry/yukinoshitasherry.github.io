@@ -4,7 +4,6 @@ date: 2025-03-10
 categories: 
     - 学CS/SE
 tags: 
-    - Slurm
     - Linux
     - GPU
 desc: Slurm是一个开源的集群管理和作业调度系统，适用于Linux集群。跑实验申请GPU会用到它。
