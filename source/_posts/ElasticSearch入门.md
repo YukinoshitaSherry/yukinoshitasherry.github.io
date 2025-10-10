@@ -45,6 +45,7 @@ Elasticsearch 是 ELK（Elasticsearch、Logstash、Kibana）架构的核心组�
 | **Shard** | 索引的物理分片单元 | 分区 |
 | **Replica** | 分片的副本，用于容错与高并发 | 数据备份 |
 
+<br>
 
 ### 架构与原理
 
@@ -57,6 +58,8 @@ Elasticsearch 集群由多个节点组成。每个节点可能扮演不同角色
 
 数据以索引（Index）为单位存储。每个索引被划分为若干个主分片（Primary Shard）和副本分片（Replica Shard）。  
 Elasticsearch 自动管理分片的分布与副本的冗余。
+<br><img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251010024309434.png" style="width:85%"><br><img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251010024245323.png" style="width:85%"><br><img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251010024431215.png" style="width:85%"><br>
+
 
 #### 倒排索引原理
 Elasticsearch 使用 **倒排索引（Inverted Index）** 实现高效的全文检索。  
@@ -100,7 +103,7 @@ Elasticsearch 使用 **倒排索引（Inverted Index）** 实现高效的全文�
 - 内存：建议至少 2GB
 - 端口：默认 HTTP 端口 9200
 
-### Linux
+#### Linux
 
 ##### 下载
 ```bash
@@ -125,7 +128,7 @@ http://localhost:9200
 
 返回集群信息 JSON 即表示成功。
 
-#### 配置文件说明
+##### 配置文件说明
 （`config/elasticsearch.yml`）
 
 常用配置项：
@@ -138,7 +141,7 @@ http.port: 9200
 discovery.seed_hosts: ["127.0.0.1"]
 cluster.initial_master_nodes: ["node-1"]
 ```
-### Windows
+#### Windows
 
 访问官方网站：
 https://www.elastic.co/downloads/elasticsearch
@@ -174,7 +177,6 @@ GET http://localhost:9200
 <br>
 
 ## 使用
-Linux
 
 ### 文档与索引
 
@@ -409,6 +411,12 @@ GET /_cat/shards?v
 | 无法启动      | 内存不足或端口冲突  | 调整 JVM 内存配置或端口                           |
 | 写入失败      | 索引被设置为只读   | 清除 `index.blocks.read_only_allow_delete` |
 
+1. **Spark connector 报 `NoClassDefFoundError` / scala 版本不匹配**：请确认 Spark 的 Scala 二进制版本（`spark-submit --version`），并选择相应 `elasticsearch-spark-30_2.12` 或 `_2.13` 以及 `spark-excel` 的 `_2.12/_2.13` 版本。spark-excel 与 elasticsearch-spark 的版本都要对应 Scala 二进制。([Maven Central][5])
+2. **SSL / self-signed 证书导致连接失败**：开发时可临时使用 `es.net.ssl.cert.allow.self.signed=true`、或在 Python 上用 `verify_certs=False`，或临时关闭 xpack.security（仅限本地测试）。详见 ES-Hadoop 的安全配置文档。([Elastic][7])
+3. **写入后索引没有出现预期字段类型**：请在写入前通过 `PUT index` 明确 mapping，避免动态映射错误。
+4. **结果分页**：ES 默认返回 10 条；若结果多，请用 `size` 或 `helpers.scan` 获取全部。
+
+
 <br>
 
 ## 实践应用场景
@@ -436,39 +444,50 @@ GET /_cat/shards?v
 ## 课程作业2
 
 ### 任务1
-任务1（5分）：ElasticSearch安装。在Linux/Windows/Mac（三者里选一个）系统上安装Spark，不要求进行分布式集群配置，只需单机版跑通即可。
+任务1（5分）：ElasticSearch安装。在Linux/Windows/Mac（三者里选一个）系统上安装，不要求进行分布式集群配置，只需单机版跑通即可。
 提交要求：安装成功后，启动ElasticSearch的屏幕截屏
 
 
 1. 下载 zip（Windows）并解压：
-   官方下载页面或 Release（选择 8.x 的 zip）。（参考官方安装说明）([Elastic][1])
-2. 假设解压到 `C:\elasticsearch-8.x.x`。进入 `C:\elasticsearch-8.x.x\bin` 目录，**以管理员身份**打开 PowerShell 或 CMD。
+   [官方下载页面](https://www.elastic.co/downloads/elasticsearch)或 Release（选择 8.x 的 zip）。（参考官方安装说明）
+2. 假设解压到 `D:\elasticsearch\elasticsearch-9.1.5`。进入 `D:\elasticsearch-9.1.5\bin` 目录，**以管理员身份**打开 PowerShell 或 CMD。
 3. 启动（前台方式，便于截图）：
+```powershell
+cd D:\elasticsearch\elasticsearch-9.1.5\bin
+.\elasticsearch.bat
+```
+* 第一次启动会看到控制台生成 TLS 证书、创建内置账户并显示 `elastic` 的初始密码 / enrollment token（请保存）。
 
-   ```powershell
-   cd C:\elasticsearch-8.x.x\bin
-   .\elasticsearch.bat
-   ```
-
-   * 第一次启动会看到控制台生成 TLS 证书、创建内置账户并显示 `elastic` 的初始密码 / enrollment token（请保存）——这是你提交 Task1 的“启动成功”屏幕截图来源。([Elastic][1])
 4. （可选）如果想安装成 Windows 服务：
+```powershell
+.\elasticsearch-service.bat install
+.\elasticsearch-service.bat start
+```
+区别：
+| 对比项        | `elasticsearch.bat`                      | `elasticsearch-service.bat`                                            |
+| :--------- | :--------------------------------------- | :--------------------------------------------------------------------- |
+| **运行模式**   | **前台运行**，手动启动，依赖当前命令行会话。关闭窗口即停止。         | **后台运行（Windows 服务）**，系统启动时自动运行。                                        |
+| **运行环境**   | 通过 PowerShell / CMD 启动，直接调用 JVM。         | 安装为 Windows Service，由 Windows 服务管理器控制。                                 |
+| **主要用途**   | **开发 / 调试 / 学习阶段**。方便观察控制台日志、截图或修改配置后测试。 | **生产 / 长期运行环境**。无需人工干预即可在后台稳定运行。                                       |
+| **日志输出**   | 输出到控制台（stdout），可实时看到启动日志。                | 日志写入 `%ES_HOME%\logs` 文件夹（如 `elasticsearch.log`），不显示在控制台。              |
+| **停止方式**   | 直接关闭窗口或使用 `Ctrl + C`。                    | 使用服务控制命令停止，例如：<br>`.\elasticsearch-service.bat stop` 或 Windows 服务面板停止。 |
+| **安装步骤**   | 无需安装，解压即可使用。                             | 需先执行 `install` 安装服务：<br>`.\elasticsearch-service.bat install`          |
+| **卸载方式**   | 直接删除目录即可。                                | 执行 `.\elasticsearch-service.bat remove` 卸载服务。                          |
+| **自动启动**   | 否（每次手动执行 `.bat`）。                        | 可设置为系统启动自动运行。                                                          |
+| **典型使用场景** | 学习、调试、截图、配置验证。                           | 长期后台运行（如服务器部署）。                                                        |
 
-   ```powershell
-   .\elasticsearch-service.bat install
-   .\elasticsearch-service.bat start
-   ```
 
-   * 服务安装也会在首次运行时显示 enrollment token 与初始密码。([Genesys 文档][3])
+   * 服务安装也会在首次运行时显示 enrollment token 与初始密码。
 
 
 * 浏览器打开（注意：若启用安全，使用 `https://localhost:9200` 并使用 `elastic` + 密码登录；浏览器会有自签名证书警告）：命令行快速验证（PowerShell）：
 
-  ```powershell
-  # 若启用了安全并想跳过证书校验
-  curl -k -u elastic:YOUR_PASSWORD https://localhost:9200/
-  # 若安全被禁用（http）
-  curl http://localhost:9200/
-  ```
+```powershell
+# 若启用了安全并想跳过证书校验
+curl -k -u elastic:YOUR_PASSWORD https://localhost:9200/
+# 若安全被禁用（http）
+curl http://localhost:9200/
+```
 * 屏幕截图要求（Task1 提交）：启动控制台（`.\elasticsearch.bat` 的输出）或 `curl` 返回的集群信息页面。
 
 
@@ -780,31 +799,4 @@ prompt = f"判定：'{text}' 这条推荐原因是否因为用户喜欢某个菜
 * Task4：识别“因为喜欢菜品被推荐”的脚本（`find_likes.py`）和运行输出的屏幕截屏（或 CSV 导出文件）。
 * 可选：把你用到的 `mapping.json`、`mapping` 创建命令保存为 `create_mapping.sh`（或 .ps1）。
 
----
 
-## 常见问题 & 排错建议
-
-1. **Spark connector 报 `NoClassDefFoundError` / scala 版本不匹配**：请确认 Spark 的 Scala 二进制版本（`spark-submit --version`），并选择相应 `elasticsearch-spark-30_2.12` 或 `_2.13` 以及 `spark-excel` 的 `_2.12/_2.13` 版本。spark-excel 与 elasticsearch-spark 的版本都要对应 Scala 二进制。([Maven Central][5])
-2. **SSL / self-signed 证书导致连接失败**：开发时可临时使用 `es.net.ssl.cert.allow.self.signed=true`、或在 Python 上用 `verify_certs=False`，或临时关闭 xpack.security（仅限本地测试）。详见 ES-Hadoop 的安全配置文档。([Elastic][7])
-3. **写入后索引没有出现预期字段类型**：请在写入前通过 `PUT index` 明确 mapping，避免动态映射错误。
-4. **结果分页**：ES 默认返回 10 条；若结果多，请用 `size` 或 `helpers.scan` 获取全部。
-
----
-
-## 参考（官方 / 关键文档）
-
-* Windows zip 安装（包含 service 脚本）与启动说明。([Elastic][1])
-* Elasticsearch 安装 / 打包与 JVM（bundled JDK）说明。([Elastic][9])
-* elasticsearch-hadoop（Spark 支持与版本后缀说明，如何在 PySpark 中使用 connector）。([Elastic][4])
-* spark-excel 插件（com.crealytics）用于 Spark 读取 Excel。([Maven Repository][2])
-* elasticsearch-spark 30 artifact（选择与 ES 版本相兼容的 connector 版本）。([elastic.ac.cn][6])
-
----
-
-如果你希望我**直接给出完整的 Python 脚本文件（.py）和一份可直接复制到 PowerShell 的命令序列**（例如 `一键运行步骤文件`），我可以在下一条消息把 **4 个脚本文件完整贴出**：
-
-* `import_excel_to_es.py`（Spark 方案）
-* `import_excel_to_es_pandas.py`（pandas 方案）
-* `query_hot.py`（Task2 查询）
-* `query_monthly.py`（Task3）
-* `find_likes.py`（Task4 规则版）
