@@ -485,10 +485,17 @@ cd D:\elasticsearch\elasticsearch-9.1.5\bin
 ```powershell
 # 若启用了安全并想跳过证书校验
 curl -k -u elastic:YOUR_PASSWORD https://localhost:9200/
+
 # 若安全被禁用（http）
 curl http://localhost:9200/
 ```
 * 屏幕截图要求（Task1 提交）：启动控制台（`.\elasticsearch.bat` 的输出）或 `curl` 返回的集群信息页面。
+
+<div style="display: flex; gap: 0; margin: 10px 0;">
+  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251014155454747.png" style="width: 75%; height: auto; display: block;">
+  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251014161829871.pngg" style="width: 25%; height: auto; display: block;">
+</div>
+
 
 
 ### 任务2
@@ -497,11 +504,12 @@ curl http://localhost:9200/
 
 
 
-### 方案 A（推荐，使用 Spark + elasticsearch-hadoop）
+#### 方案 A
+（推荐，使用 Spark + elasticsearch-hadoop）
 
-**优点**：既利用你已安装的 Spark，又能处理大表；可用 `spark-submit` 或 `pyspark --packages` 一次性下载依赖并运行。官方 elasticsearch-hadoop 提供 Spark 支持（使用 `-30` 位 Spark 3.x），请确保选择与 Spark 的 Scala 版本相匹配（通常 Spark 3.x 对应 `elasticsearch-spark-30_2.12` 或 `_2.13` 视你下载的 Spark build）。([Elastic][4])
+**优点**：既利用你已安装的 Spark，又能处理大表；可用 `spark-submit` 或 `pyspark --packages` 一次性下载依赖并运行。官方 elasticsearch-hadoop 提供 Spark 支持（使用 `-30` 位 Spark 3.x），请确保选择与 Spark 的 Scala 版本相匹配（通常 Spark 3.x 对应 `elasticsearch-spark-30_2.12` 或 `_2.13` 视你下载的 Spark build）。
 
-#### 1) 确认 Spark 的 Scala 二进制版本（很重要）
+1) 确认 Spark 的 Scala 二进制版本（很重要）
 
 在 PowerShell 运行：
 
@@ -509,19 +517,18 @@ curl http://localhost:9200/
 D:\spark\spark-3.5.7-bin-hadoop3\bin\spark-submit --version
 ```
 
-输出中会提示 Scala 目标（`_2.12` 或 `_2.13`），按此选择 connector jar（下面示例按常见的 `_2.12` 写）。([Maven Central][5])
+输出中会提示 Scala 目标（`_2.12` 或 `_2.13`），按此选择 connector jar（下面示例按常见的 `_2.12` 写）。
 
-#### 2) 用 `spark-submit`（或 `pyspark`）带 `--packages` 运行（示例）
+2) 用 `spark-submit`（或 `pyspark`）带 `--packages` 运行（示例）
 
-> 我例子中使用两份 package：`elasticsearch-spark-30_2.12:8.16.0`（用与 ES 8.x 兼容的 es-hadoop 8.16.0）与 `com.crealytics:spark-excel_2.12:0.13.5`（读取 Excel）。如果你的 Scala 版本或 ES 版本不同，请改为对应版本。([elastic.ac.cn][6])
-
+> 我例子中使用两份 package：`elasticsearch-spark-30_2.12:8.16.0`（用与 ES 8.x 兼容的 es-hadoop 8.16.0）与 `com.crealytics:spark-excel_2.12:0.13.5`（读取 Excel）。如果你的 Scala 版本或 ES 版本不同，请改为对应版本。
 在 PowerShell（或 cmd）执行（示例）：
 
 ```powershell
 D:\spark\spark-3.5.7-bin-hadoop3\bin\spark-submit --master local[2] --packages org.elasticsearch:elasticsearch-spark-30_2.12:8.16.0,com.crealytics:spark-excel_2.12:0.13.5 import_excel_to_es.py
 ```
 
-#### 3) `import_excel_to_es.py`（把下面文件保存为该名）
+3) `import_excel_to_es.py`（把下面文件保存为该名）
 
 > 修改 `EXCEL_PATH` 与 `ES_PASSWORD` 为你的实际路径和 elastic 密码；若你禁用了安全（xpack.security.enabled: false），将 `es_scheme` 改为 `http` 并移除用户名/密码项或设为空。
 
@@ -596,7 +603,7 @@ print("导入完成")
 > * **推荐**：把 ES 的证书导入 JVM truststore / 配置 `es.net.ssl.truststore.location` 等（复杂）；
 > * **更简单（本机作业）**：在 `elasticsearch.yml` 中临时禁用 security（`xpack.security.enabled: false`），然后用 `http://localhost:9200` 无需 ssl/auth 写入（请务必在作业后恢复安全配置）。有关 connector 的 SSL / auth 选项见官方文档。([Elastic][7])
 
-#### 4) 创建 index mapping（推荐先创建，以保证 `被推荐原因` 同时有 `text` 和 `keyword` 字段）
+4) 创建 index mapping（推荐先创建，以保证 `被推荐原因` 同时有 `text` 和 `keyword` 字段）
 
 你可以用 `curl`（PowerShell）或 Python `requests`/`elasticsearch` 客户端：
 
@@ -628,9 +635,11 @@ curl -k -u elastic:YOUR_PASSWORD -H "Content-Type: application/json" -XPUT "http
 
 > 说明：上面把 `被推荐原因` 设为 `text`（便于全文检索）并增加 `.keyword` 子字段（便于做 wildcard/精确匹配）。如果你明显需要中文分词（大规模中文检索），需要安装中文分词插件（如 IK 分词器），但作业里只需匹配 “热情” 关键词，`match` 或 `wildcard` 足够。
 
----
 
-### 方案 B（更直观，Python(pandas) + elasticsearch-py）
+<br>
+
+#### 方案 B
+（更直观，Python(pandas) + elasticsearch-py）
 
 **优点**：步骤简单、对 Spark/Scala 版本无关，适合小 文件（数万行以内）。
 **步骤要点**：
@@ -662,13 +671,13 @@ for i, row in df.iterrows():
 helpers.bulk(es, actions)
 ```
 
-（Python 客户端官方示例与 search/index API 文档）。([Elastic][8])
+（Python 客户端官方示例与 search/index API 文档）。
 
----
 
-### Task2 查询（“被推荐原因” 包含 “热情” 的所有商家名称）
 
-#### A. 用 Python (elasticsearch-py)
+##### 查询（“被推荐原因” 包含 “热情” 的所有商家名称）
+
+###### A python
 
 ```python
 from elasticsearch import Elasticsearch, helpers
@@ -696,7 +705,7 @@ for hit in res['hits']['hits']:
 {"query":{"wildcard":{"被推荐原因.keyword":{"value":"*热情*"}}},"_source":["商家名称"],"size":1000}
 ```
 
-#### B. 用 curl（PowerShell）
+###### B. curl（PowerShell）
 
 ```powershell
 curl -k -u elastic:YOUR_PASSWORD "https://localhost:9200/waimai/_search" -H "Content-Type: application/json" -d '{"query":{"match":{"被推荐原因":"热情"}},"_source":["商家名称"],"size":1000}'
@@ -749,7 +758,8 @@ curl -k -u elastic:YOUR_PASSWORD "https://localhost:9200/waimai/_search" -H "Con
 
 我给两种实用方法（无需调用外部模型即可完成基本题目）——先试规则方法，再给可选的大模型方法（如果你愿意使用 API）。
 
-### 方法 A（规则/关键字匹配 —— 简单、无需外部 API）
+#### 方法 A
+（规则/关键字匹配 —— 简单、无需外部 API）
 
 用 `pandas` 读取 Excel，针对 `被推荐原因` 做正则过滤，关键词示例：`喜欢|爱吃|很喜欢|必点|必吃|招牌|推荐菜|主打|特别喜欢|口味|最爱`，并可以进一步匹配常见菜名列表（如果你有）。
 
@@ -773,7 +783,8 @@ res.to_csv(r"D:\data\task4_likes.csv", index=False, encoding='utf-8-sig')
 
 这个方法对作业通常已经够用：输出 `商家名称` 与 `被推荐原因` 的行并截图即可。
 
-### 方法 B（可选：使用 LLM 对“被推荐原因”逐条分类）
+### 方法 B
+（可选：使用 LLM 对“被推荐原因”逐条分类）
 
 如果你想更智能地识别“是否因喜欢某道菜而被推荐”并抽取菜名，可以把 `被推荐原因` 逐条发送给 LLM（如 OpenAI）做二分类 + 实体抽取（输出：是否因为喜欢菜品？—是/否 + 列出菜品名称）。示例思路（伪代码）：
 
@@ -789,9 +800,11 @@ prompt = f"判定：'{text}' 这条推荐原因是否因为用户喜欢某个菜
 
 > 注意：若你使用 LLM，请在报告中说明调用次数、模型、返回示例及如何抽取结果（提交截图时也把调用结果截屏）。
 
----
 
-## 提交文件 & 截图清单（便于得分）
+
+
+
+
 
 * Task1：Elasticsearch 启动时的控制台屏幕截屏（显示已启动/生成初始密码或服务已启动）。
 * Task2：导入数据的代码文件（`import_excel_to_es.py` 或 pandas 脚本） + 查询 “热情” 的脚本（`query_hot.py`）和运行时输出的屏幕截屏（显示所有包含“热情”的商家名称）。
