@@ -15,12 +15,51 @@ block content
             .friends-container
                 if theme && theme.friends && theme.friends.length > 0
                     each friend in theme.friends
-                        .friend-card
-                            a.friend-link(href=friend.url, target="_blank", rel="noopener")
-                                if friend.avatar
-                                    img.friend-avatar(src=friend.avatar, alt=friend.name)
-                                .friend-info
-                                    h3.friend-name= friend.name
-                                    p.friend-desc= friend.desc
+                        if friend.is_welcome
+                            .friend-card.welcome-card
+                                a.friend-link(href=friend.url, target="_blank", rel="noopener")
+                                    .welcome-content
+                                        if friend.avatar
+                                            img.friend-avatar(src=friend.avatar, alt=friend.name)
+                                        .friend-info
+                                            .info-item
+                                                span.info-label URL: 
+                                                span.info-value= friend.url
+                                            .info-item
+                                                span.info-label Name: 
+                                                span.info-value= friend.name
+                                            .info-item
+                                                span.info-label Icon: 
+                                                span.info-value= friend.avatar
+                                            .info-item
+                                                span.info-label Description: 
+                                                span.info-value= friend.desc
+                                            p.welcome-text 【欢迎在评论区互换友链】
+                        else
+                            .friend-card
+                                a.friend-link(href=friend.url, target="_blank", rel="noopener")
+                                    if friend.avatar
+                                        img.friend-avatar(src=friend.avatar, alt=friend.name)
+                                    .friend-info
+                                        h3.friend-name= friend.name
+                                        p.friend-desc= friend.desc
                 else
                     p.no-friends 暂无友链
+            
+            #giscus-container
+            script(
+                src="https://giscus.app/client.js"
+                data-repo="YukinoshitaSherry/yukinoshitasherry.github.io"
+                data-repo-id="R_kgDONEFZ0Q"
+                data-category="General"
+                data-category-id="DIC_kwDONEFZ0C4CmKE4"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="light"
+                data-lang="zh-CN"
+                crossorigin="anonymous"
+                async
+            )

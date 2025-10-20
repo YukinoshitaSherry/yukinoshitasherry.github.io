@@ -1356,6 +1356,7 @@ figure .code pre {
   flex-wrap: wrap;
   gap: 24px;
   justify-content: flex-start;
+  overflow: visible; /* 确保容器不裁剪阴影 */
 }
 
 .friend-card {
@@ -1407,9 +1408,110 @@ figure .code pre {
   text-align: center;
 }
 
+/* 欢迎卡片特殊样式 */
+.friend-card.welcome-card {
+  flex: 0 0 97%; /*宽度*/
+  background: rgba(255, 255, 255, 0.4); /* 与普通友链卡片统一 */
+  border: 1.5px solid rgba(46,64,91,0.05); /* 与普通友链卡片统一 */
+  position: relative;
+  overflow: visible; /* 允许阴影显示 */
+}
+
+.friend-card.welcome-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.friend-card.welcome-card:hover {
+  box-shadow: 0 0 20px rgba(74,111,165,0.5);
+  background: rgba(255,255,255,0.92);
+}
+
+/* 欢迎卡片内容布局 */
+.welcome-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+
+.welcome-content .friend-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #4a6fa5;
+  flex-shrink: 0;
+  margin-left: 35px; /* 头像额外的左边距 */
+}
+
+.welcome-content .friend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 信息项样式 */
+.info-item {
+  margin: 3px 0; /* 减少行间距 */
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left; /* 确保左对齐 */
+}
+
+.info-label {
+  font-weight: 600;
+  color: #2e405b;
+  font-size: 14px;
+  min-width: 90px; /* 增加标签宽度确保对齐 */
+  flex-shrink: 0;
+  text-align: left; /* 标签左对齐 */
+}
+
+.info-value {
+  color: #4a6fa5;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.4;
+  flex: 1;
+  text-align: left; /* 值左对齐 */
+  padding: 0; /* 重置内边距 */
+  margin: 0; /* 重置外边距 */
+}
+
+.welcome-text {
+  font-size: 14px;
+  color: #888;
+  margin: 8px 0 0 0;
+  font-style: italic;
+  text-align: left; /* 欢迎文字也左对齐 */
+}
+
 @media (max-width: 900px) {
   .friend-card {
     flex: 0 0 100%;
+  }
+  
+  /* 移动端欢迎卡片布局 */
+  .welcome-content {
+    flex-direction: column;
+    align-items: flex-start; /* 移动端也保持左对齐 */
+    text-align: left;
+    padding-left: 10px; /* 移动端减少左边距 */
+  }
+  
+  .welcome-content .friend-avatar {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .info-item {
+    justify-content: flex-start; /* 移动端也保持左对齐 */
   }
 }
 
