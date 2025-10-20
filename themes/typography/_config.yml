@@ -4,7 +4,7 @@ personal_site: "/about/" # 指向新创建的个人主页
 keywords:
 
 twitter: #username
-rss: atom.xml
+rss: #atom.xml
 weibo: #username/id
 instagram: #username
 github: YukinoshitaSherry
