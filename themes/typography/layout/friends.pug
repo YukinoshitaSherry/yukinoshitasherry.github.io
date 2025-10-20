@@ -22,10 +22,18 @@ block content
                                         if friend.avatar
                                             img.friend-avatar(src=friend.avatar, alt=friend.name)
                                         .friend-info
-                                            .info-item URL: #{friend.url}
-                                            .info-item Name: #{friend.name}
-                                            .info-item Icon: #{friend.avatar}
-                                            .info-item Description: #{friend.desc}
+                                            .info-item
+                                                span.info-label URL: 
+                                                span.info-value= friend.url
+                                            .info-item
+                                                span.info-label Name: 
+                                                span.info-value= friend.name
+                                            .info-item
+                                                span.info-label Icon: 
+                                                span.info-value= friend.avatar
+                                            .info-item
+                                                span.info-label Description: 
+                                                span.info-value= friend.desc
                                             p.welcome-text 【欢迎在评论区互换友链】
                         else
                             .friend-card

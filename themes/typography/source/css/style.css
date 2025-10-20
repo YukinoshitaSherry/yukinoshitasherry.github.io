@@ -1446,7 +1446,7 @@ figure .code pre {
   object-fit: cover;
   border: 2px solid #4a6fa5;
   flex-shrink: 0;
-  margin-left: 35px; /* 头像额外的左边距 */
+  margin-left: 10px; /* 头像额外的左边距 */
 }
 
 .welcome-content .friend-info {
@@ -1454,15 +1454,27 @@ figure .code pre {
   min-width: 0;
 }
 
-/* 信息项样式 */
+/* 信息项样式 - 重构版本 */
 .info-item {
-  margin: 3px 0; /* 减少行间距 */
-  text-align: left; /* 确保左对齐 */
+  margin: 3px 0;
   font-size: 14px;
   font-family: 'Courier New', monospace;
+  line-height: 1.4;
+  color: #2e405b;
+  text-align: left;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #2e405b;
+  display: inline;
+  white-space: nowrap;
+}
+
+.info-value {
   color: #2e405b;
   word-break: break-all;
-  line-height: 1.4;
+  display: inline;
 }
 
 .welcome-text {
@@ -1492,7 +1504,7 @@ figure .code pre {
   }
   
   .info-item {
-    text-align: left; /* 移动端也保持左对齐 */
+    text-align: left; /* 移动端也左对齐 */
   }
 }
 
