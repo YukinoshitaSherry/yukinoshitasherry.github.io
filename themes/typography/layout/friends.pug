@@ -17,24 +17,24 @@ block content
                     each friend in theme.friends
                         if friend.is_welcome
                             .friend-card.welcome-card
-                                a.friend-link(href=friend.url, target="_blank", rel="noopener")
-                                    .welcome-content
-                                        if friend.avatar
+                                .welcome-content
+                                    if friend.avatar
+                                        a.friend-link(href=friend.url, target="_blank", rel="noopener")
                                             img.friend-avatar(src=friend.avatar, alt=friend.name)
-                                        .friend-info
-                                            .info-item
-                                                span.info-label URL: 
-                                                span.info-value= friend.url
-                                            .info-item
-                                                span.info-label Name: 
-                                                span.info-value= friend.name
-                                            .info-item
-                                                span.info-label Icon: 
-                                                span.info-value= friend.avatar
-                                            .info-item
-                                                span.info-label Description: 
-                                                span.info-value= friend.desc
-                                            p.welcome-text 【欢迎在评论区互换友链】
+                                    .friend-info
+                                        .info-item
+                                            span.info-label URL: 
+                                            span.info-value(copyable="true")= friend.url
+                                        .info-item
+                                            span.info-label Name: 
+                                            span.info-value(copyable="true")= friend.name
+                                        .info-item
+                                            span.info-label Icon: 
+                                            span.info-value(copyable="true")= friend.avatar
+                                        .info-item
+                                            span.info-label Description: 
+                                            span.info-value(copyable="true")= friend.desc
+                                        p.welcome-text 【欢迎在评论区互换友链】
                         else
                             .friend-card
                                 a.friend-link(href=friend.url, target="_blank", rel="noopener")

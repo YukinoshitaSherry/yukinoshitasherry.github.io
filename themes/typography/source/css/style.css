@@ -1446,7 +1446,13 @@ figure .code pre {
   object-fit: cover;
   border: 2px solid #4a6fa5;
   flex-shrink: 0;
-  margin-left: 10px; /* 头像额外的左边距 */
+  margin-left: 40px; /* 头像额外的左边距 */
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.welcome-content .friend-link:hover .friend-avatar {
+  transform: scale(1.05);
 }
 
 .welcome-content .friend-info {
@@ -1462,6 +1468,10 @@ figure .code pre {
   line-height: 1.4;
   color: #2e405b;
   text-align: left;
+  user-select: text; /* 允许整个信息项被选择 */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .info-label {
@@ -1475,6 +1485,11 @@ figure .code pre {
   color: #2e405b;
   word-break: break-all;
   display: inline;
+  cursor: text; /* 显示文本选择光标 */
+  user-select: text !important; /* 强制允许文本选择 */
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 .welcome-text {
@@ -1483,6 +1498,14 @@ figure .code pre {
   margin: 8px 0 0 0;
   font-style: italic;
   text-align: left; /* 欢迎文字也左对齐 */
+}
+
+/* 确保欢迎卡片内的文本可以被选择 */
+.friend-card.welcome-card .info-item {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 @media (max-width: 900px) {
@@ -1505,6 +1528,18 @@ figure .code pre {
   
   .info-item {
     text-align: left; /* 移动端也左对齐 */
+    user-select: text !important; /* 移动端也允许文本选择 */
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+  }
+  
+  .info-value {
+    cursor: text; /* 移动端也显示文本选择光标 */
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
   }
 }
 
