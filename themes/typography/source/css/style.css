@@ -1457,35 +1457,16 @@ figure .code pre {
 /* 信息项样式 */
 .info-item {
   margin: 3px 0; /* 减少行间距 */
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
   text-align: left; /* 确保左对齐 */
-}
-
-.info-label {
-  font-weight: 600;
-  color: #2e405b;
   font-size: 14px;
-  min-width: 90px; /* 增加标签宽度确保对齐 */
-  flex-shrink: 0;
-  text-align: left; /* 标签左对齐 */
-}
-
-.info-value {
-  color: #4a6fa5;
-  font-size: 13px;
   font-family: 'Courier New', monospace;
+  color: #2e405b;
   word-break: break-all;
   line-height: 1.4;
-  flex: 1;
-  text-align: left; /* 值左对齐 */
-  padding: 0; /* 重置内边距 */
-  margin: 0; /* 重置外边距 */
 }
 
 .welcome-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #888;
   margin: 8px 0 0 0;
   font-style: italic;
@@ -1511,7 +1492,7 @@ figure .code pre {
   }
   
   .info-item {
-    justify-content: flex-start; /* 移动端也保持左对齐 */
+    text-align: left; /* 移动端也保持左对齐 */
   }
 }
 
