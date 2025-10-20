@@ -4,7 +4,6 @@ date: 2025-04-30
 categories: 
     - 学CS/SE
 tags: 
-    - Tomcat
     - 后端
 desc: 软工基后端部署时候用到的工具，学习汇总。
 ---

@@ -4,7 +4,6 @@ date: 2025-04-14
 categories:
 - 学CS/SE
 tags:
-- Tools
 - GPU
 desc: 算力租赁平台AutoDL使用教程
 ---
