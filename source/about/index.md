@@ -17,7 +17,7 @@ layout: page
 
 秋月春风/Yukinoshita Sherry 
 因为不擅长起名，所以这两个几乎是沿用多年的全网统一ID。分别取自杨慎《临江仙·滚滚长江东逝水》中的“白发渔樵江渚上，惯看秋月春风”，与我喜欢的二次元角色灰原哀、雪之下雪乃。<br>
-Asexuality, She/Her/Hers。赛博八字为水瓶座、INTJ、拉文克劳。
+Pronouns:She/Her/Hers, Gender: Asexuality <img width="25" height="25" alt="image" src="https://github.com/user-attachments/assets/ec37ab95-c138-445e-851a-d1817bd9d449" /> 。赛博八字为水瓶座、INTJ、拉文克劳。
 向往科技与艺术的结合。人生信条是『向外探索宇宙的哲学与规律，向内追寻内心的自洽与平和』。
 <br>
 
