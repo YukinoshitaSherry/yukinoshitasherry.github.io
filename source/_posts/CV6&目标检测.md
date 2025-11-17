@@ -6,7 +6,7 @@ categories:
 tags:
   - CV
 desc: CS231n Lec12-13 笔记，资料整合与一些自己的思考。两阶段、R-CNN系列、SSD、YOLO系列。
-
+hidden: true
 ---
 
 - 参考

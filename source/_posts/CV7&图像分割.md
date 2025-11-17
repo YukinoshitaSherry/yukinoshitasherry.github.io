@@ -6,7 +6,7 @@ categories:
 tags:
   - CV
 desc: CS231n Lec14 笔记，资料整合与一些自己的思考。常见应用，评估指标，典型语义分割算法（FCN,SegNet,U-Net,PSPNet,DeepLab,RefineNet）等。
-
+hidden: true
 ---
 
 - 参考

@@ -6,7 +6,7 @@ categories:
 tags:
   - CV
 desc: CS231n Lec15 笔记，资料整合与一些自己的思考。可视化的方法（特征、滤波器可视化），一些应用，如DeepDream、图像神经风格迁移（特征反演 + 纹理生成）等。
-
+hidden: true
 ---
 
 - 参考
