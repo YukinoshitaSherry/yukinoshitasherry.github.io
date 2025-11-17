@@ -802,14 +802,3 @@ prompt = f"判定：'{text}' 这条推荐原因是否因为用户喜欢某个菜
 
 
 
-
-
-
-
-* Task1：Elasticsearch 启动时的控制台屏幕截屏（显示已启动/生成初始密码或服务已启动）。
-* Task2：导入数据的代码文件（`import_excel_to_es.py` 或 pandas 脚本） + 查询 “热情” 的脚本（`query_hot.py`）和运行时输出的屏幕截屏（显示所有包含“热情”的商家名称）。
-* Task3：查询 `月售 >= 500` 的脚本（`query_monthly.py`）和运行输出屏幕截屏（显示所有符合条件的商家名称）。
-* Task4：识别“因为喜欢菜品被推荐”的脚本（`find_likes.py`）和运行输出的屏幕截屏（或 CSV 导出文件）。
-* 可选：把你用到的 `mapping.json`、`mapping` 创建命令保存为 `create_mapping.sh`（或 .ps1）。
-
-
