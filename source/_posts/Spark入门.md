@@ -70,21 +70,22 @@ desc: 2025~2026秋冬学学期大数据分析与应用课程需要使用Spark，
 
 
 ##### RDD创建方式
-1️⃣ 从外部数据创建
+1. 从外部数据创建
 
 ```
 # 例子：从本地或HDFS文件中创建
 rdd = spark.sparkContext.textFile("hdfs://path/data.txt")
 ```
 
-2️⃣ 从集合创建
+2. 从集合创建
 ```
 data = [1, 2, 3, 4, 5]
 rdd = spark.sparkContext.parallelize(data)
 ```
 
+
+3. 从其他 RDD 转换得到
 ```
-3️⃣ 从其他 RDD 转换得到
 rdd2 = rdd.map(lambda x: x * 2)
 rdd3 = rdd2.filter(lambda x: x > 5)
 ```
