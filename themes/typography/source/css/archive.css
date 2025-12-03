@@ -240,4 +240,20 @@
     padding-left: 0;
 }
 
+/* 手机端时间轴调整 - 避免与右边重叠 */
+@media (max-width: 768px) {
+    .archive-timeline {
+        left: 10px;  /* 从50px减小到10px，左移时间轴 */
+        width: 150px;  /* 稍微减小宽度以适应手机端 */
+        padding: 15px;  /* 减小内边距 */
+    }
+    
+    /* 手机端archive容器调整 */
+    .archive.animated.fadeInDown {
+        margin-left: 20px;  /* 从75px减小到20px，适配时间轴左移 */
+        padding-left: 10px;
+        width: calc(100% - 20px);
+    }
+}
+
 

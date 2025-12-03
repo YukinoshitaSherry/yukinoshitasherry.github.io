@@ -18,7 +18,6 @@ hexo.on('generateAfter', function() {
             fs.mkdirSync(targetDir, { recursive: true });
         }
         fs.writeFileSync(targetCssPath, customCss, 'utf8');
-        console.log('✓ 已自动应用自定义 Prism CSS 主题:', targetCssPath);
     } else {
         console.log('警告: 自定义 Prism CSS 文件不存在:', customCssPath);
     }
@@ -34,7 +33,6 @@ hexo.on('generateAfter', function() {
             fs.mkdirSync(targetJsDir, { recursive: true });
         }
         fs.writeFileSync(targetJsPath, customJs, 'utf8');
-        console.log('✓ 已自动复制语言标签脚本:', targetJsPath);
     } else {
         console.log('警告: 语言标签脚本文件不存在:', customJsPath);
     }
