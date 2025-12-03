@@ -95,11 +95,12 @@ figure.highlight pre {
 
 /* 确保代码行中的所有文本默认使用变量名颜色 */
 figure.highlight .code pre span.line {
-	color: #24292e !important; /* 变量名颜色 */
+	color: #24292e !important; /* 变量名颜色 - 仅作为后备 */
 }
 
+/* 移除 inherit，让特定class的颜色生效 */
 figure.highlight .code pre span.line > * {
-	color: inherit; /* 继承父元素颜色，除非有特定class覆盖 */
+	/* 不设置 color，让各个class的颜色规则生效 */
 }
 
 figure.highlight .gutter {
@@ -163,7 +164,7 @@ figure.highlight span.comment {
 /* 标点符号 */
 .token.punctuation,
 figure.highlight .punctuation {
-	color: #586e75 !important; /* 深灰色标点符号 */
+	color: #00a8a8 !important; /* 青色标点符号（重复度高） */
 }
 
 .token.namespace {
@@ -183,7 +184,7 @@ figure.highlight .number,
 figure.highlight .literal,
 figure.highlight .constant,
 figure.highlight span.number {
-	color: #d73a49 !important; /* 红色数字和常量 */
+	color: #e36209 !important; /* 橙色数字和常量 */
 }
 
 /* 选择器、属性名、字符串、字符、内置函数、插入 */
@@ -206,7 +207,7 @@ figure.highlight span.string {
 .language-css .token.string,
 .style .token.string,
 figure.highlight .operator {
-	color: #a626a4 !important; /* 紫色运算符 */
+	color: #00a8a8 !important; /* 青色运算符（重复度高） */
 }
 
 /* 规则、属性值、关键字 */
@@ -239,12 +240,17 @@ figure.highlight .regexp {
 }
 
 /* hexo-prism-plugin 生成的特定类名 - 确保优先级最高 */
+/* 使用更精确的选择器，确保覆盖所有情况 */
+figure.highlight .code pre span.line span.keyword,
 figure.highlight .code span.keyword,
-figure.highlight span.keyword {
+figure.highlight span.keyword,
+figure.highlight .code pre span.keyword {
 	color: #d73a49 !important; /* 关键字红色 */
 	font-weight: 500;
 }
 
+figure.highlight .code pre span.line span.title,
+figure.highlight .code pre span.line span.title.function_,
 figure.highlight .code span.title,
 figure.highlight .code span.title.function_,
 figure.highlight span.title,
@@ -252,35 +258,43 @@ figure.highlight span.title.function_ {
 	color: #6f42c1 !important; /* 函数名紫色 */
 }
 
+figure.highlight .code pre span.line span.string,
 figure.highlight .code span.string,
 figure.highlight span.string {
 	color: #0c178c !important; /* 字符串深蓝色 */
 }
 
+figure.highlight .code pre span.line span.number,
 figure.highlight .code span.number,
 figure.highlight span.number {
-	color: #d73a49 !important; /* 数字红色 */
+	color: #e36209 !important; /* 橙色数字 */
 }
 
+figure.highlight .code pre span.line span.built_in,
 figure.highlight .code span.built_in,
 figure.highlight span.built_in {
 	color: #005cc5 !important; /* 内置函数蓝色 */
 }
 
+figure.highlight .code pre span.line span.params,
 figure.highlight .code span.params,
 figure.highlight span.params {
 	color: #355 !important; /* 参数青色 */
 }
 
+figure.highlight .code pre span.line span.meta,
 figure.highlight .code span.meta,
 figure.highlight span.meta {
 	color: #6a737d !important; /* 预处理指令灰色 */
 }
 
 /* C++/C 类型关键字（int, char, float, double, void等） */
+figure.highlight .code pre span.line span.type,
 figure.highlight .code span.type,
 figure.highlight span.type,
+figure.highlight.highlight-cpp .code pre span.line span.type,
 figure.highlight.highlight-cpp .code span.type,
+figure.highlight.highlight-c .code pre span.line span.type,
 figure.highlight.highlight-c .code span.type {
 	color: #005cc5 !important; /* 蓝色类型关键字 */
 	font-weight: 500;
@@ -288,13 +302,17 @@ figure.highlight.highlight-c .code span.type {
 
 /* C++标准库类型和命名空间（vector, unordered_map, std等） */
 /* 通过JavaScript动态添加class后，使用这些规则着色 */
+figure.highlight.highlight-cpp .code pre span.line span.std-type,
 figure.highlight.highlight-cpp .code span.std-type,
+figure.highlight.cpp .code pre span.line span.std-type,
 figure.highlight.cpp .code span.std-type {
 	color: #005cc5 !important; /* 标准库类型蓝色 */
 	font-weight: 500;
 }
 
+figure.highlight.highlight-cpp .code pre span.line span.std-namespace,
 figure.highlight.highlight-cpp .code span.std-namespace,
+figure.highlight.cpp .code pre span.line span.std-namespace,
 figure.highlight.cpp .code span.std-namespace {
 	color: #005cc5 !important; /* std命名空间蓝色 */
 	font-weight: 500;
@@ -306,6 +324,7 @@ figure.highlight .code pre span.line > span:not(.keyword):not(.string):not(.numb
 	color: #24292ee0 !important; /* 变量名深灰色 */
 }
 
+figure.highlight .code pre span.line span.function,
 figure.highlight .code span.function,
 figure.highlight span.function {
 	color: #6f42c1 !important; /* 函数紫色 */

@@ -18,8 +18,6 @@ hexo.on('generateAfter', function() {
             fs.mkdirSync(targetDir, { recursive: true });
         }
         fs.writeFileSync(targetCssPath, customCss, 'utf8');
-    } else {
-        console.log('警告: 自定义 Prism CSS 文件不存在:', customCssPath);
     }
     
     // 2. 复制语言标签JavaScript文件
@@ -33,7 +31,5 @@ hexo.on('generateAfter', function() {
             fs.mkdirSync(targetJsDir, { recursive: true });
         }
         fs.writeFileSync(targetJsPath, customJs, 'utf8');
-    } else {
-        console.log('警告: 语言标签脚本文件不存在:', customJsPath);
     }
 });
