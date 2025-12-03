@@ -243,16 +243,27 @@
 /* 手机端时间轴调整 - 避免与右边重叠 */
 @media (max-width: 768px) {
     .archive-timeline {
-        left: 10px;  /* 从50px减小到10px，左移时间轴 */
-        width: 150px;  /* 稍微减小宽度以适应手机端 */
-        padding: 15px;  /* 减小内边距 */
+        left: 5px;  /* 进一步左移时间轴 */
+        width: 110px;  /* 减小宽度以适应手机端 */
+        padding: 10px;  /* 减小内边距 */
+        font-size: 0.9em;  /* 稍微减小字体 */
+    }
+    
+    .timeline-year {
+        font-size: 1em;  /* 手机端年份字体稍小 */
+        margin: 20px 0;  /* 减小间距 */
+    }
+    
+    .timeline-month {
+        margin-left: 15px;  /* 减小月份左边距 */
+        font-size: 0.9em;  /* 月份字体稍小 */
     }
     
     /* 手机端archive容器调整 */
     .archive.animated.fadeInDown {
-        margin-left: 20px;  /* 从75px减小到20px，适配时间轴左移 */
+        margin-left: 135px;  /* 给时间轴留出足够空间：5px + 110px + 20px间距 */
         padding-left: 10px;
-        width: calc(100% - 20px);
+        width: calc(100% - 135px);
     }
 }
 
