@@ -69,7 +69,7 @@ std::vector<int> twoSum(std::vector<int>& nums, int target) {
 }
 ```
 
-
+<br>
 
 ### 2. 三数之和 (3Sum)
 
@@ -168,7 +168,7 @@ std::vector<std::vector<int>> threeSum(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 3. 盛最多水的容器 (Container With Most Water)
 
@@ -244,7 +244,7 @@ int maxArea(std::vector<int>& height) {
 }
 ```
 
-
+<br>
 
 ### 4. 无重复字符的最长子串 (Longest Substring Without Repeating Characters)
 
@@ -312,7 +312,7 @@ int lengthOfLongestSubstring(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 5. 最长回文子串 (Longest Palindromic Substring)
 
@@ -395,7 +395,7 @@ std::string longestPalindrome(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 6. 合并两个有序数组 (Merge Sorted Array)
 
@@ -474,7 +474,7 @@ void merge(std::vector<int>& nums1, int m, std::vector<int>& nums2, int n) {
 }
 ```
 
-
+<br>
 
 ### 7. 移动零 (Move Zeroes)
 
@@ -529,7 +529,7 @@ void moveZeroes(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 8. 找到所有数组中消失的数字 (Find All Numbers Disappeared in an Array)
 
@@ -595,7 +595,7 @@ std::vector<int> findDisappearedNumbers(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 9. 除自身以外数组的乘积 (Product of Array Except Self)
 
@@ -667,7 +667,7 @@ std::vector<int> productExceptSelf(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 10. 旋转图像 (Rotate Image)
 
@@ -733,7 +733,6 @@ void rotate(std::vector<std::vector<int>>& matrix) {
     }
 }
 ```
-
 
 
 ## 二、链表
@@ -804,7 +803,7 @@ ListNode* reverseList(ListNode* head) {
 }
 ```
 
-
+<br>
 
 ### 12. 合并两个有序链表 (Merge Two Sorted Lists)
 
@@ -874,7 +873,7 @@ ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
 }
 ```
 
-
+<br>
 
 ### 13. 环形链表 (Linked List Cycle)
 
@@ -944,7 +943,7 @@ bool hasCycle(ListNode* head) {
 }
 ```
 
-
+<br>
 
 ### 14. 环形链表 II (Linked List Cycle II)
 
@@ -1035,7 +1034,7 @@ ListNode* detectCycle(ListNode* head) {
 }
 ```
 
-
+<br>
 
 ### 15. 相交链表 (Intersection of Two Linked Lists)
 
@@ -1096,7 +1095,7 @@ ListNode* getIntersectionNode(ListNode* headA, ListNode* headB) {
 }
 ```
 
-
+<br>
 
 ### 16. 删除链表的倒数第 N 个结点 (Remove Nth Node From End of List)
 
@@ -1173,7 +1172,7 @@ ListNode* removeNthFromEnd(ListNode* head, int n) {
 }
 ```
 
-
+<br>
 
 ### 17. 两数相加 (Add Two Numbers)
 
@@ -1252,7 +1251,7 @@ ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
 }
 ```
 
-
+<br>
 
 ### 18. 合并 K 个升序链表 (Merge k Sorted Lists)
 
@@ -1362,7 +1361,6 @@ ListNode* mergeKLists(std::vector<ListNode*>& lists) {
 ```
 
 
-
 ## 三、字符串
 
 ### 19. 有效的括号 (Valid Parentheses)
@@ -1439,7 +1437,7 @@ bool isValid(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 20. 字母异位词分组 (Group Anagrams)
 
@@ -1506,7 +1504,6 @@ std::vector<std::vector<std::string>> groupAnagrams(std::vector<std::string>& st
 ```
 
 
-
 ## 四、动态规划
 
 ### 21. 爬楼梯 (Climbing Stairs)
@@ -1569,7 +1566,7 @@ int climbStairs(int n) {
 }
 ```
 
-
+<br>
 
 ### 22. 买卖股票的最佳时机 (Best Time to Buy and Sell Stock)
 
@@ -1632,7 +1629,7 @@ int maxProfit(std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 23. 最大子数组和 (Maximum Subarray)
 
@@ -1690,7 +1687,7 @@ int maxSubArray(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 24. 打家劫舍 (House Robber)
 
@@ -1766,7 +1763,7 @@ int rob(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 25. 完全平方数 (Perfect Squares)
 
@@ -1829,7 +1826,7 @@ int numSquares(int n) {
 }
 ```
 
-
+<br>
 
 ### 26. 单词拆分 (Word Break)
 
@@ -1899,7 +1896,7 @@ bool wordBreak(std::string s, std::vector<std::string>& wordDict) {
 }
 ```
 
-
+<br>
 
 ### 27. 最长递增子序列 (Longest Increasing Subsequence)
 
@@ -1976,7 +1973,7 @@ int lengthOfLIS(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 28. 零钱兑换 (Coin Change)
 
@@ -2042,7 +2039,7 @@ int coinChange(std::vector<int>& coins, int amount) {
 }
 ```
 
-
+<br>
 
 ### 29. 编辑距离 (Edit Distance)
 
@@ -2136,7 +2133,7 @@ int minDistance(std::string word1, std::string word2) {
 }
 ```
 
-
+<br>
 
 ### 30. 最长公共子序列 (Longest Common Subsequence)
 
@@ -2206,7 +2203,6 @@ int longestCommonSubsequence(std::string text1, std::string text2) {
 ```
 
 
-
 ## 五、二叉树
 
 ### 31. 二叉树的最大深度 (Maximum Depth of Binary Tree)
@@ -2271,7 +2267,7 @@ int maxDepth(TreeNode* root) {
 }
 ```
 
-
+<br>
 
 ### 32. 对称二叉树 (Symmetric Tree)
 
@@ -2337,7 +2333,7 @@ bool isMirror(TreeNode* left, TreeNode* right) {
 }
 ```
 
-
+<br>
 
 ### 33. 二叉树的层序遍历 (Binary Tree Level Order Traversal)
 
@@ -2431,7 +2427,7 @@ std::vector<std::vector<int>> levelOrder(TreeNode* root) {
 }
 ```
 
-
+<br>
 
 ### 34. 将有序数组转换为二叉搜索树 (Convert Sorted Array to Binary Search Tree)
 
@@ -2494,7 +2490,7 @@ TreeNode* build(std::vector<int>& nums, int left, int right) {
 }
 ```
 
-
+<br>
 
 ### 35. 验证二叉搜索树 (Validate Binary Search Tree)
 
@@ -2570,7 +2566,7 @@ bool inorder(TreeNode* node, TreeNode*& prev) {
 }
 ```
 
-
+<br>
 
 ### 36. 二叉树的最近公共祖先 (Lowest Common Ancestor of a Binary Tree)
 
@@ -2630,7 +2626,7 @@ TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
 }
 ```
 
-
+<br>
 
 ### 37. 二叉树中的最大路径和 (Binary Tree Maximum Path Sum)
 
@@ -2706,7 +2702,6 @@ int maxGain(TreeNode* node, int& max_sum) {
     return node->val + std::max(left_gain, right_gain);
 }
 ```
-
 
 
 ## 二、回溯算法
@@ -2788,7 +2783,7 @@ std::vector<std::vector<int>> permute(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 39. 子集 (Subsets)
 
@@ -2855,7 +2850,7 @@ std::vector<std::vector<int>> subsets(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 40. 组合总和 (Combination Sum)
 
@@ -2941,7 +2936,7 @@ std::vector<std::vector<int>> combinationSum(std::vector<int>& candidates, int t
 }
 ```
 
-
+<br>
 
 ### 41. 单词搜索 (Word Search)
 
@@ -3044,7 +3039,7 @@ bool exist(std::vector<std::vector<char>>& board, std::string word) {
 }
 ```
 
-
+<br>
 
 ### 42. 分割回文串 (Palindrome Partitioning)
 
@@ -3139,7 +3134,6 @@ std::vector<std::vector<std::string>> partition(std::string s) {
 ```
 
 
-
 ## 三、贪心算法
 
 ### 43. 跳跃游戏 (Jump Game)
@@ -3202,7 +3196,7 @@ bool canJump(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 44. 跳跃游戏 II (Jump Game II)
 
@@ -3267,7 +3261,7 @@ int jump(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 45. 合并区间 (Merge Intervals)
 
@@ -3330,7 +3324,7 @@ std::vector<std::vector<int>> merge(std::vector<std::vector<int>>& intervals) {
 }
 ```
 
-
+<br>
 
 ### 46. 插入区间 (Insert Interval)
 
@@ -3413,7 +3407,7 @@ std::vector<std::vector<int>> insert(std::vector<std::vector<int>>& intervals, s
 }
 ```
 
-
+<br>
 
 ### 47. 螺旋矩阵 (Spiral Matrix)
 
@@ -3512,7 +3506,7 @@ std::vector<int> spiralOrder(std::vector<std::vector<int>>& matrix) {
 }
 ```
 
-
+<br>
 
 ### 48. 旋转图像 (Rotate Image)
 
@@ -3579,7 +3573,7 @@ void rotate(std::vector<std::vector<int>>& matrix) {
 }
 ```
 
-
+<br>
 
 ### 49. 搜索二维矩阵 II (Search a 2D Matrix II)
 
@@ -3651,7 +3645,7 @@ bool searchMatrix(std::vector<std::vector<int>>& matrix, int target) {
 }
 ```
 
-
+<br>
 
 ### 50. 最长连续序列 (Longest Consecutive Sequence)
 
@@ -3731,7 +3725,6 @@ int longestConsecutive(std::vector<int>& nums) {
     return longest;
 }
 ```
-
 
 
 ## 四、图论
@@ -3829,7 +3822,7 @@ int numIslands(std::vector<std::vector<char>>& grid) {
 }
 ```
 
-
+<br>
 
 ### 52. 课程表 (Course Schedule)
 
@@ -3925,7 +3918,7 @@ bool canFinish(int numCourses, std::vector<std::vector<int>>& prerequisites) {
 }
 ```
 
-
+<br>
 
 ### 53. 克隆图 (Clone Graph)
 
@@ -4003,7 +3996,7 @@ Node* cloneGraph(Node* node) {
 }
 ```
 
-
+<br>
 
 ### 54. 单词接龙 (Word Ladder)
 
@@ -4106,7 +4099,6 @@ int ladderLength(std::string beginWord, std::string endWord, std::vector<std::st
 ```
 
 
-
 ## 五、堆与优先队列
 
 ### 55. 数组中的第K个最大元素 (Kth Largest Element in an Array)
@@ -4164,7 +4156,7 @@ int findKthLargest(std::vector<int>& nums, int k) {
 }
 ```
 
-
+<br>
 
 ### 56. 前 K 个高频元素 (Top K Frequent Elements)
 
@@ -4237,7 +4229,7 @@ std::vector<int> topKFrequent(std::vector<int>& nums, int k) {
 }
 ```
 
-
+<br>
 
 ### 57. 合并K个升序链表 (Merge k Sorted Lists)
 
@@ -4325,7 +4317,6 @@ ListNode* mergeKLists(std::vector<ListNode*>& lists) {
 ```
 
 
-
 ## 六、栈与队列
 
 ### 58. 有效的括号 (Valid Parentheses)
@@ -4397,7 +4388,7 @@ bool isValid(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 59. 最小栈 (Min Stack)
 
@@ -4493,7 +4484,7 @@ public:
 };
 ```
 
-
+<br>
 
 ### 60. 每日温度 (Daily Temperatures)
 
@@ -4558,7 +4549,7 @@ std::vector<int> dailyTemperatures(std::vector<int>& temperatures) {
 }
 ```
 
-
+<br>
 
 ### 61. 柱状图中最大的矩形 (Largest Rectangle in Histogram)
 
@@ -4639,7 +4630,7 @@ int largestRectangleArea(std::vector<int>& heights) {
 }
 ```
 
-
+<br>
 
 ### 62. 接雨水 (Trapping Rain Water)
 
@@ -4731,7 +4722,6 @@ int trap(std::vector<int>& height) {
 ```
 
 
-
 ## 七、字符串处理
 
 ### 63. 最长公共前缀 (Longest Common Prefix)
@@ -4797,7 +4787,7 @@ std::string longestCommonPrefix(std::vector<std::string>& strs) {
 }
 ```
 
-
+<br>
 
 ### 64. 反转字符串 (Reverse String)
 
@@ -4848,7 +4838,7 @@ void reverseString(std::vector<char>& s) {
 }
 ```
 
-
+<br>
 
 ### 65. 反转字符串中的单词 (Reverse Words in a String)
 
@@ -4913,7 +4903,7 @@ std::string reverseWords(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 66. 字符串相乘 (Multiply Strings)
 
@@ -5000,7 +4990,7 @@ std::string multiply(std::string num1, std::string num2) {
 }
 ```
 
-
+<br>
 
 ### 67. 简化路径 (Simplify Path)
 
@@ -5078,7 +5068,7 @@ std::string simplifyPath(std::string path) {
 }
 ```
 
-
+<br>
 
 ### 68. 编辑距离 (Edit Distance)
 
@@ -5165,7 +5155,6 @@ int minDistance(std::string word1, std::string word2) {
 ```
 
 
-
 ## 八、位运算
 
 ### 69. 只出现一次的数字 (Single Number)
@@ -5216,7 +5205,7 @@ int singleNumber(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 70. 只出现一次的数字 II (Single Number II)
 
@@ -5270,7 +5259,7 @@ int singleNumber(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 71. 只出现一次的数字 III (Single Number III)
 
@@ -5342,7 +5331,6 @@ std::vector<int> singleNumber(std::vector<int>& nums) {
 ```
 
 
-
 ## 九、其他重要题目
 
 ### 72. 缺失的第一个正数 (First Missing Positive)
@@ -5410,7 +5398,7 @@ int firstMissingPositive(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 73. 寻找重复数 (Find the Duplicate Number)
 
@@ -5481,7 +5469,7 @@ int findDuplicate(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 74. 寻找两个正序数组的中位数 (Median of Two Sorted Arrays)
 
@@ -5577,7 +5565,7 @@ double findMedianSortedArrays(std::vector<int>& nums1, std::vector<int>& nums2) 
 }
 ```
 
-
+<br>
 
 ### 75. 正则表达式匹配 (Regular Expression Matching)
 
@@ -5659,7 +5647,7 @@ bool isMatch(std::string s, std::string p) {
 }
 ```
 
-
+<br>
 
 ### 76. 通配符匹配 (Wildcard Matching)
 
@@ -5741,7 +5729,7 @@ bool isMatch(std::string s, std::string p) {
 }
 ```
 
-
+<br>
 
 ### 77. 买卖股票的最佳时机 (Best Time to Buy and Sell Stock)
 
@@ -5803,7 +5791,7 @@ int maxProfit(std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 78. 买卖股票的最佳时机 II (Best Time to Buy and Sell Stock II)
 
@@ -5859,7 +5847,7 @@ int maxProfit(std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 79. 买卖股票的最佳时机 III (Best Time to Buy and Sell Stock III)
 
@@ -5927,7 +5915,7 @@ int maxProfit(std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 80. 买卖股票的最佳时机 IV (Best Time to Buy and Sell Stock IV)
 
@@ -6010,7 +5998,7 @@ int maxProfit(int k, std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 81. 最大矩形 (Maximal Rectangle)
 
@@ -6095,7 +6083,7 @@ int maximalRectangle(std::vector<std::vector<char>>& matrix) {
 }
 ```
 
-
+<br>
 
 ### 82. 分割等和子集 (Partition Equal Subset Sum)
 
@@ -6163,7 +6151,7 @@ bool canPartition(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 83. 目标和 (Target Sum)
 
@@ -6238,7 +6226,7 @@ int findTargetSumWays(std::vector<int>& nums, int target) {
 }
 ```
 
-
+<br>
 
 ### 84. 不同路径 (Unique Paths)
 
@@ -6296,7 +6284,7 @@ int uniquePaths(int m, int n) {
 }
 ```
 
-
+<br>
 
 ### 85. 不同路径 II (Unique Paths II)
 
@@ -6366,7 +6354,7 @@ int uniquePathsWithObstacles(std::vector<std::vector<int>>& obstacleGrid) {
 }
 ```
 
-
+<br>
 
 ### 86. 最小路径和 (Minimum Path Sum)
 
@@ -6438,7 +6426,7 @@ int minPathSum(std::vector<std::vector<int>>& grid) {
 }
 ```
 
-
+<br>
 
 ### 87. 三角形最小路径和 (Triangle)
 
@@ -6497,7 +6485,7 @@ int minimumTotal(std::vector<std::vector<int>>& triangle) {
 }
 ```
 
-
+<br>
 
 ### 88. 解码方法 (Decode Ways)
 
@@ -6585,7 +6573,7 @@ int numDecodings(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 89. 单词拆分 II (Word Break II)
 
@@ -6677,7 +6665,7 @@ std::vector<std::string> wordBreak(std::string s, std::vector<std::string>& word
 }
 ```
 
-
+<br>
 
 ### 90. 回文子串 (Palindromic Substrings)
 
@@ -6753,7 +6741,7 @@ int countSubstrings(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 91. 最长有效括号 (Longest Valid Parentheses)
 
@@ -6823,7 +6811,7 @@ int longestValidParentheses(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 92. 戳气球 (Burst Balloons)
 
@@ -6897,7 +6885,7 @@ int maxCoins(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 93. 打家劫舍 II (House Robber II)
 
@@ -6963,7 +6951,7 @@ int rob(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 94. 打家劫舍 III (House Robber III)
 
@@ -7042,7 +7030,7 @@ int rob(TreeNode* root) {
 }
 ```
 
-
+<br>
 
 ### 95. 分割回文串 II (Palindrome Partitioning II)
 
@@ -7146,7 +7134,7 @@ int minCut(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 96. 最长回文子序列 (Longest Palindromic Subsequence)
 
@@ -7223,7 +7211,7 @@ int longestPalindromeSubseq(std::string s) {
 }
 ```
 
-
+<br>
 
 ### 97. 俄罗斯套娃信封问题 (Russian Doll Envelopes)
 
@@ -7305,7 +7293,7 @@ int maxEnvelopes(std::vector<std::vector<int>>& envelopes) {
 }
 ```
 
-
+<br>
 
 ### 98. 最长递增子序列 (Longest Increasing Subsequence)
 
@@ -7376,7 +7364,7 @@ int lengthOfLIS(std::vector<int>& nums) {
 }
 ```
 
-
+<br>
 
 ### 99. 最佳买卖股票时机含冷冻期 (Best Time to Buy and Sell Stock with Cooldown)
 
@@ -7445,7 +7433,7 @@ int maxProfit(std::vector<int>& prices) {
 }
 ```
 
-
+<br>
 
 ### 100. 买卖股票的最佳时机含手续费 (Best Time to Buy and Sell Stock with Transaction Fee)
 
@@ -7513,33 +7501,3 @@ int maxProfit(std::vector<int>& prices, int fee) {
 }
 ```
 
-
-
-## 总结
-
-本文档整理了 LeetCode Hot 100 的**全部100道题目**，涵盖了以下主要算法类型：
-
-1. **数组与哈希表**：两数之和、三数之和、盛最多水的容器、最长连续序列等
-2. **链表**：反转链表、合并链表、环形链表、两数相加等
-3. **字符串**：有效的括号、字母异位词分组、最长回文子串、编辑距离等
-4. **动态规划**：爬楼梯、买卖股票系列、最大子数组和、不同路径等
-5. **二叉树**：最大深度、对称二叉树、层序遍历、最近公共祖先等
-6. **回溯算法**：全排列、子集、组合总和、单词搜索等
-7. **贪心算法**：跳跃游戏、合并区间、插入区间等
-8. **图论**：岛屿数量、课程表、克隆图、单词接龙等
-9. **堆与优先队列**：第K个最大元素、前K个高频元素、合并K个链表等
-10. **栈与队列**：有效的括号、最小栈、每日温度、柱状图最大矩形等
-11. **位运算**：只出现一次的数字系列等
-12. **其他重要题目**：缺失的第一个正数、寻找重复数、正则表达式匹配等
-
-每道题目都包含：
-- 详细的题目描述和示例
-- 清晰的解题思路
-- 时间和空间复杂度分析
-- Python 和 C++ 的完整代码实现
-
-这些题目是面试中的高频考点，建议反复练习，深入理解算法思想，为面试做好充分准备。
-
-
-
-**提示**：由于 Hot 100 包含100道题目，本文档展示了核心题目。建议结合 LeetCode 官方题单进行系统练习，掌握每类问题的解题模式和技巧。
