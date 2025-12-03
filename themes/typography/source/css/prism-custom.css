@@ -2,6 +2,8 @@
  * 自定义蓝黑色系 Prism.js 代码高亮主题
  * 基于 Prism.js default theme，配色以蓝黑色系为主
  * 美观且有区分度
+ * 
+ * 注意：此文件必须在 blog_basic.css 之后加载，以确保样式优先级
  */
 
 /* 使用更高的优先级确保覆盖默认prism.css样式 */
@@ -54,25 +56,27 @@ code[class*="language-"] ::selection {
 
 /* Code blocks - 标准 Prism 格式 */
 pre[class*="language-"] {
-	padding: 1.2em;
-	margin: .8em 0;
-	overflow: auto;
-	background: rgba(255, 255, 255, 0.6) !important; /* 白色半透明背景，适配日间夜间模式 */
-	border-radius: 6px;
-	border: 1px solid rgba(0, 0, 0, 0.12);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-	position: relative; /* 为语言标签定位 */
+	padding: 1.2em !important;
+	margin: .8em 0 !important;
+	overflow: auto !important;
+	background: rgba(255, 255, 255, 0.6) !important;
+	border-radius: 6px !important;
+	border: 1px solid rgba(0, 0, 0, 0.12) !important; /* 简单边框 */
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+	position: relative !important;
 }
 
 /* Code blocks - hexo-prism-plugin 格式 (figure.highlight) */
 figure.highlight {
-	position: relative;
-	margin: .8em 0;
-	border-radius: 6px;
-	overflow: hidden;
-	background: rgba(255, 255, 255, 0.6) !important; /* 白色半透明背景 */
-	border: 1px solid rgba(0, 0, 0, 0.12);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	position: relative !important;
+	margin: .8em 0 !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
+	background: rgba(255, 255, 255, 0.6) !important;
+	border: 1px solid rgba(0, 0, 0, 0.12) !important; /* 简单边框 */
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+	line-height: 1.6 !important;
+	overflow-x: auto !important;
 }
 
 figure.highlight table {
@@ -86,7 +90,16 @@ figure.highlight pre {
 	padding: 1.2em;
 	background: transparent !important;
 	border: none;
-	color: #333 !important; /* 深色文字，在白色背景上清晰可见 */
+	color: #24292e !important; /* 变量名颜色 - 深灰色 */
+}
+
+/* 确保代码行中的所有文本默认使用变量名颜色 */
+figure.highlight .code pre span.line {
+	color: #24292e !important; /* 变量名颜色 */
+}
+
+figure.highlight .code pre span.line > * {
+	color: inherit; /* 继承父元素颜色，除非有特定class覆盖 */
 }
 
 figure.highlight .gutter {
@@ -183,7 +196,7 @@ figure.highlight span.number {
 figure.highlight .string,
 figure.highlight .attr-value,
 figure.highlight span.string {
-	color: #032f62 !important; /* 深蓝色字符串 */
+	color: #0c178c !important; /* 深蓝色字符串 */
 }
 
 /* 运算符、实体、URL、CSS字符串 */
@@ -241,7 +254,7 @@ figure.highlight span.title.function_ {
 
 figure.highlight .code span.string,
 figure.highlight span.string {
-	color: #032f62 !important; /* 字符串深蓝色 */
+	color: #0c178c !important; /* 字符串深蓝色 */
 }
 
 figure.highlight .code span.number,
@@ -256,7 +269,7 @@ figure.highlight span.built_in {
 
 figure.highlight .code span.params,
 figure.highlight span.params {
-	color: #333 !important; /* 参数深色 */
+	color: #355 !important; /* 参数青色 */
 }
 
 figure.highlight .code span.meta,
@@ -273,6 +286,26 @@ figure.highlight.highlight-c .code span.type {
 	font-weight: 500;
 }
 
+/* C++标准库类型和命名空间（vector, unordered_map, std等） */
+/* 通过JavaScript动态添加class后，使用这些规则着色 */
+figure.highlight.highlight-cpp .code span.std-type,
+figure.highlight.cpp .code span.std-type {
+	color: #005cc5 !important; /* 标准库类型蓝色 */
+	font-weight: 500;
+}
+
+figure.highlight.highlight-cpp .code span.std-namespace,
+figure.highlight.cpp .code span.std-namespace {
+	color: #005cc5 !important; /* std命名空间蓝色 */
+	font-weight: 500;
+}
+
+/* 变量名 - 确保所有没有特定class的文本都显示为变量名颜色 */
+figure.highlight .code pre span.line > span:not([class]),
+figure.highlight .code pre span.line > span:not(.keyword):not(.string):not(.number):not(.title):not(.built_in):not(.params):not(.meta):not(.type):not(.function):not(.comment):not(.operator):not(.punctuation):not(.regexp):not(.attr-value):not(.std-type):not(.std-namespace) {
+	color: #24292ee0 !important; /* 变量名深灰色 */
+}
+
 figure.highlight .code span.function,
 figure.highlight span.function {
 	color: #6f42c1 !important; /* 函数紫色 */
@@ -280,17 +313,17 @@ figure.highlight span.function {
 
 /* 变量名和普通标识符 - 确保没有特定类的文本显示为变量名 */
 figure.highlight .code pre span.line {
-	color: #24292e !important; /* 默认文字颜色（变量名） */
+	color: #24292ee0 !important; /* 默认文字颜色（变量名） */
 }
 
 /* 匹配没有class的span（通常是变量名） */
 figure.highlight .code pre span.line > span:not([class]) {
-	color: #24292e !important; /* 变量名深灰色 */
+	color: #24292ee0 !important; /* 变量名深灰色 */
 }
 
 /* 确保代码行中的文本默认颜色 */
 figure.highlight .code pre span.line > *:not(.keyword):not(.string):not(.number):not(.title):not(.built_in):not(.params):not(.meta):not(.type):not(.function):not(.comment):not(.operator):not(.punctuation):not(.regexp):not(.attr-value):not([class*="token"]) {
-	color: #24292e !important; /* 变量名深灰色 */
+	color: #24292ee0 !important; /* 变量名深灰色 */
 }
 
 .token.important,
