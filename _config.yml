@@ -135,6 +135,7 @@ prism_plugin:
   mode: "preprocess"
   theme: "default"
   line_number: true
+  custom_css: "themes/typography/source/css/prism-custom.css"
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment

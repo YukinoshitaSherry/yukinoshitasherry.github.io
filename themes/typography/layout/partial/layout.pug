@@ -30,6 +30,8 @@ html(lang="zh-CN")
         script(src= url_for('js/jquery.appear.js'))
         script(src= url_for('js/google-analytics.js'))
         script(src= url_for('js/typography.js'))
+        //- 代码块语言标签脚本
+        script(src= url_for('js/prism-language-label.js'))
         if is_post()
             script(src= url_for('js/toc.js'))
         if page.archive
