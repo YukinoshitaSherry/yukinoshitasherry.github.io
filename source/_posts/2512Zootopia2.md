@@ -46,7 +46,7 @@ desc: 2025.12.4 疯狂动物城2 repo
 
 <br>
 <div style="display: flex; gap: 0; margin: 10px 0;">
-  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251205221410984.png" style="width: 34%; height: auto; display: block;">
+  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251205221410984.png" style="width: 35%; height: auto; display: block;">
   <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251205221420894.png" style="width: 34%; height: auto; display: block;">
-  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251205221426552.png" style="width: 32%; height: auto; display: block;">
+  <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20251205221426552.png" style="width: 31%; height: auto; display: block;">
 </div><br>
