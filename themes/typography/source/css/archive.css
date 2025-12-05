@@ -261,9 +261,9 @@
     
     /* 手机端archive容器调整 */
     .archive.animated.fadeInDown {
-        margin-left: 135px;  /* 给时间轴留出足够空间：5px + 110px + 20px间距 */
+        margin-left: 120px;  /* 减小左边距，让内容更靠左：5px + 110px + 5px间距 */
         padding-left: 10px;
-        width: calc(100% - 135px);
+        width: calc(100% - 120px);  /* 增加内容区域宽度 */
     }
 }
 
