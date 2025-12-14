@@ -171,10 +171,31 @@ Track Large Files with Git LFS:
 git lfs track "*.pdf"
 ```
 
+
+```
+
 提交：
 ```bash
 git add .gitattributes
 git commit -m "Track large files with Git LFS"
 git push -u origin main
 ```
+<br>
+
+
+
+如果`git add .gitattributes"`报错：
+```bash
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified: xxx.pdf
+```
+需要增加以下一步把所有“已修改”的 PDF 重新 add（这会触发 LFS 指针转换）
+```bash
+git add $(git status --porcelain | grep -E '\.pdf$' | awk '{print $2}')
+```
+然后再`git commit -m "Track large files with Git LFS"`
+
+
 <br>
