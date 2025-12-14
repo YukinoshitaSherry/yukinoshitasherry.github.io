@@ -5,7 +5,7 @@ categories:
 - 学CS/SE
 tags:
 - Git&Github
-desc: ZJU朋辈辅学技能拾遗笔记，主要参考了授课人鹤翔万里的ppt
+desc: ZJU朋辈辅学技能拾遗笔记，主要参考了授课人鹤翔万里的ppt。补充了log写法、仓库关联本地文件夹、Git LFS上传大文件的内容。
 ---
 
 ## 介绍与用法
@@ -156,3 +156,25 @@ chore: 其他更改
 <br>
 
 
+## Git LFS
+
+文件太大(比如＞100MB的pdf)无法上传，会报错。此时需要使用Git LFS。
+
+Install Git LFS:
+```bash
+git lfs install
+```
+
+Track Large Files with Git LFS:
+文件类型可以替换，比如wav,mp4,等等。
+```bash
+git lfs track "*.pdf"
+```
+
+提交：
+```bash
+git add .gitattributes
+git commit -m "Track large files with Git LFS"
+git push -u origin main
+```
+<br>

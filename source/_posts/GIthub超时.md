@@ -91,6 +91,7 @@ git config --global --unset https.proxy
 
 SSH方式通常比HTTPS更稳定，特别是在网络环境复杂的情况下。
 将远程仓库地址从HTTPS改为SSH协议，可以避免代理配置的复杂性。
+但是SSH比HTTPS慢。
 
 ### 检查当前远程地址
 
