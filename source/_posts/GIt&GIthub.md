@@ -158,7 +158,7 @@ chore: 其他更改
 
 ## Git LFS
 
-文件太大(比如＞100MB的pdf)无法上传，会报错。此时需要使用Git LFS。
+文件太大无法上传，会报错。此时需要使用Git LFS。
 
 Install Git LFS:
 ```bash
@@ -182,9 +182,9 @@ git push -u origin main
 ```
 <br>
 
+### 错误处理
 
-
-如果`git add .gitattributes"`报错：
+1. 如果`git add .gitattributes"`报错：
 ```bash
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -197,5 +197,10 @@ git add $(git status --porcelain | grep -E '\.pdf$' | awk '{print $2}')
 ```
 然后再`git commit -m "Track large files with Git LFS"`
 
+2. 如果打算删了太大的不上传(不会删除本地的，就删除上传操作)
+```bash
+git rm --cached "xxx.pdf"
+```
+然后再`git commit -m "..."`, `git push -u origin main`。
 
 <br>
