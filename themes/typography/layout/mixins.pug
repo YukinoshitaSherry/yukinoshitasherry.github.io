@@ -99,7 +99,8 @@ mixin make_pager()
                 onsubmit="return false;"
             )
                 span.jump-label Turn to
-                input(
+                span.jump-gap &nbsp;&nbsp;
+                input.jump-input(
                     type="number"
                     min="1"
                     max= page.total
@@ -108,7 +109,8 @@ mixin make_pager()
                     inputmode="numeric"
                     pattern="[0-9]*"
                 )
-                button(type="submit") Go
+                span.jump-gap &nbsp;&nbsp;
+                button.jump-btn(type="submit") Go
         script.
             (function () {
               var form = document.querySelector('.pager-jump-form');

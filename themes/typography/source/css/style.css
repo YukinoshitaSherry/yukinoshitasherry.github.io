@@ -1693,45 +1693,75 @@ blockquote {
 .pagination .pagination-jump form {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  column-gap: 12px;
+  gap: 12px;
   margin: 0;
   flex-wrap: nowrap;
 }
 
 .pagination .pagination-jump form span {
   white-space: nowrap;
-  margin-right: 12px;
+  margin-right: 0;
   display: inline-block;
 }
 
 .pagination .pagination-jump .jump-label {
-  margin-right: 12px;
-  padding-right: 2px;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.pagination .pagination-jump .jump-gap {
+  display: inline-block;
+  width: 24px;
+  flex-shrink: 0;
 }
 
 .pagination .pagination-jump input[type="number"] {
-  width: 36px;
-  padding: 3px 6px;
+  width: 30px !important;
+  padding: 2px 5px;
+  margin-left: 10px !important;
   border: 1px solid rgba(31, 41, 55, 0.25);
-  border-radius: 6px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.6);
   color: #2e405b;
-  font-size: 12px;
-  line-height: 1.2;
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.pagination .pagination-jump .jump-input {
+  width: 30px !important;
+  padding: 2px 5px;
+  margin-left: 10px !important;
+  height: 22px;
+  font-size: 11px;
+  line-height: 1.1;
+  border: 1px solid rgba(31, 41, 55, 0.25);
+  border-radius: 5px;
 }
 
 .pagination .pagination-jump button {
-  padding: 3px 8px;
-  border: 1px solid rgba(31, 41, 55, 0.25);
-  border-radius: 6px;
-  background: rgba(31, 41, 55, 0.08);
+  padding: 2px 7px;
+  border: 1px solid rgba(31, 41, 55, 0.15);
+  border-radius: 5px;
+  background: rgba(31, 41, 55, 0.05);
   color: #2e405b;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
+  -webkit-transition: background 0.15s ease, transform 0.15s ease;
+  -moz-transition: background 0.15s ease, transform 0.15s ease;
+  -ms-transition: background 0.15s ease, transform 0.15s ease;
+  -o-transition: background 0.15s ease, transform 0.15s ease;
 }
 
+.pagination .pagination-jump .jump-btn {
+  padding: 2px 6px;
+  height: 22px;
+  font-size: 11px;
+  border: 1px solid rgba(31, 41, 55, 0.15);
+  border-radius: 5px;
+  background: rgba(31, 41, 55, 0.05);
+  color: #2e405b;
+}
 .pagination .pagination-jump button:hover {
   background: rgba(31, 41, 55, 0.15);
 }
