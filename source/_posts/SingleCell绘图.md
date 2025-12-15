@@ -2,7 +2,7 @@
 title: Single Cell常见可视化图表
 date: 2025-05-28
 categories:
-  - 学AI/DS
+  - 学CS/SE
 tags:
   - AI4S
   - CompBio

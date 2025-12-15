@@ -98,11 +98,6 @@ figure.highlight .code pre span.line {
 	color: #24292e !important; /* 变量名颜色 - 仅作为后备 */
 }
 
-/* 移除 inherit，让特定class的颜色生效 */
-figure.highlight .code pre span.line > * {
-	/* 不设置 color，让各个class的颜色规则生效 */
-}
-
 figure.highlight .gutter {
 	background: rgba(0, 0, 0, 0.05) !important;
 	border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -318,10 +313,10 @@ figure.highlight.cpp .code span.std-namespace {
 	font-weight: 500;
 }
 
-/* 变量名 - 确保所有没有特定class的文本都显示为变量名颜色 */
+/* 变量名 - IDE 风格绿色，更显眼 */
 figure.highlight .code pre span.line > span:not([class]),
 figure.highlight .code pre span.line > span:not(.keyword):not(.string):not(.number):not(.title):not(.built_in):not(.params):not(.meta):not(.type):not(.function):not(.comment):not(.operator):not(.punctuation):not(.regexp):not(.attr-value):not(.std-type):not(.std-namespace) {
-	color: #24292ee0 !important; /* 变量名深灰色 */
+	color: #0f7653 !important; /* 变量名绿色 */
 }
 
 figure.highlight .code pre span.line span.function,
@@ -332,17 +327,26 @@ figure.highlight span.function {
 
 /* 变量名和普通标识符 - 确保没有特定类的文本显示为变量名 */
 figure.highlight .code pre span.line {
-	color: #24292ee0 !important; /* 默认文字颜色（变量名） */
+	color: #1f2937 !important; /* 默认文字颜色 */
 }
 
 /* 匹配没有class的span（通常是变量名） */
 figure.highlight .code pre span.line > span:not([class]) {
-	color: #24292ee0 !important; /* 变量名深灰色 */
+	color: #0f7653 !important; /* 变量名绿色 */
 }
 
 /* 确保代码行中的文本默认颜色 */
 figure.highlight .code pre span.line > *:not(.keyword):not(.string):not(.number):not(.title):not(.built_in):not(.params):not(.meta):not(.type):not(.function):not(.comment):not(.operator):not(.punctuation):not(.regexp):not(.attr-value):not([class*="token"]) {
-	color: #24292ee0 !important; /* 变量名深灰色 */
+	color: #0f7653 !important; /* 变量名绿色 */
+}
+
+/* 变量（IDE风格绿色） */
+.token.variable,
+.token.identifier,
+figure.highlight .code span.variable,
+figure.highlight .code span.identifier,
+figure.highlight .code pre span.line > span:not([class]) {
+	color: #0f7653 !important;
 }
 
 .token.important,

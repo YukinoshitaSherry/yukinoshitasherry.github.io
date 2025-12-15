@@ -47,6 +47,7 @@ Callout 是 Obsidian 的特有语法，源于 markdown的引用。其他地方�
 >[!INFO]- 请输入标题
 > 正文
 
+<br>
 
 ### 自带格式类型
 #### 笔记
@@ -285,7 +286,7 @@ Callout 是 Obsidian 的特有语法，源于 markdown的引用。其他地方�
 > [!DONE]
 > 这里是callouts的done模块
 
-
+<br>
 
 ### 自定义格式类型
 
