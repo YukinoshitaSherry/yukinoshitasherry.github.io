@@ -1762,6 +1762,33 @@ blockquote {
   background: rgba(31, 41, 55, 0.05);
   color: #2e405b;
 }
+
+/* 移动端分页跳转收紧布局，不影响桌面端 */
+@media (max-width: 768px) {
+  .pagination .pagination-jump {
+    font-size: 14px;
+  }
+  .pagination .pagination-jump form {
+    gap: 8px;
+  }
+  .pagination .pagination-jump .jump-gap {
+    width: 12px;
+  }
+  .pagination .pagination-jump .jump-label {
+    padding-right: 4px;
+  }
+  .pagination .pagination-jump .jump-input {
+    width: 28px !important;
+    padding: 2px 4px;
+    height: 22px;
+    font-size: 11px;
+  }
+  .pagination .pagination-jump .jump-btn {
+    padding: 2px 6px;
+    height: 22px;
+    font-size: 11px;
+  }
+}
 .pagination .pagination-jump button:hover {
   background: rgba(31, 41, 55, 0.15);
 }
