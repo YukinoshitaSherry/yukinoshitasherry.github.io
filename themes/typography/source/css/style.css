@@ -1681,6 +1681,103 @@ blockquote {
   background-color: #f9f9f9 !important;
 }
 
+/* Callout 卡片 */
+.callout {
+  margin: 18px 0;
+  border: 1px solid #dbe3ee;
+  border-left: 6px solid #aeb7c2;
+  border-radius: 10px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.callout .callout-title,
+.callout > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.callout > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.callout > summary::-webkit-details-marker {
+  display: none;
+}
+
+.callout .callout-icon {
+  font-size: 18px;
+}
+
+.callout .callout-title-text {
+  font-size: 16px;
+}
+
+.callout .callout-content {
+  padding: 0 12px 12px;
+}
+
+.callout .callout-content p:last-child {
+  margin-bottom: 0;
+}
+
+details.callout .callout-caret {
+  display: inline-block;
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+details.callout[open] .callout-caret {
+  transform: rotate(90deg);
+}
+
+.callout[data-callout="info"],
+.callout[data-callout="note"],
+.callout[data-callout="hint"],
+.callout[data-callout="important"],
+.callout[data-callout="question"],
+.callout[data-callout="help"] {
+  border-left-color: #38bdf8;
+}
+
+.callout[data-callout="tip"],
+.callout[data-callout="success"] {
+  border-left-color: #22c55e;
+}
+
+.callout[data-callout="warning"],
+.callout[data-callout="caution"],
+.callout[data-callout="attention"] {
+  border-left-color: #f59e0b;
+}
+
+.callout[data-callout="abstract"],
+.callout[data-callout="summary"],
+.callout[data-callout="tldr"],
+.callout[data-callout="example"] {
+  border-left-color: #8b5cf6;
+}
+
+.callout[data-callout="danger"],
+.callout[data-callout="failure"],
+.callout[data-callout="fail"],
+.callout[data-callout="missing"],
+.callout[data-callout="error"],
+.callout[data-callout="bug"] {
+  border-left-color: #ef4444;
+}
+
+.callout[data-callout="quote"],
+.callout[data-callout="cite"] {
+  border-left-color: #9ca3af;
+}
+
 /* PC端引用块样式 */
 @media (min-width: 769px) {
   blockquote {
