@@ -90,6 +90,44 @@ mixin make_pager()
                         a(href= url_for((page.base || page.path.split('/page/')[0]) + '/page/' + page.total + '/'), aria-label= __('last')) Last
                         | &nbsp;
                         i.fa.fa-angle-double-right
+        // 跳页表单
+        p.pagination-jump
+            form.pager-jump-form(
+                data-base= url_for(page.base || page.path.split('/page/')[0])
+                data-total= page.total
+                data-current= page.current
+                onsubmit="return false;"
+            )
+                span.jump-label Turn to
+                input(
+                    type="number"
+                    min="1"
+                    max= page.total
+                    value= page.current
+                    aria-label="page number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                )
+                button(type="submit") Go
+        script.
+            (function () {
+              var form = document.querySelector('.pager-jump-form');
+              if (!form) return;
+              form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var total = parseInt(form.dataset.total, 10) || 1;
+                var base = (form.dataset.base || '/').replace(/\/$/, '');
+                var input = form.querySelector('input');
+                if (!input) return;
+                var val = parseInt(input.value, 10);
+                if (isNaN(val)) return;
+                if (val < 1) val = 1;
+                if (val > total) val = total;
+                input.value = val;
+                var target = val === 1 ? base || '/' : (base + '/page/' + val + '/');
+                window.location.href = target;
+              });
+            })();
 
 mixin postList()
     - var year = 0;

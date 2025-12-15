@@ -1681,6 +1681,65 @@ blockquote {
   background-color: #f9f9f9 !important;
 }
 
+/* 分页跳页表单 */
+.pagination .pagination-jump {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-start;
+  color: #2e405b;
+  font-size: 16px;
+}
+
+.pagination .pagination-jump form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  column-gap: 12px;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+.pagination .pagination-jump form span {
+  white-space: nowrap;
+  margin-right: 12px;
+  display: inline-block;
+}
+
+.pagination .pagination-jump .jump-label {
+  margin-right: 12px;
+  padding-right: 2px;
+}
+
+.pagination .pagination-jump input[type="number"] {
+  width: 36px;
+  padding: 3px 6px;
+  border: 1px solid rgba(31, 41, 55, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #2e405b;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.pagination .pagination-jump button {
+  padding: 3px 8px;
+  border: 1px solid rgba(31, 41, 55, 0.25);
+  border-radius: 6px;
+  background: rgba(31, 41, 55, 0.08);
+  color: #2e405b;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pagination .pagination-jump button:hover {
+  background: rgba(31, 41, 55, 0.15);
+}
+
+.pagination .pagination-jump button:active {
+  transform: translateY(1px);
+}
+
 /* Callout 卡片 */
 .callout {
   margin: 18px 0;
