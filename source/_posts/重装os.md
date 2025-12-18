@@ -269,8 +269,120 @@ Copy-Item "$PROFILE" -Destination "your_backup_path\PowerShell-profile.ps1" -Err
 # Windows Terminal配置
 robocopy "C:\Users\<用户名>\AppData\Local\Packages\Microsoft.WindowsTerminal_*\LocalState" "your_backup_path\WindowsTerminal" /E /Z
 ```
-
 <br>
+
+#### WSL-Ubuntu安装到D盘
+
+**重要说明：**
+- WSL默认安装在C盘，占用空间较大
+- 将WSL安装到D盘可以节省C盘空间，重装系统时数据不会丢失
+- 如果WSL已经在C盘，可以导出后迁移到D盘
+
+##### 方法1：全新安装WSL到D盘
+
+1. **启用WSL功能（如果未启用）**
+   ```powershell
+   # 以管理员身份运行PowerShell
+   dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+   dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+   
+   # 重启计算机
+   Restart-Computer
+   ```
+
+2. **下载WSL2内核更新包**
+   - 访问：https://aka.ms/wsl2kernel
+   - 下载并安装WSL2 Linux内核更新包
+
+3. **设置WSL默认版本为WSL2**
+   ```powershell
+   wsl --set-default-version 2
+   ```
+
+4. **下载Ubuntu安装包**
+   - 访问Microsoft Store或直接下载Ubuntu的.appx安装包
+   - 将下载的`.appx`文件重命名为`.zip`
+   - 解压到D盘，例如：`D:\Ubuntu`
+
+5. **安装Ubuntu到D盘**
+   ```powershell
+   # 进入解压后的目录
+   cd D:\Ubuntu
+   
+   # 运行ubuntu.exe完成安装
+   .\ubuntu.exe
+   ```
+
+6. **设置默认用户**
+   - 首次运行会要求创建用户名和密码
+   - 完成后Ubuntu会安装在D盘
+
+##### 方法2：迁移已安装的WSL到D盘
+
+如果WSL已经在C盘，可以导出后迁移：
+
+1. **导出当前WSL分发版**
+   ```powershell
+   # 以管理员身份运行PowerShell
+   # 查看已安装的WSL分发版
+   wsl --list --verbose
+   
+   # 导出Ubuntu（替换为你的分发版名称）
+   wsl --export Ubuntu D:\Ubuntu\ubuntu-backup.tar
+   ```
+
+2. **注销当前WSL分发版**
+   ```powershell
+   # 注销Ubuntu（会删除C盘中的WSL数据）
+   wsl --unregister Ubuntu
+   ```
+
+3. **导入到D盘**
+   ```powershell
+   # 在D盘创建Ubuntu目录
+   New-Item -ItemType Directory -Path "D:\Ubuntu" -Force
+   
+   # 导入Ubuntu到D盘
+   wsl --import Ubuntu D:\Ubuntu D:\Ubuntu\ubuntu-backup.tar --version 2
+   ```
+
+4. **设置默认用户**
+   ```powershell
+   # 进入Ubuntu安装目录
+   cd D:\Ubuntu
+   
+   # 设置默认用户（替换为你的用户名）
+   ubuntu.exe config --default-user <你的用户名>
+   
+   # 或者使用wsl命令
+   wsl -d Ubuntu -u <你的用户名>
+   ```
+
+5. **验证安装位置**
+   ```powershell
+   # 查看WSL分发版信息
+   wsl --list --verbose
+   
+   # 进入Ubuntu验证
+   wsl -d Ubuntu
+   
+   # 在Ubuntu中查看挂载点
+   df -h
+   ```
+
+**备份WSL数据（重装前）：**
+
+如果WSL已安装在D盘，数据会自动保留。如果担心，可以额外备份：
+
+```powershell
+# 导出WSL分发版（备份）
+wsl --export Ubuntu D:\Backup\ubuntu-backup.tar
+
+# 或者直接备份整个D:\Ubuntu目录
+robocopy "D:\Ubuntu" "your_backup_path\Ubuntu" /E /Z
+```
+
+<br><br>
 
 ### 重装
 
