@@ -123,9 +123,14 @@
 
   .post-desc {
     margin: 10px 0;
+    padding-right: 1em !important; /* 增加右侧内边距，防止文字被裁剪 */
     color: #666;
     font-size: 0.9em;
-    font-family:"Times New Roman","楷体"
+    font-family:"Times New Roman","楷体";
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
+    word-wrap: break-word; /* 长单词自动换行 */
+    overflow-wrap: break-word; /* 兼容性更好的换行 */
+    overflow: visible !important; /* 确保内容不被裁剪 */
   }
 
   /* 归档页面时间轴样式 */
@@ -186,7 +191,10 @@
 .archive.animated.fadeInDown {
     margin-left: 75px;
     padding-left: 20px;
-    width: calc(100% - 75px);  /* 确保内容区域宽度正确 */
+    padding-right: 1em; /* 添加右侧内边距，防止内容被裁剪 */
+    width: calc(100% - 75px - 1em);  /* 确保内容区域宽度正确，减去右侧padding */
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
+    overflow: visible !important; /* 确保内容不被裁剪 */
 }
 
 /* 年份区域容器 */
@@ -238,6 +246,9 @@
 .post-container {
     margin-left: 0;
     padding-left: 0;
+    padding-right: 0.5em; /* 给容器添加右侧内边距 */
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
+    overflow: visible !important; /* 确保内容不被裁剪 */
 }
 
 /* 手机端时间轴调整 - 避免与右边重叠 */
@@ -263,7 +274,23 @@
     .archive.animated.fadeInDown {
         margin-left: 120px;  /* 减小左边距，让内容更靠左：5px + 110px + 5px间距 */
         padding-left: 10px;
-        width: calc(100% - 120px);  /* 增加内容区域宽度 */
+        padding-right: 1em; /* 移动端也添加右侧内边距 */
+        width: calc(100% - 120px - 1em);  /* 增加内容区域宽度，减去右侧padding */
+        box-sizing: border-box; /* 确保padding包含在宽度内 */
+        overflow: visible !important; /* 确保内容不被裁剪 */
+    }
+    
+    /* 手机端post-desc样式调整 */
+    .post-desc {
+        padding-right: 1em !important; /* 移动端也保持右侧内边距 */
+        padding-left: 0; /* 确保左侧没有额外padding */
+        overflow: visible !important; /* 确保内容不被裁剪 */
+    }
+    
+    /* 手机端post-container样式调整 */
+    .post-container {
+        padding-right: 0.5em; /* 移动端也保持右侧内边距 */
+        overflow: visible !important; /* 确保内容不被裁剪 */
     }
 }
 

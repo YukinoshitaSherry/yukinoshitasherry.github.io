@@ -912,8 +912,11 @@ footer * {
 }
 .post-container {
   margin: 0 0 20px 0;
+  padding-right: 0.5em; /* 给容器添加右侧内边距 */
   font-weight: normal;
   font-family: "Times New Roman", "楷体","华文中宋";
+  box-sizing: border-box; /* 确保padding包含在宽度内 */
+  overflow: visible !important; /* 确保内容不被裁剪 */
 }
 /* 文章标题样式 */
 .post-title {
@@ -993,6 +996,17 @@ table th,td {
   border-bottom: none !important;
   background-color: transparent !important;
   color: #2e405b !important;
+}
+.post-desc {
+  margin: 10px 0;
+  padding-right: 1em !important; /* 增加右侧内边距，防止文字被裁剪 */
+  color: #666;
+  font-size: 0.9em;
+  font-family: "Times New Roman", "楷体";
+  box-sizing: border-box; /* 确保padding包含在宽度内 */
+  word-wrap: break-word; /* 长单词自动换行 */
+  overflow-wrap: break-word; /* 兼容性更好的换行 */
+  overflow: visible !important; /* 确保内容不被裁剪 */
 }
 .post-abstract {
   font-size: 16px;
@@ -1334,6 +1348,11 @@ figure .code pre {
     font-size: 14px;
     margin: 10px 0;
     font-family: "Times New Roman", "华文中宋";
+  }
+  .post-desc {
+    padding-right: 1em !important; /* 移动端也保持右侧内边距 */
+    padding-left: 0; /* 确保左侧没有额外padding */
+    overflow: visible !important; /* 确保内容不被裁剪 */
   }
   .post-abstract {
     font-size: 16px;
