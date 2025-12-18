@@ -1434,6 +1434,7 @@ figure .code pre {
   border: 1.5px solid rgba(46,64,91,0.05); /* 与普通友链卡片统一 */
   position: relative;
   overflow: visible; /* 允许阴影显示 */
+  padding: 28px 16px 20px 16px !important; /* 保持卡片内边距 */
 }
 
 .friend-card.welcome-card::before {
@@ -1456,6 +1457,8 @@ figure .code pre {
   align-items: flex-start;
   gap: 24px;
   width: 100%;
+  padding-left: 20px !important; /* 保持适当的左边距，不贴边，使用!important确保生效 */
+  margin-left: 0 !important; /* 确保没有额外的左边距 */
 }
 
 .welcome-content .friend-avatar {
@@ -1465,7 +1468,7 @@ figure .code pre {
   object-fit: cover;
   border: 2px solid #4a6fa5;
   flex-shrink: 0;
-  margin-left: 40px; /* 头像额外的左边距 */
+  margin-left: 0; /* 移除额外的左边距 */
   display: block;
   transition: transform 0.3s ease;
 }
@@ -1502,13 +1505,16 @@ figure .code pre {
 
 .info-value {
   color: #2e405b;
-  word-break: break-all;
+  word-break: normal; /* 改为normal，防止强制换行 */
+  white-space: nowrap; /* 不换行 */
   display: inline;
   cursor: text; /* 显示文本选择光标 */
   user-select: text !important; /* 强制允许文本选择 */
   -webkit-user-select: text !important;
   -moz-user-select: text !important;
   -ms-user-select: text !important;
+  overflow-x: auto; /* 如果内容过长，允许横向滚动 */
+  max-width: 100%; /* 确保不超过容器宽度 */
 }
 
 .welcome-text {
@@ -1537,7 +1543,7 @@ figure .code pre {
     flex-direction: column;
     align-items: flex-start; /* 移动端也保持左对齐 */
     text-align: left;
-    padding-left: 10px; /* 移动端减少左边距 */
+    padding-left: 20px; /* 移动端保持适当的左边距，不贴边 */
   }
   
   .welcome-content .friend-avatar {
@@ -1559,6 +1565,9 @@ figure .code pre {
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
+    white-space: nowrap; /* 移动端也不换行 */
+    word-break: normal; /* 移动端也不强制换行 */
+    overflow-x: auto; /* 如果内容过长，允许横向滚动 */
   }
 }
 
