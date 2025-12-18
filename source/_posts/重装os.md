@@ -6,7 +6,6 @@ categories:
 tags: 
     - 修电脑
 desc: 喜报！只能重装！联想我恨你。各种踩坑损失惨重的一集，浪费了我宝贵的两天时间，还好chocolately救我狗命，可惜只能救一点但不多。
-hidden: true
 ---
 
 【特别鸣谢：ZJUEA社团志愿者对于本次重装OS的帮助orz】
