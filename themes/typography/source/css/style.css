@@ -569,6 +569,7 @@ body {
 .side-container {
   position: fixed;
   right: -180px;
+  left: auto !important; /* 明确设置left为auto，确保在右侧 */
   top: 0px;
   width: 250px;
   height: 60vh; /* 减小高度从75vh到60vh */
@@ -578,22 +579,24 @@ body {
 
 
 
-/* 响应式布局 - 只在较小屏幕（小于1200px）时改变侧边栏布局，避免影响Mac 14寸等中等屏幕 */
-@media screen and (max-width: 1200px) {
+/* 响应式布局 - 只在较小屏幕（小于992px）时改变侧边栏布局，避免影响Mac 14寸等中等屏幕 */
+@media screen and (max-width: 992px) {
   .side-container {
     position: relative;
     right: auto;
+    left: auto;
     width: 100%;
     height: auto;
     padding: 20px;
   }
 }
 
-/* Mac 14寸等中等屏幕保持固定定位 */
-@media screen and (min-width: 1201px) and (max-width: 1600px) {
+/* 确保所有大于992px的屏幕都使用右侧固定定位（包括Mac 14寸） */
+@media screen and (min-width: 993px) {
   .side-container {
     position: fixed !important;
     right: -180px !important;
+    left: auto !important; /* 确保不设置left，避免覆盖right */
     width: 250px !important;
     height: 60vh !important;
     padding: 15px 20px !important;
