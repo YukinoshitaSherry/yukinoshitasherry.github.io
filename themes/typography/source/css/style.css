@@ -578,14 +578,26 @@ body {
 
 
 
-/* 响应式布局 */
-@media screen and (max-width: 1400px) {
+/* 响应式布局 - 只在较小屏幕（小于1200px）时改变侧边栏布局，避免影响Mac 14寸等中等屏幕 */
+@media screen and (max-width: 1200px) {
   .side-container {
     position: relative;
     right: auto;
     width: 100%;
     height: auto;
     padding: 20px;
+  }
+}
+
+/* Mac 14寸等中等屏幕保持固定定位 */
+@media screen and (min-width: 1201px) and (max-width: 1600px) {
+  .side-container {
+    position: fixed !important;
+    right: -180px !important;
+    width: 250px !important;
+    height: 60vh !important;
+    padding: 15px 20px !important;
+    z-index: 100 !important;
   }
 }
 .ar-year {
