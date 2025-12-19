@@ -565,10 +565,10 @@ body {
   }
 }
 
-/* 右侧边栏秋月春风位置控制 */
+/* 右侧边栏秋月春风位置控制 - 固定在右侧完全显示 */
 .side-container {
   position: fixed;
-  right: -180px;
+  right: 0px !important; /* 固定在右侧，完全显示 */
   left: auto !important; /* 明确设置left为auto，确保在右侧 */
   top: 0px;
   width: 250px;
@@ -595,12 +595,29 @@ body {
 @media screen and (min-width: 993px) {
   .side-container {
     position: fixed !important;
-    right: -180px !important;
+    right: 0px !important; /* 固定在右侧，完全显示 */
     left: auto !important; /* 确保不设置left，避免覆盖right */
     width: 250px !important;
     height: 60vh !important;
     padding: 15px 20px !important;
     z-index: 100 !important;
+  }
+}
+
+/* 针对不同屏幕尺寸优化显示 - 所有屏幕都完全显示 */
+/* 中等屏幕（Mac 14寸等，1200-1600px） */
+@media screen and (min-width: 993px) and (max-width: 1600px) {
+  .side-container {
+    right: 0px !important; /* 固定在右侧，完全显示 */
+    left: auto !important;
+  }
+}
+
+/* 大屏幕（Windows等，>1600px） */
+@media screen and (min-width: 1601px) {
+  .side-container {
+    right: 0px !important; /* 固定在右侧，完全显示 */
+    left: auto !important;
   }
 }
 .ar-year {
