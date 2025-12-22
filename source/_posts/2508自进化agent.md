@@ -51,39 +51,79 @@ desc: 整理自 https://arxiv.org/abs/2507.21046 《A Survey of Self-Evolving Ag
 
 ### 形式化定义
 
-论文将外部环境建模为 **部分可观测马尔可夫决策过程**
-（Partially Observable Markov Decision Process, POMDP）：
+论文首先将智能体系统的**环境**（包括用户和执行环境，如 Linux shell）定义为 **部分可观测马尔可夫决策过程**
+（Partially Observable Markov Decision Process, POMDP），表示为元组：
 $$
 E = (G, S, A, T, R, \Omega, O, \gamma)
 $$
+
+
+
 其中各要素定义如下：
-- $ G $：目标集合（goal set），通常由用户自然语言指令实例化；
-- $ S $：状态空间（state space），包含环境状态与智能体内存状态；
-- $ A $：动作空间（action space），包括工具调用（tool invocation）、推理步骤生成（reasoning step generation）、记忆更新（memory update）等；
-- $ T(s'|s,a) $：状态转移函数（transition function），描述执行动作 $ a $ 后状态如何变化；
-- $ R(s,a) $：奖励函数（reward function），可为标量数值（如任务完成度）或文本反馈（如“你的计划忽略了权限限制”）；
-- $ \Omega $：观测空间（observation space），即智能体在每一步可感知的信息（如网页 HTML、API 返回结果）；
-- $ O(o|s) $：观测概率（observation probability），表示在真实状态 $ s $ 下获得观测 $ o $ 的可能性；
-- $ \gamma \in [0,1] $：折扣因子（discount factor），用于权衡即时与长期回报。
+- $ G $：**潜在目标集合**（set of potential goals）。每个 $ g \in G $ 是智能体需要完成的任务目标，例如用户查询（user query）；
+- $ S $：**状态集合**（set of states）。每个 $ s \in S $ 表示环境的内部状态（internal state of the environment）；
+- $ A $：**动作集合**（set of actions）。每个动作 $ a \in A $ 可以是文本推理（textual reasoning）、外部知识检索（retrieval of external knowledge）和工具调用（tool calls）的组合；
+- $ T $：**状态转移概率函数**（state transition probability function），输入状态-动作对 $ (s, a) $，输出下一个状态的概率分布 $ T(s'|s, a) $；
+- $ R $：**反馈/奖励函数**（feedback/reward function），条件于特定目标 $ g \in G $。反馈 $ r = R(s, a, g) $ 通常采用标量分数（scalar score）或文本反馈（textual feedback）的形式。函数签名为 $ R: S \times A \times G \rightarrow \mathbb{R} $；
+- $ \Omega $：**观测集合**（set of observations），智能体可访问的观测集合；
+- $ O $：**观测概率函数**（observation probability function），输入状态-动作对 $ (s, a) $，输出下一个观测的概率分布 $ O(o'|s, a) $；
+- $ \gamma $：**折扣因子**（discount factor）。
+
+<mark style="background: #FFF3A3A6;">【理解】该公式将智能体与环境的交互建模为 POMDP，核心机制如下：整个过程形成"观测 $ o \in \Omega $ → 推断状态 $ s \in S $ → 选择动作 $ a \in A $ → 状态转移 $ T $ → 获得反馈 $ R $ → 更新观测 $ O $"的完整循环。环境具有真实状态空间 $ S $（智能体无法直接看到），智能体只能通过观测空间 $ \Omega $ 间接感知环境，观测概率函数 $ O(o'|s, a) $ 决定了在状态 $ s $ 和执行动作 $ a $ 后观测到 $ o' $ 的概率，体现了"部分可观测"特性；智能体执行动作 $ a \in A $（文本推理、知识检索、工具调用的组合）后，状态转移函数 $ T(s'|s, a) $ 决定环境如何从状态 $ s $ 转移到 $ s' $；反馈函数 $ R(s, a, g) $ 根据当前状态 $ s $、执行的动作 $ a $ 和目标任务目标 $ g \in G $ 给出反馈 $ r $（标量分数或文本反馈）；折扣因子 $ \gamma $ 用于权衡即时奖励与长期回报。</mark>
+
+> [!INFO]+ 为什么智能体环境需要用 POMDP？
+> 在真实环境中，智能体通常无法完全观测：
+> - 网页导航：看到 DOM 结构（观测），但不知道后端数据是否已更新（状态）
+> - 代码执行：看到输出（观测），但不知道内存中的完整状态（状态）
+> - 用户交互：看到用户输入（观测），但不知道用户的真实意图或上下文（状态）
+> 
+> **与完全可观测 MDP 的区别**
+> - 完全可观测 MDP：智能体直接知道状态 $s$，决策更简单
+> - POMDP：智能体只能看到观测 $o$，需要：通过观测概率函数 $O(o|s)$ 推断可能的状态、维护对状态的信念belief state）、基于历史观测序列做决策
+
+<br>
 
 在此框架下，智能体系统被形式化为四元组：
 $$
-\psi = (\mathcal{M}, \mathcal{C}, \mathcal{T}, \mathcal{A})
+\Pi = (\Gamma, \lbrace\psi_i\rbrace, \lbrace C_i\rbrace, \lbrace W_i\rbrace)
 $$
-- $ \mathcal{M} $：模型组件（Model），即底层 LLM backbone（如 Llama-3、Qwen-Max）；
-- $ \mathcal{C} $：上下文组件（Context），包含 prompt 模板、短期记忆缓存、长期记忆库；
-- $ \mathcal{T} $：工具组件（Tool），即可供调用的外部功能集合（如搜索引擎、代码解释器、数据库接口）；
-- $ \mathcal{A} $：架构组件（Architecture），指智能体内部模块的组织方式（如是否包含 planner、executor、reflector 等角色，以及它们之间的数据流拓扑）。
+- $ \Gamma $：**架构组件**（Architecture），决定智能体系统的控制流或协作结构，通常表示为节点序列（$N_1, N_2, \ldots$），可通过图结构或代码结构组织；
+- $ \lbrace\psi_i\rbrace $：**模型组件集合**（Model），即底层 LLM/MLLM 集合（如 Llama-3、Qwen-Max）；
+- $ \lbrace C_i\rbrace $：**上下文信息集合**（Context），包含 prompt $P_i$ 和记忆 $M_i$ 等；
+- $ \lbrace W_i\rbrace $：**工具/API 集合**（Tool），即可供调用的外部功能集合（如搜索引擎、代码解释器、数据库接口）。
 
-**自进化的目标**是寻找一个演化策略 $ f $，使得在给定任务序列 $ \{T\_j\}\_{j=1}^n $ 上最大化累计效用（cumulative utility）：
-$$
-\max_f \sum_{j=1}^n U(\Pi\_j, T\_j)
-$$
-其中：
-- $ \Pi_j = f(\psi\_{j-1}, T\_j) $ 表示第 $ j $ 个任务所采用的策略（即更新后的智能体配置）；
-- $ U $ 是一个复合效用函数，综合衡量任务成功率（task success rate）、执行效率（steps/time）、安全性（safety compliance）、资源消耗（compute cost）等多个维度。
 
-该公式揭示了自进化智能体的本质：**通过策略 $ f $ 对四元组 $ \psi $ 进行迭代优化，以实现跨任务性能的持续提升**。
+<mark style="background: #FFF3A3A6;">【理解】该公式定义了自进化的核心机制：变换函数 $ f $ 以当前智能体系统 $ \Pi = (\Gamma, \lbrace\psi_i\rbrace, \lbrace C_i\rbrace, \lbrace W_i\rbrace) $ 为输入，结合任务执行过程中的轨迹 $ \tau = (o_0, a_0, o_1, a_1, \ldots) $（记录了"观测到什么、做了什么"的完整序列）和反馈 $ r $（记录了"效果如何"，可来自外部环境奖励或内部评估信号），输出演化后的新系统 $ \Pi' = (\Gamma', \lbrace\psi'_i\rbrace, \lbrace C'_i\rbrace, \lbrace W'_i\rbrace) $。四个组件同时演化：架构 $ \Gamma \rightarrow \Gamma' $（调整节点拓扑或数据流）、模型 $ \lbrace\psi_i\rbrace \rightarrow \lbrace\psi'_i\rbrace $（更新参数或切换模型）、上下文 $ \lbrace C_i\rbrace \rightarrow \lbrace C'_i\rbrace $（优化 prompt 或更新记忆）、工具 $ \lbrace W_i\rbrace \rightarrow \lbrace W'_i\rbrace $（添加新工具或改进现有工具），实现"从经验中学习并自我改进"。</mark>
+<br>
+
+每个节点 $N_i$ 包含三个组件：底层模型 $ \psi_i $、上下文信息 $ C_i $、可用工具集合 $ W_i $。
+
+**智能体策略**：在每个节点 $N_i$ 处，智能体策略是一个函数 $ \pi_{\theta_i}(\cdot|o) $，它以观测 $ o $ 为输入，输出下一个动作的概率分布。策略参数 $ \theta_i = (\psi_i, C_i) $，动作空间是自然语言空间与工具空间 $ W_i $ 的并集。
+
+**任务表示**：给定任务 $ T = (E, g) $，其中 $ E $ 表示环境，$ g \in \mathcal{G} $ 表示对应的目标。智能体系统遵循拓扑结构 $ \Gamma $ 生成轨迹 $ \tau = (o_0, a_0, o_1, a_1, \ldots) $，并在任务执行过程中接收反馈 $ r $。反馈 $ r $ 可来自外部环境或内部信号（如自信度或评估器的反馈）。
+
+**自进化策略**（Self-evolving strategy）：自进化策略是一个变换 $ f $，它将当前智能体系统映射到新状态，条件为生成的轨迹 $ \tau $ 和外部/内部反馈 $ r $：
+$$
+f(\Pi, \tau, r) = \Pi' = (\Gamma', \lbrace\psi'_i\rbrace, \lbrace C'_i\rbrace, \lbrace W'_i\rbrace)
+$$
+
+
+**自进化智能体的目标**：设 $ U $ 是一个效用函数，通过分配标量分数 $ U(\Pi, \mathcal{T}) \in \mathbb{R} $ 来衡量智能体系统 $ \Pi $ 在给定任务 $ \mathcal{T} $ 上的性能。效用可能来自任务特定的反馈 $ r $（如奖励信号或文本评估），也可能结合其他性能指标（如完成时间、准确性或鲁棒性）。
+
+给定任务序列 $(\mathcal{T}_0, \mathcal{T}_1, \ldots, \mathcal{T}_n)$ 和初始智能体系统 $\Pi_0$，自进化策略 $f$ 递归地生成演化序列 $(\Pi_1, \Pi_2, \ldots, \Pi_n)$ ：
+
+$$
+\Pi_{j+1} = f(\Pi_j, \tau_j, r_j)
+$$
+
+其中 $\tau_j$ 和 $r_j$ 分别是任务 $\mathcal{T}_j$ 上的轨迹和反馈。
+
+**设计自进化智能体的总体目标**是构造策略 $ f $，使得跨任务的累计效用最大化：
+$$
+\max_f \sum_{j=0}^n U(\Pi_j, \mathcal{T}_j)
+$$
+
+该公式揭示了自进化智能体的本质：**通过策略 $ f $ 对智能体系统 $ \Pi $ 的四个组件（架构 $ \Gamma $、模型 $ \lbrace\psi_i\rbrace $、上下文 $ \lbrace C_i\rbrace $、工具 $ \lbrace W_i\rbrace $）进行迭代优化，以实现跨任务性能的持续提升**。
 
 <br>
 
@@ -185,9 +225,9 @@ $$
   - **Expel**（Experiential Prompting for Lifelong Learning）：将 past experiences 存入 memory bank，新任务中检索相似案例用于 in-context learning（ICL）。
   - **AgentGen**：生成 synthetic environments（PDDL/Gym 格式），构建 curriculum for offline training（如从简单导航到复杂多目标规划）。
   - **STaR**（Self-Taught Reasoner）：将失败轨迹中的 self-generated explanations（如“我忽略了边界条件”）转化为训练数据，用于 SFT。
-- **特点**：性能提升显著，但需计算资源与时间。
+- **特点**：性能提升显著，但需计算资源与时间，适用于 offline 场景。
 
-<mark style="background: #FFF3A3A6;">【理解：Intra-test-time 演化提供 immediate adaptation，而 inter-test-time 演化实现 long-term capability growth。二者常结合使用，形成“在线微调 + 离线精炼”的混合范式。】</mark>
+<mark style="background: #FFF3A3A6;">【理解】Intra-test-time 演化提供 immediate adaptation，而 inter-test-time 演化实现 long-term capability growth。二者常结合使用，形成“在线微调 + 离线精炼”的混合范式。</mark>
 
 <br>
 
@@ -226,7 +266,7 @@ $$
 - **EvoMAC**（Evolutionary Multi-Agent Collaboration）：multi-agent co-evolution via textual backpropagation.
 - **EvoAgent**：使用 evolutionary algorithms 自动生成 multi-agent systems.
 
-<mark style="background: #FFF3A3A6;">【理解：Reward-based 方法依赖 explicit feedback，而 imitation 方法利用 implicit knowledge；population-based 则探索 diverse strategies。三者可融合，如用 population 生成 demos → 用 reward 过滤 → 用于 SFT。】</mark>
+<mark style="background: #FFF3A3A6;">【理解】Reward-based 方法依赖 explicit feedback，而 imitation 方法利用 implicit knowledge；population-based 则探索 diverse strategies。三者可融合，如用 population 生成 demos → 用 reward 过滤 → 用于 SFT。</mark>
 
 <br>
 
@@ -243,7 +283,7 @@ $$
 
 <br>
 
-<mark style="background: #FFF3A3A6;">【理解：不同场景对演化维度有不同侧重。例如，Web Navigation 侧重 tool mastery 与 process reward，而 Strategic Games 侧重 architecture evolution（如增加 deception detection module）。】</mark>
+<mark style="background: #FFF3A3A6;">【理解】不同场景对演化维度有不同侧重，根本原因在于任务特性与约束条件的差异。**Web Navigation** 侧重 tool mastery 与 process reward，原因在于：动态 HTML 环境中的 DOM 结构复杂且频繁变化，智能体需要掌握大量网页操作工具（如 click、type、scroll、wait），且长轨迹任务中稀疏奖励（仅在最终页面满足 query 时获得）导致学习困难，因此需要 process reward 对每一步操作（如"成功定位到搜索框"）进行即时反馈，同时通过 tool mastery 学习不同网站的操作模式（如电商网站的"登录→搜索→筛选→购买"流程）。**Strategic Games** 侧重 architecture evolution，原因在于：多人博弈环境需要复杂的心理建模与策略推理能力，单一模块无法同时处理"预测对手意图"、"制定欺骗策略"、"评估联盟关系"等多层次任务，因此需要演化架构，动态添加 specialized modules（如 deception detection module、alliance negotiation module），形成多智能体协作拓扑。类似地，**Code Generation** 侧重 model evolution（通过执行验证生成训练数据），**Mathematical Reasoning** 侧重 context evolution（优化推理链 prompt）与 process reward（对每个推理步骤打分）。</mark>
 
 
 
@@ -326,44 +366,43 @@ $$
 | 工作 | 核心贡献 | 来源 |
 |------|--------|------|
 | Promptbreeder | Evolutionary prompt optimization | arXiv:2309.16797 |
-| SCA | Self-challenging for code tasks | NeurIPS 2023 |
+| SCA | Self-challenging for code tasks | arXiv:2303.17651 |
 | TextGrad | Textual gradient-based optimization | ICLR 2024 |
-| MAS-Zero | Multi-agent self-evolution | arXiv:2502.0xxxx |
+| MAS-Zero | Multi-agent self-evolution | arXiv:2505.14996 |
 | AgentGen | Synthetic environment generation | ICML 2024 |
-| Reflexion | Self-reflection via natural language | NeurIPS 2023 |
+| Reflexion | Self-reflection via natural language | arXiv:2303.11366 |
 | AdaPlanner | Closed-loop adaptive planning | AAAI 2024 |
-| Self-Refine | Iterative self-critique & refine | NeurIPS 2023 |
+| Self-Refine | Iterative self-critique & refine | arXiv:2303.11147 |
 | RAGen | RL for agent generation | arXiv:2504.20073 |
-| Mem0 | Scalable long-term memory | arXiv:2501.xxxx |
-| Expel | Experiential learning | AAAI 2024 |
-| Agent Workflow Memory | Multi-turn workflow storage | arXiv:2503.xxxx |
+| Mem0 | Scalable long-term memory | arXiv:2504.19413 |
+| Expel | Experiential learning | arXiv:2312.16848 |
+| Agent Workflow Memory | Multi-turn workflow storage | arXiv:2409.07429 |
 | Richelieu | Structural self-modification in diplomacy | NeurIPS 2024 |
 | PromptAgent | Strategic prompt planning | ACL 2024 |
-| SPO | Self-supervised prompt optimization | arXiv:2502.xxxx |
-| EvoAgent | Evolutionary multi-agent generation | GECCO 2024 |
-| Voyager | Open-ended embodied agent | NeurIPS 2023 |
-| Alita | Generalist self-evolving agent | arXiv:2505.xxxx |
-| ATLASS | Closed-loop tool selection | arXiv:2504.xxxx |
+| SPO | Self-supervised prompt optimization | arXiv:2502.06855 |
+| EvoAgent | Evolutionary multi-agent generation | arXiv:2406.14228 |
+| Voyager | Open-ended embodied agent | arXiv:2305.16291 |
+| Alita | Generalist self-evolving agent | arXiv:2505.20286 |
+| ATLASS | Closed-loop tool selection | arXiv:2503.10071 |
 | CREATOR | Tool creation for reasoning | ICLR 2025 |
 | SkillWeaver | Web agent skill discovery | WWW 2025 |
-| CRAFT | Specialized toolset customization | arXiv:2503.xxxx |
+| CRAFT | Specialized toolset customization | arXiv:2309.17428 |
 | LearnAct | Action learning for tool mastery | EMNLP 2024 |
-| DRAFT | Self-driven tool interaction | arXiv:2502.xxxx |
+| DRAFT | Self-driven tool interaction | arXiv:2410.08197 |
 | ToolLLM | Mastering 16000+ APIs | NeurIPS 2024 |
 | ToolGen | Unified tool retrieval & calling | ACL 2025 |
-| Agentsquare | Automatic agent search | arXiv:2501.xxxx |
+| Agentsquare | Automatic agent search | arXiv:2410.06153 |
 | Darwin Gödel Machine | Open-ended self-improvement | arXiv:2505.22954 |
 | AlphaEvolve | Evolutionary workflow search | GECCO 2025 |
 | ReMA | Multi-agent role coordination | AAMAS 2025 |
 | SiriuS | Experience sharing | arXiv:2312.17025 |
 | WebRL | ORM for web tasks | arXiv:2406.12373 |
-| DigiRL | VLM-based sparse reward for GUI | arXiv:2405.xxxx |
-| SOFT | Self-optimized feedback | arXiv:2502.xxxx |
-| EvoMAC | Multi-agent co-evolution | arXiv:2406.xxxx |
+| DigiRL | VLM-based sparse reward for GUI | arXiv:2406.11896 |
+| EvoMAC | Multi-agent co-evolution | arXiv:2410.16946v1 |
 | Math-Shepherd | MCTS-based process annotation | ICLR 2025 |
 | Agent Q | Step-wise verification + DPO | NeurIPS 2024 |
 | GiGPO | Dual-level reward for stability | ICML 2025 |
 | AutoWebGLM | Outcome-based self-evolution | arXiv:2406.12373 |
-| rStar-Math | Iterative PRM evolution | arXiv:2501.xxxx |
+| rStar-Math | Iterative PRM evolution | arXiv:2501.04519 |
 
 <br>
