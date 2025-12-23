@@ -4,7 +4,7 @@ date: 2024-11-17
 categories: 
     - 学CS/SE
 tags: 
-    - 文献管理
+    - 科研技巧
 desc: 利用Zotero管理论文，但zotero的免费托管内存不够，配合支持WebDAV的坚果云可以方便地满足上云与设备迁移需要。
 ---
 
