@@ -203,7 +203,7 @@ $$
   - **Multi-Agent Design**：搜索 multi-agent collaboration graph（谁与谁通信）以最大化 team performance（如在医疗诊断中，symptom-analyzer 与 drug-recommender 需高频交互）。
   - **Agentsquare**：automatic agent search in modular design space（如从 planner/retriever/executor 模块库中自动组合最优 agent）。
 
-<mark style="background: #FFF3A3A6;">【理解：传统 AI 系统仅更新模型参数；而自进化智能体实现了 **四维协同演化**（model + context + tool + architecture），从而获得更强的适应性与泛化能力。】</mark>
+<mark style="background: #FFF3A3A6;">【理解】传统 AI 系统仅更新模型参数；而自进化智能体实现了 **四维协同演化**（model + context + tool + architecture），从而获得更强的适应性与泛化能力。</mark>
 
 <br>
 
