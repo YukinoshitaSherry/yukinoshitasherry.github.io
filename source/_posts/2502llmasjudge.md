@@ -8,6 +8,8 @@ tags:
 desc: 整理自 https://arxiv.org/abs/2411.16594v7 《From Generation to Judgment- Opportunities and Challenges of LLM-as-a-judge》
 ---
 
+要用这个方法，学一下排除偏见的常用措施。
+
 综述地址：<a href="https://arxiv.org/abs/2411.16594v7"> From Generation to Judgment- Opportunities and Challenges of LLM-as-a-judge </a>
 
 ## 背景
