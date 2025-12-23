@@ -323,6 +323,8 @@ cuDNN 会自动选择"最优"算法，但选择可能因运行环境而异：
 - 虽然这些 GPU 兼容，但架构细节、CUDA 实现、甚至驱动版本可能不同
 - 这可能导致相同计算在不同硬件上产生略微不同的结果
 
+<br>
+
 #### Transformer Engine影响
 
 H100 引入了 **Transformer Engine**，使用 FP8 精度进行训练和推理：
@@ -340,6 +342,8 @@ x_{\text{FP8}} = \text{quantize}(x_{\text{FP32}}, \text{scale})
 $$
 
 其中 `quantize` 操作可能因硬件实现而异。
+
+<br>
 
 #### 模型并行影响
 
@@ -372,9 +376,8 @@ GPU 3: Layer 31-40
 
 ### Tie-breaking机制
 
-#### Argmax平局处理
 
-理论上，`argmax` 应该有固定的平局处理规则（tie-breaking rule），例如：
+理论上，`argmax` 应该有固定的**平局处理**规则（tie-breaking rule），例如：
 
 - 选择索引较小的 token
 - 选择 ID 较小的 token
@@ -385,7 +388,7 @@ $$
 \text{argmax}(x) = \min\{i : x_i = \max(x)\}
 $$
 
-#### 实际实现不稳定性
+
 
 但在实际实现中，由于前述各种因素：
 
@@ -404,9 +407,8 @@ $$
 ```
 
 
-#### 累积效应
 
-在自回归生成中：
+在自回归生成中有**累积效应**：
 
 1. **第一步**：微小的差异导致选择了不同的 token
 2. **后续步骤**：不同的 token 作为输入，导致完全不同的生成路径
@@ -449,6 +451,9 @@ if "eligible" in llm_output.lower() or "yes" in llm_output.lower():
 result = parse_eligibility(llm_output)  # 处理多种表达方式
 ```
 
+<br>
+
+
 ### 部署开源模型策略
 
 **使用确定性算子库**：
@@ -488,6 +493,8 @@ os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
 - 但这会显著降低吞吐量
 - 对于 MoE 模型，批次级非确定性是架构固有的，难以完全消除
 
+<br>
+
 ### 评估和测试策略
 
 **考虑固有不确定性**：
@@ -513,7 +520,6 @@ def self_consistency_predict(prompt, n_samples=5):
 **评估指标调整**：
 
 - 使用**语义相似度**而非精确匹配
-- 使用 **BLEU、ROUGE** 等容忍变体的指标
 - 对于结构化输出，使用**字段级匹配**而非全文匹配
 
 <br>
