@@ -147,8 +147,6 @@ $$
 <img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20250603005054314.png" style="width:85%">
 <br>
 
-#### eg
-- <a href="https://blog.csdn.net/ggbb_4/article/details/126781363">`反向传播例题`</a>
 
 
 ### 向量化形态
@@ -173,6 +171,368 @@ $$
   - 使用矩阵运算代替循环，提高计算速度
   - 缓存中间结果，避免重复计算
   - 批量处理，提高内存访问效率
+
+  <br>
+
+
+### 示例
+
+<br>
+
+#### 例题
+
+- <a href="https://blog.csdn.net/ggbb_4/article/details/126781363">`反向传播例题`</a>
+<br>
+
+
+#### 简单
+
+
+> [!note]+ 简单反向传播计算示例
+>
+> **网络结构**
+> 单输入、单隐藏单元、单输出神经网络：
+> $x \xrightarrow{w_1} h \xrightarrow{\text{ReLU}} a \xrightarrow{w_2} \hat{y}$
+>
+> **前向传播公式**
+> $h = w_1 x,\quad a = \text{ReLU}(h),\quad \hat{y} = w_2 a$
+>
+> **给定数值**
+> $x = 2,\quad y = 10,\quad w_1 = 1,\quad w_2 = 3$
+>
+> **前向计算**
+> $h = 1 \times 2 = 2,\quad a = \max(0,2) = 2,\quad \hat{y} = 3 \times 2 = 6$
+>
+> **损失函数（MSE，单样本）**
+> $L = \frac{1}{2}(\hat{y} - y)^2 = \frac{1}{2}(6 - 10)^2 = 8$
+>
+> **反向传播（链式法则）**
+> 输出层梯度：
+> $\frac{\partial L}{\partial \hat{y}} = \hat{y} - y = -4$
+>
+> 权重 $w_2$ 的梯度：
+> $\frac{\partial L}{\partial w_2}
+> = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial w_2}
+> = (-4) \cdot a
+> = -8$
+>
+> 激活值 $a$ 的梯度：
+> $\frac{\partial L}{\partial a}
+> = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial a}
+> = (-4) \cdot 3
+> = -12$
+>
+> ReLU 导数：
+> $
+> \frac{\partial a}{\partial h} =
+> \begin{cases}
+> 1, & h > 0 \
+> 0, & h \le 0
+> \end{cases}
+> $
+>
+> 权重 $w_1$ 的梯度：
+> $\frac{\partial L}{\partial w_1}
+> = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial h} \cdot \frac{\partial h}{\partial w_1}
+> = (-12) \cdot 1 \cdot 2
+> = -24$
+>
+> **梯度汇总**
+> $\boxed{\frac{\partial L}{\partial w_2} = -8,\quad \frac{\partial L}{\partial w_1} = -24}$
+>
+> **梯度下降更新（学习率 $\eta = 0.1$）**
+> $w_2 \leftarrow 3 - 0.1(-8) = 3.8,\quad w_1 \leftarrow 1 - 0.1(-24) = 3.4$
+>
+> **核心理解**
+> 反向传播利用链式法则，将输出误差逐层分配给各参数，梯度刻画了每个参数对损失的“责任”，参数沿负梯度方向更新以减小损失。
+
+
+
+
+<br>
+
+#### 矩阵
+
+
+
+> [!note]+ **矩阵形式的反向传播计算示例（Linear Layer）**
+>
+> **网络结构（向量 → 标量）**
+> 一个最基本的线性层 + 损失函数：
+> $$
+> \mathbf{x} \xrightarrow{\mathbf{W}} \hat{y} \xrightarrow{\text{MSE}} L
+> $$
+> 其中：
+> * 输入向量：$\mathbf{x} \in \mathbb{R}^d$
+> * 权重向量：$\mathbf{W} \in \mathbb{R}^d$
+> * 输出标量：$\hat{y} \in \mathbb{R}$
+>
+> **前向传播公式**
+> $$
+> \hat{y} = \mathbf{W}^\top \mathbf{x}
+> $$
+>
+> **损失函数（单样本 MSE）**
+> $$
+> L = \frac{1}{2}(\hat{y} - y)^2
+> $$
+>
+> **反向传播目标**
+> 计算权重梯度：
+> $$
+> \frac{\partial L}{\partial \mathbf{W}}
+> $$
+>
+> **Step 1：损失对输出的梯度**
+> $$
+> \frac{\partial L}{\partial \hat{y}} = \hat{y} - y
+> $$
+>
+> **Step 2：输出对权重的梯度**
+> 由于：
+> $$
+> \hat{y} = \mathbf{W}^\top \mathbf{x} \quad \Rightarrow \quad
+> \frac{\partial \hat{y}}{\partial \mathbf{W}} = \mathbf{x}
+> $$
+>
+> **Step 3：链式法则（关键一步）**
+> $$
+> \frac{\partial L}{\partial \mathbf{W}}
+> = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial \mathbf{W}}
+> = (\hat{y} - y) \mathbf{x}
+> $$
+>
+> **最终梯度结果（向量形式）**
+> $$
+> \boxed{
+> \frac{\partial L}{\partial \mathbf{W}} = (\hat{y} - y) \mathbf{x}
+> }
+> $$
+>
+> **参数更新（梯度下降）**
+> 学习率 $\eta$：
+> $$
+> \mathbf{W} \leftarrow \mathbf{W} - \eta (\hat{y} - y) \mathbf{x}
+> $$
+>
+> **与标量版本的对应关系**
+> * 标量情况：$w \leftarrow w - \eta (\hat{y}-y)x$
+> * 向量情况：$\mathbf{W} \leftarrow \mathbf{W} - \eta (\hat{y}-y)\mathbf{x}$
+>   唯一的变化是：“数” → “向量”，链式法则完全一致
+>
+> **核心理解**
+> 在线性层中，反向传播的梯度等于：**输出误差 × 输入特征**
+> * 输入越大，对参数更新影响越大
+> * 误差为零时，梯度为零
+>   这也是 Transformer、MLP、Embedding 层反向传播的基础单元
+
+
+
+
+
+
+<br>
+
+#### 复杂的矩阵
+
+
+
+> [!note]+ **矩阵形式的反向传播示例（Softmax + CrossEntropy）**
+>
+> **问题设置（多分类）**
+> * 类别数：$C$
+> * logits（未归一化输出）：$\mathbf{z} \in \mathbb{R}^{C}$
+> * 真实标签（one-hot）：$\mathbf{y} \in \mathbb{R}^{C}$，其中 $y_k \in {0,1}$
+>
+> **模型结构**
+> $$
+> \mathbf{z} \xrightarrow{\text{Softmax}} \hat{\mathbf{p}} \xrightarrow{\text{CrossEntropy}} L
+> $$
+>
+> **前向传播公式**
+> $$
+> \hat{p}*i = \frac{e^{z_i}}{\sum*{j=1}^{C} e^{z_j}}
+> $$
+>
+> **交叉熵损失（单样本）**
+> $$
+> L = - \sum_{i=1}^{C} y_i \log \hat{p}_i
+> $$
+>
+> **反向传播目标**
+> 计算 logits 梯度：
+> $$
+> \frac{\partial L}{\partial \mathbf{z}}
+> $$
+>
+> **Step 1：Softmax + CrossEntropy 简化结果**
+> 对于 Softmax + CrossEntropy，链式法则简化得到：
+> $$
+> \frac{\partial L}{\partial z_i} = \hat{p}_i - y_i
+> $$
+> 或矩阵形式：
+> $$
+> \frac{\partial L}{\partial \mathbf{z}} = \hat{\mathbf{p}} - \mathbf{y}
+> $$
+>
+> **Step 2：接上线性层（例如 Transformer 分类头）**
+> 假设 logits 来自线性层：
+> $$
+> \mathbf{z} = \mathbf{W}^\top \mathbf{h}, \quad
+> \mathbf{h} \in \mathbb{R}^{d}, \quad
+> \mathbf{W} \in \mathbb{R}^{d \times C}
+> $$
+>
+> **Step 3：线性层梯度（权重 & 隐藏状态）**
+> 权重梯度：
+> $$
+> \frac{\partial L}{\partial \mathbf{W}} = \mathbf{h} (\hat{\mathbf{p}} - \mathbf{y})^\top
+> $$
+> 隐藏状态梯度（反传到下游）：
+> $$
+> \frac{\partial L}{\partial \mathbf{h}} = \mathbf{W} (\hat{\mathbf{p}} - \mathbf{y})
+> $$
+>
+> **Step 4：参数更新（梯度下降）**
+> 学习率 $\eta$：
+> $$
+> \mathbf{W} \leftarrow \mathbf{W} - \eta , \mathbf{h} (\hat{\mathbf{p}} - \mathbf{y})^\top
+> $$
+>
+> **核心理解**
+> 在多分类任务中，反向传播的本质是：
+> $$
+> \text{error vector} = \hat{\mathbf{p}} - \mathbf{y}
+> $$
+>
+> * 线性层梯度 = 输入 × error
+> * Softmax + CrossEntropy 将复杂的雅可比矩阵化简为简单的误差向量
+>   这也是 Transformer、BERT、GPT 分类头训练信号的核心单元
+
+
+
+
+<br>
+
+
+#### Self-Attention 反向传播（单头）
+
+> [!note]+ Self-Attention 的反向传播（单头）
+>
+> **结构定义**
+> 输入序列：$X \in \mathbb{R}^{n \times d}$
+> 权重矩阵：$W_Q, W_K, W_V \in \mathbb{R}^{d \times d_k}$
+>
+> **前向传播**
+>
+> $Q = X W_Q,\quad K = X W_K,\quad V = X W_V$
+>
+> $S = \frac{QK^\top}{\sqrt{d_k}}$
+>
+> $A = \text{softmax}(S)$
+>
+> $O = A V$
+>
+> **反向传播目标**
+> 已知 $\frac{\partial L}{\partial O}$，求：
+> $\frac{\partial L}{\partial W_V},;
+> \frac{\partial L}{\partial W_Q},;
+> \frac{\partial L}{\partial W_K}$
+>
+> ---
+>
+> **Step 1：从输出回传到 V**
+>
+> $\frac{\partial L}{\partial V} = A^\top \frac{\partial L}{\partial O}$
+>
+> $\frac{\partial L}{\partial A} = \frac{\partial L}{\partial O} V^\top$
+>
+> ---
+>
+> **Step 2：穿过 Softmax**
+>
+> 对每一行 $A_i = \text{softmax}(S_i)$：
+>
+> $\frac{\partial L}{\partial S_i}
+> = A_i \odot \left(
+> \frac{\partial L}{\partial A_i}
+>
+> * \left\langle \frac{\partial L}{\partial A_i}, A_i \right\rangle
+>   \right)$
+>
+> ---
+>
+> **Step 3：回传到 Q 和 K**
+>
+> $\frac{\partial L}{\partial Q}
+> = \frac{1}{\sqrt{d_k}}
+> \frac{\partial L}{\partial S} K$
+>
+> $\frac{\partial L}{\partial K}
+> = \frac{1}{\sqrt{d_k}}
+> \left(\frac{\partial L}{\partial S}\right)^\top Q$
+>
+> ---
+>
+> **Step 4：回传到权重矩阵**
+>
+> $\frac{\partial L}{\partial W_V}
+> = X^\top \frac{\partial L}{\partial V}$
+>
+> $\frac{\partial L}{\partial W_Q}
+> = X^\top \frac{\partial L}{\partial Q}$
+>
+> $\frac{\partial L}{\partial W_K}
+> = X^\top \frac{\partial L}{\partial K}$
+>
+> ---
+>
+> **核心理解**
+>
+> * Attention 的梯度流是
+>   **输出 → V → A → (Q, K) → 权重**
+> * Softmax 决定了梯度如何在 token 间分配
+> * 缩放项 $\frac{1}{\sqrt{d_k}}$ 同时影响前向和反向的稳定性
+>
+> Transformer 的反向传播，本质仍然是：
+> **矩阵乘法 + Softmax 的链式法则**
+
+
+
+对应 PyTorch 代码:
+
+```python
+import torch
+import torch.nn.functional as F
+
+# input
+X = torch.randn(5, 16, requires_grad=True)
+
+# weights
+W_Q = torch.randn(16, 8, requires_grad=True)
+W_K = torch.randn(16, 8, requires_grad=True)
+W_V = torch.randn(16, 8, requires_grad=True)
+
+# forward
+Q = X @ W_Q
+K = X @ W_K
+V = X @ W_V
+
+scores = Q @ K.T / (8 ** 0.5)
+A = F.softmax(scores, dim=-1)
+O = A @ V
+
+# dummy loss
+loss = O.sum()
+
+# backward
+loss.backward()
+
+# gradients
+print(W_Q.grad.shape)  # (16, 8)
+print(W_K.grad.shape)
+print(W_V.grad.shape)
+```
 
 <br>
 
@@ -265,6 +625,12 @@ def eval_numerical_gradient(f, x):
 
 ## 正则化
 正则化是防止过拟合的重要技术，通过限制模型复杂度来提高泛化能力。
+
+[为什么正则化能够防止过拟合](../正则化与过拟合)
+
+
+<br>
+
 
 - L1正则化：
   - 损失函数：$J = L + \lambda \sum_w |w|$，增加权重绝对值的惩罚项
