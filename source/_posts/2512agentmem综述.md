@@ -19,7 +19,7 @@ desc: 整理自 https://arxiv.org/abs/2512.13564 《Memory in the Age of AI Agen
 
 ### 动机
 
-大语言模型（LLMs）虽然在单次对话中表现出色，但其本质上是**无状态的（stateless）**。给定上下文窗口 $C$，LLM 只能处理长度不超过 $|C|$ 的输入序列，其中 $|C|$ 通常限制在 4K 到 128K tokens 之间。这种限制使得 LLM 无法在**跨会话、跨任务、长期运行**的场景中维持记忆。
+大语言模型（LLMs）虽然在单次对话中表现出色，但其本质上是**无状态的（stateless）** 。给定上下文窗口 $C$，LLM 只能处理长度不超过 $|C|$ 的输入序列，其中 $|C|$ 通常限制在 4K 到 128K tokens 之间。这种限制使得 LLM 无法在**跨会话、跨任务、长期运行**的场景中维持记忆。
 
 形式化地，设 $M_t$ 表示时刻 $t$ 的记忆状态，$X_t$ 表示时刻 $t$ 的输入，则传统 LLM 的决策函数为：
 
@@ -33,24 +33,24 @@ $$a_t = f_{LLM}(X_t, C_t)$$
 
 本文提出 **Forms–Functions–Dynamics 三维分析框架**，首次系统性地将智能体记忆研究纳入统一范式。该框架将记忆系统分解为三个相互关联的维度：
 
-**Forms（形式）**：记忆的表示形式，回答"What architectural or representational forms can agent memory take"。
+**Forms（形式）** ：记忆的表示形式，回答"What architectural or representational forms can agent memory take"。
 - 包括记忆的**编码方式**（结构化 vs 非结构化）、**粒度**（事件级 vs 知识级）、**存储介质**（向量、图、关系型数据库）等。
 - 形式化地，记忆形式可以表示为 $m \in \mathcal{M}$，其中 $\mathcal{M}$ 是记忆空间，$m$ 可以是向量 $\mathbf{v} \in \mathbb{R}^d$、图节点 $n \in \mathcal{G}$、或结构化记录 $r \in \mathcal{R}$。
 
-**Functions（功能）**：记忆的用途，回答"Why is agent memory needed, and what roles or purposes does it serve"。
+**Functions（功能）** ：记忆的用途，回答"Why is agent memory needed, and what roles or purposes does it serve"。
 - 记忆系统支持五种核心功能：
-  - **检索（Retrieval）**$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$，从记忆库中召回相关信
-  - **反思（Reflection）**$\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$，从具体经验中提炼抽象原则
-  - **规划（Planning）**$\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$，基于历史计划生成新计划
-  - **个性化（Personalization）**$\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$，构建用户画像
-  - **协作（Collaboration）**$\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$，多 Agent 记忆融合。
+  - **检索（Retrieval）** $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$，从记忆库中召回相关信
+  - **反思（Reflection）** $\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$，从具体经验中提炼抽象原则
+  - **规划（Planning）** $\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$，基于历史计划生成新计划
+  - **个性化（Personalization）** $\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$，构建用户画像
+  - **协作（Collaboration）** $\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$，多 Agent 记忆融合。
 
-**Dynamics（动态）**：记忆的演化机制，回答"How does agent memory operate, adapt, and evolve over time"。
+**Dynamics（动态）** ：记忆的演化机制，回答"How does agent memory operate, adapt, and evolve over time"。
 - 记忆不是静态仓库，而是动态演化的认知器官。
 - 动态机制包括：
-  - 巩固（Consolidation）$\mathcal{CON}: \mathcal{M}\_{short} \rightarrow \mathcal{M}\_{long}$，将短期记忆整合为长期知识
-  - 更新（Updating）$\mathcal{UPD}: \mathcal{M}\_{old} \times \mathcal{E}\_{new} \rightarrow \mathcal{M}\_{new}$，根据新证据更新记忆
-  - 遗忘（Forgetting）$\mathcal{FOR}: \mathcal{M} \times \mathcal{C} \rightarrow \mathcal{M}'$，移除过时或低价值记忆。
+  - **巩固（Consolidation）** $\mathcal{CON}: \mathcal{M}\_{short} \rightarrow \mathcal{M}\_{long}$，将短期记忆整合为长期知识
+  - **更新（Updating）**  $\mathcal{UPD}: \mathcal{M}\_{old} \times \mathcal{E}\_{new} \rightarrow \mathcal{M}\_{new}$，根据新证据更新记忆
+  - **遗忘（Forgetting）**  $\mathcal{FOR}: \mathcal{M} \times \mathcal{C} \rightarrow \mathcal{M}'$，移除过时或低价值记忆。
 
 
 三个维度不可割裂。例如，"反思"功能要求高抽象语义记忆（Form），并通过全局整合（Dynamics）实现。形式化地，这种耦合关系可以表示为：
@@ -64,15 +64,15 @@ $$\mathcal{F}(\mathcal{M}\_{episodic}) = \mathcal{CON}(\mathcal{M}\_{episodic}, 
 
 ### Agent
 
-**Agent（智能体）**是一个以 LLM 为核心推理引擎的自主系统。形式化地，Agent 可以表示为元组 $\mathcal{A} = \langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{M}, f_{LLM} \rangle$，其中 $\mathcal{S}$ 是状态空间，$\mathcal{A}$ 是动作空间，$\mathcal{T}$ 是工具集合，$\mathcal{M}$ 是记忆系统，$f_{LLM}: \mathcal{S} \times \mathcal{M} \rightarrow \mathcal{A}$ 是 LLM 决策函数。
+**Agent（智能体）** 是一个以 LLM 为核心推理引擎的自主系统。形式化地，Agent 可以表示为元组 $\mathcal{A} = \langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{M}, f_{LLM} \rangle$，其中 $\mathcal{S}$ 是状态空间，$\mathcal{A}$ 是动作空间，$\mathcal{T}$ 是工具集合，$\mathcal{M}$ 是记忆系统，$f_{LLM}: \mathcal{S} \times \mathcal{M} \rightarrow \mathcal{A}$ 是 LLM 决策函数。
 
-Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**使得 Agent 能够在时间维度上持续运行，跨越多个会话和任务。设 $T = \{t_1, t_2, \ldots, t_n\}$ 表示时间序列，Agent 的状态演化遵循 $s_{t+1} = f_{transition}(s_t, a_t, m_t)$，其中 $m_t \in \mathcal{M}$ 是从记忆系统检索的相关记忆。
+Agent 具备四个核心能力。**时间持续性（Temporal Persistence）** 使得 Agent 能够在时间维度上持续运行，跨越多个会话和任务。设 $T = \{t_1, t_2, \ldots, t_n\}$ 表示时间序列，Agent 的状态演化遵循 $s_{t+1} = f_{transition}(s_t, a_t, m_t)$，其中 $m_t \in \mathcal{M}$ 是从记忆系统检索的相关记忆。
 
-**工具调用（Tool Usage）**能力使得 Agent 能够调用外部工具和 API。形式化地，工具调用可以表示为 $a_t = \text{call}(tool_i, params)$，其中 $tool_i \in \mathcal{T}$，$params$ 是参数。工具调用的结果被存储到记忆系统中，形成经验 $\mathcal{E} = \{(tool_i, params, result, timestamp)\}$。
+**工具调用（Tool Usage）** 能力使得 Agent 能够调用外部工具和 API。形式化地，工具调用可以表示为 $a_t = \text{call}(tool_i, params)$，其中 $tool_i \in \mathcal{T}$，$params$ 是参数。工具调用的结果被存储到记忆系统中，形成经验 $\mathcal{E} = \{(tool_i, params, result, timestamp)\}$。
 
-**交互能力（Interaction）**使得 Agent 能够与人类用户或其他 Agent 进行协作和通信。在多 Agent 系统中，Agent $i$ 和 Agent $j$ 之间的交互可以建模为消息传递 $m_{i \rightarrow j} = f_{comm}(s_i, \mathcal{M}_i)$，其中 $\mathcal{M}_i$ 是 Agent $i$ 的记忆系统。
+**交互能力（Interaction）** 使得 Agent 能够与人类用户或其他 Agent 进行协作和通信。在多 Agent 系统中，Agent $i$ 和 Agent $j$ 之间的交互可以建模为消息传递 $m_{i \rightarrow j} = f_{comm}(s_i, \mathcal{M}_i)$，其中 $\mathcal{M}_i$ 是 Agent $i$ 的记忆系统。
 
-**记忆利用（Memory Utilization）**是 Agent 的核心能力。Agent 利用记忆系统存储、检索和更新历史经验，以支持决策。决策函数可以扩展为 $a_t = f_{LLM}(s_t, \mathcal{R}(q_t, \mathcal{M}))$，其中 $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 是检索函数，$q_t$ 是查询。
+**记忆利用（Memory Utilization）** 是 Agent 的核心能力。Agent 利用记忆系统存储、检索和更新历史经验，以支持决策。决策函数可以扩展为 $a_t = f_{LLM}(s_t, \mathcal{R}(q_t, \mathcal{M}))$，其中 $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 是检索函数，$q_t$ 是查询。
 
 根据 Agent 数量，可以分为 Single-Agent 系统和 Multi-Agent 系统。Single-Agent 系统独立运行，决策函数为 $a_t = f_{LLM}(s_t, \mathcal{M})$。Multi-Agent 系统包含多个 Agent $\{\mathcal{A}_1, \mathcal{A}_2, \ldots, \mathcal{A}_n\}$，需要共享记忆 $\mathcal{M}\_{shared}$，决策函数为 $a_{i,t} = f_{LLM}(s_{i,t}, \mathcal{M}_i, \mathcal{M}\_{shared})$。
 
@@ -84,15 +84,15 @@ Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**�
 
 ### Memory System
 
-**Memory System（记忆系统）**是一个完整的架构，由四个核心组件构成。形式化地，记忆系统可以表示为 $\mathcal{M} = \langle \mathcal{D}, \mathcal{R}, \mathcal{W}, \mathcal{I} \rangle$。
+**Memory System（记忆系统）** 是一个完整的架构，由四个核心组件构成。形式化地，记忆系统可以表示为 $\mathcal{M} = \langle \mathcal{D}, \mathcal{R}, \mathcal{W}, \mathcal{I} \rangle$。
 
-**记忆数据库（Memory Database）**$\mathcal{D}$ 是持久化存储层，支持多种数据结构。设 $\mathcal{M}\_{vector} = \{\mathbf{v}_i \in \mathbb{R}^d\}\_{i=1}^n$ 表示向量记忆库，$\mathcal{M}\_{graph} = \langle V, E \rangle$ 表示图记忆库，$\mathcal{M}\_{relational} = \{r_i\}\_{i=1}^n$ 表示关系型记忆库。记忆数据库提供存储操作 $\text{store}: \mathcal{M} \times m \rightarrow \mathcal{M}'$，其中 $m$ 是要存储的记忆项。
+**记忆数据库（Memory Database）** $\mathcal{D}$ 是持久化存储层，支持多种数据结构。设 $\mathcal{M}\_{vector} = \{\mathbf{v}_i \in \mathbb{R}^d\}\_{i=1}^n$ 表示向量记忆库，$\mathcal{M}\_{graph} = \langle V, E \rangle$ 表示图记忆库，$\mathcal{M}\_{relational} = \{r_i\}\_{i=1}^n$ 表示关系型记忆库。记忆数据库提供存储操作 $\text{store}: \mathcal{M} \times m \rightarrow \mathcal{M}'$，其中 $m$ 是要存储的记忆项。
 
-**读/写接口（Read/Write APIs）**提供记忆的存储、检索、更新、删除操作。写操作可以表示为 $\mathcal{M}' = \mathcal{M} \cup \{m\}$，读操作可以表示为 $m = \text{read}(\mathcal{M}, id)$，更新操作可以表示为 $\mathcal{M}' = (\mathcal{M} \setminus \{m_{old}\}) \cup \{m_{new}\}$，删除操作可以表示为 $\mathcal{M}' = \mathcal{M} \setminus \{m\}$。
+**读/写接口（Read/Write APIs）** 提供记忆的存储、检索、更新、删除操作。写操作可以表示为 $\mathcal{M}' = \mathcal{M} \cup \{m\}$，读操作可以表示为 $m = \text{read}(\mathcal{M}, id)$，更新操作可以表示为 $\mathcal{M}' = (\mathcal{M} \setminus \{m_{old}\}) \cup \{m_{new}\}$，删除操作可以表示为 $\mathcal{M}' = \mathcal{M} \setminus \{m\}$。
 
-**检索机制（Retrieval Mechanism）**$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 基于查询从记忆库中召回相关信息。对于向量记忆库，检索可以表示为 $\mathcal{M}' = \text{TopK}(\{\text{sim}(q, \mathbf{v}_i)\}\_{i=1}^n)$，其中 $\text{sim}$ 是相似度函数（如余弦相似度 $\cos(\mathbf{q}, \mathbf{v}) = \frac{\mathbf{q} \cdot \mathbf{v}}{||\mathbf{q}|| \cdot ||\mathbf{v}||}$）。对于图记忆库，检索可以表示为图查询 $Q = \text{match}(pattern, \mathcal{M}\_{graph})$。
+**检索机制（Retrieval Mechanism）** $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 基于查询从记忆库中召回相关信息。对于向量记忆库，检索可以表示为 $\mathcal{M}' = \text{TopK}(\{\text{sim}(q, \mathbf{v}_i)\}\_{i=1}^n)$，其中 $\text{sim}$ 是相似度函数（如余弦相似度 $\cos(\mathbf{q}, \mathbf{v}) = \frac{\mathbf{q} \cdot \mathbf{v}}{||\mathbf{q}|| \cdot ||\mathbf{v}||}$）。对于图记忆库，检索可以表示为图查询 $Q = \text{match}(pattern, \mathcal{M}\_{graph})$。
 
-**整合模块（Integration Module）**$\mathcal{I}: \mathcal{M}' \times \mathcal{C} \rightarrow \mathcal{C}'$ 将检索到的记忆整合到 Agent 的决策上下文中。整合操作可以表示为 $c' = \text{integrate}(c, \{m_1, m_2, \ldots, m_k\})$，其中 $c$ 是当前上下文，$\{m_i\}$ 是检索到的记忆。
+**整合模块（Integration Module）** $\mathcal{I}: \mathcal{M}' \times \mathcal{C} \rightarrow \mathcal{C}'$ 将检索到的记忆整合到 Agent 的决策上下文中。整合操作可以表示为 $c' = \text{integrate}(c, \{m_1, m_2, \ldots, m_k\})$，其中 $c$ 是当前上下文，$\{m_i\}$ 是检索到的记忆。
 
 记忆系统与 Agent 的耦合方式有两种。**紧密耦合**中，记忆操作直接嵌入 Agent 的决策循环，决策函数为 $a_t = f_{LLM}(s_t, \mathcal{I}(\mathcal{R}(q_t, \mathcal{M}), c_t))$。**松散耦合**中，记忆系统作为独立服务，通过 API 调用，决策函数为 $a_t = f_{LLM}(s_t, \text{API}(\mathcal{M}, q_t))$。
 
@@ -102,9 +102,9 @@ Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**�
 
 #### 按时间维度
 
-记忆系统按时间维度可以分为短期记忆和长期记忆。**短期记忆（Short-term Memory）**$\mathcal{M}\_{short}$ 存储原始、未处理、高保真的详细信息，通常存储在 LLM 上下文窗口或临时缓存中。形式化地，短期记忆可以表示为 $\mathcal{M}\_{short} = \{m_i\}\_{i=t-k}^{t-1}$，其中 $k \leq |C|$ 是上下文窗口大小。短期记忆的生命周期为单次任务或会话内，典型大小为 4K-128K tokens。
+记忆系统按时间维度可以分为短期记忆和长期记忆。**短期记忆（Short-term Memory）** $\mathcal{M}\_{short}$ 存储原始、未处理、高保真的详细信息，通常存储在 LLM 上下文窗口或临时缓存中。形式化地，短期记忆可以表示为 $\mathcal{M}\_{short} = \{m_i\}\_{i=t-k}^{t-1}$，其中 $k \leq |C|$ 是上下文窗口大小。短期记忆的生命周期为单次任务或会话内，典型大小为 4K-128K tokens。
 
-**长期记忆（Long-term Memory）**$\mathcal{M}\_{long}$ 存储抽象、结构化、可索引的压缩信息，存储在外部数据库（向量数据库、图数据库、SQL 数据库、文件系统）中。形式化地，长期记忆可以表示为 $\mathcal{M}\_{long} = \{m_j\}\_{j=1}^N$，其中 $N$ 可以非常大（受存储限制）。长期记忆的生命周期为跨任务、跨会话、持久化。
+**长期记忆（Long-term Memory）** $\mathcal{M}\_{long}$ 存储抽象、结构化、可索引的压缩信息，存储在外部数据库（向量数据库、图数据库、SQL 数据库、文件系统）中。形式化地，长期记忆可以表示为 $\mathcal{M}\_{long} = \{m_j\}\_{j=1}^N$，其中 $N$ 可以非常大（受存储限制）。长期记忆的生命周期为跨任务、跨会话、持久化。
 
 关键区别在于：短期记忆受限于 LLM 上下文长度，通常直接包含在 prompt 中，无需检索，即 $c_t = [m_{t-k}, m_{t-k+1}, \ldots, m_{t-1}]$。长期记忆需要外部存储和检索机制（如 RAG），通过相似性搜索或结构化查询获取，即 $c_t = \mathcal{I}(\mathcal{R}(q_t, \mathcal{M}\_{long}), c_{short})$。
 
@@ -112,11 +112,11 @@ Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**�
 
 #### 按抽象层次
 
-记忆系统按抽象层次可以分为三个层次。**原始层（Raw）**$\mathcal{M}\_{raw}$ 存储未处理的交互日志、对话历史，形式为 $m_{raw} = \text{"User: What's the weather? Agent: It's sunny."}$。原始层保留完整信息，适合回溯，但存储效率低。
+记忆系统按抽象层次可以分为三个层次。**原始层（Raw）** $\mathcal{M}\_{raw}$ 存储未处理的交互日志、对话历史，形式为 $m_{raw} = \text{"User: What's the weather? Agent: It's sunny."}$。原始层保留完整信息，适合回溯，但存储效率低。
 
-**事件层（Event-level）**$\mathcal{M}\_{event}$ 存储结构化的事件记录，包含时间戳、动作、结果。形式化地，事件可以表示为 $e = \langle t, a, o, r \rangle$，其中 $t$ 是时间戳，$a$ 是动作，$o$ 是观察，$r$ 是奖励。事件层适合个性化、行为分析，存储效率中等。
+**事件层（Event-level）** $\mathcal{M}\_{event}$ 存储结构化的事件记录，包含时间戳、动作、结果。形式化地，事件可以表示为 $e = \langle t, a, o, r \rangle$，其中 $t$ 是时间戳，$a$ 是动作，$o$ 是观察，$r$ 是奖励。事件层适合个性化、行为分析，存储效率中等。
 
-**知识层（Knowledge-level）**$\mathcal{M}\_{knowledge}$ 存储抽象的事实、规则、原则。形式化地，知识可以表示为 $k = \text{"用户偏好简洁回答"}$ 或三元组 $k = \langle subject, predicate, object \rangle$。知识层适合泛化、推理、规划，存储效率高但可能丢失细节。
+**知识层（Knowledge-level）** $\mathcal{M}\_{knowledge}$ 存储抽象的事实、规则、原则。形式化地，知识可以表示为 $k = \text{"用户偏好简洁回答"}$ 或三元组 $k = \langle subject, predicate, object \rangle$。知识层适合泛化、推理、规划，存储效率高但可能丢失细节。
 
 抽象层次之间的关系可以表示为映射 $\phi: \mathcal{M}\_{raw} \rightarrow \mathcal{M}\_{event} \rightarrow \mathcal{M}\_{knowledge}$，其中 $\phi$ 是抽象函数。
 
@@ -124,11 +124,11 @@ Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**�
 
 #### 按存储结构
 
-记忆系统按存储结构可以分为非结构化、半结构化、结构化三种。**非结构化（Unstructured）**记忆 $\mathcal{M}\_{unstructured}$ 存储原始文本，形式为 $m = \text{"raw text"}$。非结构化记忆灵活、易存储，但难以查询，检索效率低，适合原始日志、对话历史。
+记忆系统按存储结构可以分为非结构化、半结构化、结构化三种。**非结构化（Unstructured）** 记忆 $\mathcal{M}\_{unstructured}$ 存储原始文本，形式为 $m = \text{"raw text"}$。非结构化记忆灵活、易存储，但难以查询，检索效率低，适合原始日志、对话历史。
 
-**半结构化（Semi-structured）**记忆 $\mathcal{M}\_{semi}$ 存储 JSON、XML 等格式的结构化数据，形式为 $m = \{\text{"key": "value"}\}$。半结构化记忆平衡灵活性和可查询性，但需要 schema 设计，适合 JSON、XML 格式的事件记录。
+**半结构化（Semi-structured）** 记忆 $\mathcal{M}\_{semi}$ 存储 JSON、XML 等格式的结构化数据，形式为 $m = \{\text{"key": "value"}\}$。半结构化记忆平衡灵活性和可查询性，但需要 schema 设计，适合 JSON、XML 格式的事件记录。
 
-**结构化（Structured）**记忆 $\mathcal{M}\_{structured}$ 存储在关系型数据库或图数据库中，形式为 $m \in \mathcal{R}$ 或 $m \in \mathcal{G}$。结构化记忆高效查询、支持复杂推理，但需要预定义 schema、灵活性低，适合图数据库、关系型数据库。
+**结构化（Structured）** 记忆 $\mathcal{M}\_{structured}$ 存储在关系型数据库或图数据库中，形式为 $m \in \mathcal{R}$ 或 $m \in \mathcal{G}$。结构化记忆高效查询、支持复杂推理，但需要预定义 schema、灵活性低，适合图数据库、关系型数据库。
 
 <br>
 
@@ -136,17 +136,17 @@ Agent 具备四个核心能力。**时间持续性（Temporal Persistence）**�
 
 ### 分类原则
 
-记忆形式的分类遵循三个核心维度：表示粒度、结构化程度、模态。**表示粒度（Granularity）**描述记忆的抽象层次。事件级（Event-level）记忆记录具体的交互事件，包含完整上下文，形式化地可以表示为 $m_{event} = \langle t, s, a, o, r \rangle$，其中 $t$ 是时间戳，$s$ 是状态，$a$ 是动作，$o$ 是观察，$r$ 是奖励。知识级（Knowledge-level）记忆存储抽象的事实、规则、模式，去除具体细节，形式化地可以表示为 $m_{knowledge} = \phi(m_{event})$，其中 $\phi$ 是抽象函数。
+记忆形式的分类遵循三个核心维度：表示粒度、结构化程度、模态。**表示粒度（Granularity）** 描述记忆的抽象层次。事件级（Event-level）记忆记录具体的交互事件，包含完整上下文，形式化地可以表示为 $m_{event} = \langle t, s, a, o, r \rangle$，其中 $t$ 是时间戳，$s$ 是状态，$a$ 是动作，$o$ 是观察，$r$ 是奖励。知识级（Knowledge-level）记忆存储抽象的事实、规则、模式，去除具体细节，形式化地可以表示为 $m_{knowledge} = \phi(m_{event})$，其中 $\phi$ 是抽象函数。
 
-**结构化程度（Structure）**描述记忆的组织方式。非结构化（Unstructured）记忆存储原始日志、自由文本，形式为 $m_{unstructured} = \text{"raw text"}$。半结构化（Semi-structured）记忆存储 JSON、XML 等格式的数据，形式为 $m_{semi} = \{k_i: v_i\}\_{i=1}^n$。结构化（Structured）记忆存储在图、关系型数据库中，形式为 $m_{structured} \in \mathcal{G}$ 或 $m_{structured} \in \mathcal{R}$。
+**结构化程度（Structure）** 描述记忆的组织方式。非结构化（Unstructured）记忆存储原始日志、自由文本，形式为 $m_{unstructured} = \text{"raw text"}$。半结构化（Semi-structured）记忆存储 JSON、XML 等格式的数据，形式为 $m_{semi} = \{k_i: v_i\}\_{i=1}^n$。结构化（Structured）记忆存储在图、关系型数据库中，形式为 $m_{structured} \in \mathcal{G}$ 或 $m_{structured} \in \mathcal{R}$。
 
-**模态（Modality）**描述记忆的内容类型。单模态记忆主要处理文本，形式为 $m_{text} \in \mathcal{T}$，其中 $\mathcal{T}$ 是文本空间。多模态记忆处理文本、图像、音频、视频等多种模态，形式为 $m_{multimodal} = \{m_{text}, m_{image}, m_{audio}, m_{video}\}$，其中各模态通过嵌入函数映射到统一空间 $\mathbf{v} = f_{embed}(m_{modality}) \in \mathbb{R}^d$。
+**模态（Modality）** 描述记忆的内容类型。单模态记忆主要处理文本，形式为 $m_{text} \in \mathcal{T}$，其中 $\mathcal{T}$ 是文本空间。多模态记忆处理文本、图像、音频、视频等多种模态，形式为 $m_{multimodal} = \{m_{text}, m_{image}, m_{audio}, m_{video}\}$，其中各模态通过嵌入函数映射到统一空间 $\mathbf{v} = f_{embed}(m_{modality}) \in \mathbb{R}^d$。
 
 ### 主要形式
 
 #### Episodic Memory（情景记忆）
 
-**Episodic Memory（情景记忆）**记录 Agent 与环境的**具体交互事件**，包含时间戳、动作、观察、奖励、反馈等完整信息。形式化地，episodic memory 可以表示为元组 $e = \langle t, s, a, o, r, f \rangle$，其中 $t \in \mathbb{R}^+$ 是时间戳，$s \in \mathcal{S}$ 是状态，$a \in \mathcal{A}$ 是动作，$o \in \mathcal{O}$ 是观察，$r \in \mathbb{R}$ 是奖励，$f \in \mathcal{F}$ 是反馈。Episodic memory 集合可以表示为 $\mathcal{M}\_{episodic} = \{e_i\}\_{i=1}^n$，其中 $n$ 是事件数量。
+**Episodic Memory（情景记忆）** 记录 Agent 与环境的**具体交互事件**，包含时间戳、动作、观察、奖励、反馈等完整信息。形式化地，episodic memory 可以表示为元组 $e = \langle t, s, a, o, r, f \rangle$，其中 $t \in \mathbb{R}^+$ 是时间戳，$s \in \mathcal{S}$ 是状态，$a \in \mathcal{A}$ 是动作，$o \in \mathcal{O}$ 是观察，$r \in \mathbb{R}$ 是奖励，$f \in \mathcal{F}$ 是反馈。Episodic memory 集合可以表示为 $\mathcal{M}\_{episodic} = \{e_i\}\_{i=1}^n$，其中 $n$ 是事件数量。
 
 Episodic memory 的核心特征包括**高保真性**、**时间序列性**、**上下文完整性**。高保真性意味着保留原始交互细节，不进行抽象，即 $e$ 包含完整信息 $\text{info}(e) = \{t, s, a, o, r, f\}$。时间序列性意味着按时间顺序组织，支持时间查询，即 $\mathcal{M}\_{episodic}$ 可以按时间排序 $\{e_i: t_i < t_j \text{ if } i < j\}$。上下文完整性意味着包含事件发生的完整上下文，即 $e$ 包含状态 $s$ 和观察 $o$。
 
@@ -164,7 +164,7 @@ Episodic memory 的优势是信息完整、支持细粒度查询、适合个性�
 
 #### Semantic Memory（语义记忆）
 
-**Semantic Memory（语义记忆）**存储**抽象的事实、规则、常识、领域知识**，去除具体事件细节，保留可泛化的语义信息。形式化地，semantic memory 可以表示为知识集合 $\mathcal{M}\_{semantic} = \{k_i\}\_{i=1}^m$，其中 $k_i$ 是知识项。知识项可以通过抽象函数从 episodic memory 中提取：$k = \phi(e)$，其中 $\phi: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$ 是抽象映射。
+**Semantic Memory（语义记忆）** 存储**抽象的事实、规则、常识、领域知识**，去除具体事件细节，保留可泛化的语义信息。形式化地，semantic memory 可以表示为知识集合 $\mathcal{M}\_{semantic} = \{k_i\}\_{i=1}^m$，其中 $k_i$ 是知识项。知识项可以通过抽象函数从 episodic memory 中提取：$k = \phi(e)$，其中 $\phi: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$ 是抽象映射。
 
 Semantic memory 的核心特征包括**高抽象性**、**任务无关性**、**可复用性**。高抽象性意味着从具体事件中提炼通用知识，抽象过程可以表示为 $k = \arg\min_{k'} \text{loss}(\{e_i\}, k')$，其中 $\text{loss}$ 是抽象损失函数。任务无关性意味着不绑定特定任务或用户，即 $k$ 不包含任务特定信息 $\text{task\_info}(k) = \emptyset$。可复用性意味着可在多个场景中复用，形式化地可以表示为 $k$ 适用于场景集合 $\mathcal{S}_k = \{s_1, s_2, \ldots, s_n\}$。
 
@@ -182,7 +182,7 @@ Semantic memory 的优势是高度抽象、可复用、支持复杂推理、存�
 
 #### Procedural Memory（程序记忆）
 
-**Procedural Memory（程序记忆）**存储**任务执行流程、技能模板、操作序列**，记录"如何做"而非"是什么"。形式化地，procedural memory 可以表示为程序集合 $\mathcal{M}\_{procedural} = \{\pi_i\}\_{i=1}^p$，其中 $\pi_i$ 是程序或计划。程序可以表示为函数 $\pi: \mathcal{S} \times \mathcal{P} \rightarrow \mathcal{A}^*$，其中 $\mathcal{S}$ 是状态空间，$\mathcal{P}$ 是参数空间，$\mathcal{A}^*$ 是动作序列。
+**Procedural Memory（程序记忆）** 存储**任务执行流程、技能模板、操作序列**，记录"如何做"而非"是什么"。形式化地，procedural memory 可以表示为程序集合 $\mathcal{M}\_{procedural} = \{\pi_i\}\_{i=1}^p$，其中 $\pi_i$ 是程序或计划。程序可以表示为函数 $\pi: \mathcal{S} \times \mathcal{P} \rightarrow \mathcal{A}^*$，其中 $\mathcal{S}$ 是状态空间，$\mathcal{P}$ 是参数空间，$\mathcal{A}^*$ 是动作序列。
 
 Procedural memory 的核心特征包括**过程性**、**可执行性**、**参数化**。过程性意味着关注执行步骤和流程，程序可以表示为步骤序列 $\pi = [a_1, a_2, \ldots, a_n]$，其中 $a_i \in \mathcal{A}$ 是动作。可执行性意味着可直接用于指导行动，执行函数可以表示为 $\text{execute}(\pi, s, p) = [a_1(s, p), a_2(s, p), \ldots, a_n(s, p)]$。参数化意味着支持不同输入参数，程序可以表示为 $\pi(p_1, p_2, \ldots, p_k)$，其中 $p_i$ 是参数。
 
@@ -203,7 +203,7 @@ Procedural memory 的优势是直接可执行、高效复用、支持复杂任�
 
 #### Graph-based Memory（基于图的记忆）
 
-**Graph-based Memory（基于图的记忆）**使用**图结构**存储记忆，节点表示实体或事件，边表示关系或因果关系。形式化地，图记忆可以表示为 $\mathcal{G} = \langle V, E, \lambda_V, \lambda_E \rangle$，其中 $V$ 是节点集合，$E \subseteq V \times V$ 是边集合，$\lambda_V: V \rightarrow \mathcal{L}_V$ 是节点标签函数，$\lambda_E: E \rightarrow \mathcal{L}_E$ 是边标签函数。
+**Graph-based Memory（基于图的记忆）** 使用**图结构**存储记忆，节点表示实体或事件，边表示关系或因果关系。形式化地，图记忆可以表示为 $\mathcal{G} = \langle V, E, \lambda_V, \lambda_E \rangle$，其中 $V$ 是节点集合，$E \subseteq V \times V$ 是边集合，$\lambda_V: V \rightarrow \mathcal{L}_V$ 是节点标签函数，$\lambda_E: E \rightarrow \mathcal{L}_E$ 是边标签函数。
 
 Graph-based memory 的核心特征包括**关系显式化**、**多跳推理**、**灵活查询**。关系显式化意味着关系作为一等公民存储，边 $e = (u, v) \in E$ 显式表示节点 $u$ 和 $v$ 之间的关系。多跳推理支持沿着边的路径进行推理，路径可以表示为 $p = [v_1, e_1, v_2, e_2, \ldots, v_k]$，其中 $(v_i, v_{i+1}) \in E$。灵活查询支持复杂的图查询语言，查询可以表示为 $Q = \text{match}(pattern, \mathcal{G})$，其中 $pattern$ 是查询模式。
 
@@ -221,7 +221,7 @@ Graph-based memory 的优势是支持复杂关系查询、多跳推理、灵活�
 
 #### Vector-based Memory（基于向量的记忆）
 
-**Vector-based Memory（基于向量的记忆）**将文本（或其他模态）**嵌入为高维向量**，通过向量相似性搜索进行检索。形式化地，向量记忆可以表示为 $\mathcal{M}\_{vector} = \{(\mathbf{v}_i, m_i)\}\_{i=1}^n$，其中 $\mathbf{v}_i \in \mathbb{R}^d$ 是嵌入向量，$m_i$ 是原始记忆项，$d$ 是向量维度。嵌入函数可以表示为 $f_{embed}: \mathcal{M} \rightarrow \mathbb{R}^d$，将记忆项映射到向量空间。
+**Vector-based Memory（基于向量的记忆）** 将文本（或其他模态）** 嵌入为高维向量**，通过向量相似性搜索进行检索。形式化地，向量记忆可以表示为 $\mathcal{M}\_{vector} = \{(\mathbf{v}_i, m_i)\}\_{i=1}^n$，其中 $\mathbf{v}_i \in \mathbb{R}^d$ 是嵌入向量，$m_i$ 是原始记忆项，$d$ 是向量维度。嵌入函数可以表示为 $f_{embed}: \mathcal{M} \rightarrow \mathbb{R}^d$，将记忆项映射到向量空间。
 
 Vector-based memory 的核心特征包括**语义相似性**、**高效检索**、**多模态支持**。语义相似性意味着相似的文本在向量空间中距离近，相似度可以表示为 $\text{sim}(\mathbf{v}_1, \mathbf{v}_2) = \cos(\mathbf{v}_1, \mathbf{v}_2) = \frac{\mathbf{v}_1 \cdot \mathbf{v}_2}{||\mathbf{v}_1|| \cdot ||\mathbf{v}_2||}$。高效检索使用近似最近邻（ANN）算法快速检索，检索可以表示为 $\mathcal{Q}\_{ANN}(q, k) = \text{TopK}(\{\text{sim}(\mathbf{q}, \mathbf{v}_i)\}\_{i=1}^n)$，其中 $\mathbf{q} = f_{embed}(q)$ 是查询向量，$k$ 是返回数量。多模态支持可扩展到图像、音频等模态，多模态嵌入可以表示为 $\mathbf{v}\_{multimodal} = f_{multimodal}(m_{text}, m_{image}, m_{audio})$。
 
@@ -271,15 +271,15 @@ Vector-based memory 的优势是检索速度快、支持语义相似性、易于
 
 记忆系统为 Agent 提供五大核心功能，每种功能对应不同的记忆形式和实现技术。形式化地，功能可以表示为映射 $F: \mathcal{M} \times \mathcal{Q} \rightarrow \mathcal{O}$，其中 $\mathcal{M}$ 是记忆空间，$\mathcal{Q}$ 是查询空间，$\mathcal{O}$ 是输出空间。
 
-**检索（Retrieval）**$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 从记忆库中召回与当前任务相关的历史信息，所需记忆形式为 Episodic、Semantic 或 Vector，典型实现技术包括 Dense retrieval、BM25、Hybrid search，评估指标为 Recall@K、Precision@K、MRR。
+**检索（Retrieval）** $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$ 从记忆库中召回与当前任务相关的历史信息，所需记忆形式为 Episodic、Semantic 或 Vector，典型实现技术包括 Dense retrieval、BM25、Hybrid search，评估指标为 Recall@K、Precision@K、MRR。
 
-**反思（Reflection）**$\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$ 对历史经验进行元认知分析，提炼抽象原则，所需记忆形式为 Semantic（high-level），典型实现技术包括 LLM-based summarization、Insight extraction，评估指标为原则质量、泛化能力。
+**反思（Reflection）** $\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$ 对历史经验进行元认知分析，提炼抽象原则，所需记忆形式为 Semantic（high-level），典型实现技术包括 LLM-based summarization、Insight extraction，评估指标为原则质量、泛化能力。
 
-**规划（Planning）**$\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$ 基于历史经验指导未来行动序列，所需记忆形式为 Procedural 或 Graph，典型实现技术包括 Case-based reasoning、Plan reuse、Hierarchical planning，评估指标为任务成功率、规划效率。
+**规划（Planning）** $\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$ 基于历史经验指导未来行动序列，所需记忆形式为 Procedural 或 Graph，典型实现技术包括 Case-based reasoning、Plan reuse、Hierarchical planning，评估指标为任务成功率、规划效率。
 
-**个性化（Personalization）**$\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$ 根据用户历史行为定制 Agent 的响应和行为，所需记忆形式为 Episodic + User Profile，典型实现技术包括 Preference modeling、Role prompting、User embedding，评估指标为用户满意度、行为一致性。
+**个性化（Personalization）** $\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$ 根据用户历史行为定制 Agent 的响应和行为，所需记忆形式为 Episodic + User Profile，典型实现技术包括 Preference modeling、Role prompting、User embedding，评估指标为用户满意度、行为一致性。
 
-**协作（Collaboration）**$\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$ 多 Agent 之间共享知识和经验，所需记忆形式为 Shared Semantic 或 Graph，典型实现技术包括 Memory broadcasting、Consensus protocols、Federated memory，评估指标为知识共享效率、一致性。
+**协作（Collaboration）** $\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$ 多 Agent 之间共享知识和经验，所需记忆形式为 Shared Semantic 或 Graph，典型实现技术包括 Memory broadcasting、Consensus protocols、Federated memory，评估指标为知识共享效率、一致性。
 
 <br>
 
@@ -287,7 +287,7 @@ Vector-based memory 的优势是检索速度快、支持语义相似性、易于
 
 #### Retrieval（检索）
 
-**Retrieval（检索）**从长期记忆库中**召回与当前查询相关的历史信息**，是记忆系统最基础的功能。形式化地，检索可以表示为函数 $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$，其中 $\mathcal{Q}$ 是查询空间，$\mathcal{M}$ 是记忆库，$\mathcal{M}' \subseteq \mathcal{M}$ 是检索到的记忆子集。检索的目标是最大化相关性 $\text{rel}(q, m)$，同时保持检索效率。
+**Retrieval（检索）** 从长期记忆库中**召回与当前查询相关的历史信息**，是记忆系统最基础的功能。形式化地，检索可以表示为函数 $\mathcal{R}: \mathcal{Q} \times \mathcal{M} \rightarrow \mathcal{M}'$，其中 $\mathcal{Q}$ 是查询空间，$\mathcal{M}$ 是记忆库，$\mathcal{M}' \subseteq \mathcal{M}$ 是检索到的记忆子集。检索的目标是最大化相关性 $\text{rel}(q, m)$，同时保持检索效率。
 
 检索的核心挑战包括相关性判断、检索效率、信息整合。相关性判断需要计算查询和记忆之间的相似度，形式化地可以表示为 $\text{rel}(q, m) = f_{similarity}(q, m)$，其中 $f_{similarity}$ 是相似度函数。检索效率需要在百万级记忆库中快速检索，检索复杂度应该为 $O(\log n)$ 或 $O(\sqrt{n})$，而不是 $O(n)$。信息整合需要将多个检索结果整合为有用的上下文，形式化地可以表示为 $c = f_{integrate}(\{m_1, m_2, \ldots, m_k\})$，其中 $c$ 是整合后的上下文。
 
@@ -307,7 +307,7 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 #### Reflection（反思）
 
-**Reflection（反思）**是 Agent 定期对历史轨迹进行**元认知分析**，从具体经验中提炼抽象的、可泛化的原则和见解的过程。形式化地，反思可以表示为函数 $\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$，将 episodic memory 映射到 semantic memory。反思的目标是从具体事件 $\{e_1, e_2, \ldots, e_n\}$ 中提取抽象原则 $k$，使得 $k$ 能够解释和指导未来行为。
+**Reflection（反思）** 是 Agent 定期对历史轨迹进行**元认知分析**，从具体经验中提炼抽象的、可泛化的原则和见解的过程。形式化地，反思可以表示为函数 $\mathcal{F}: \mathcal{M}\_{episodic} \rightarrow \mathcal{M}\_{semantic}$，将 episodic memory 映射到 semantic memory。反思的目标是从具体事件 $\{e_1, e_2, \ldots, e_n\}$ 中提取抽象原则 $k$，使得 $k$ 能够解释和指导未来行为。
 
 **核心机制**包括触发条件、反思流程、原则提取三个阶段：
 
@@ -334,7 +334,7 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 **挑战与解决方案**：
 
-- **过度泛化（Over-generalization）**：
+- **过度泛化（Over-generalization）** ：
   - **问题**：从少数案例中提取过于宽泛的原则，即 $\text{support}(k) < \theta_{min}$ 但 $\text{scope}(k)$ 过大
   - **解决**：要求最小支持度 $\text{support}(k) \geq \theta_{min}$，其中 $\text{support}(k) = |\{e: k \text{ applies to } e\}|$，以及交叉验证 $\text{validate}(k, \mathcal{E}\_{test})$
 
@@ -366,7 +366,7 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 #### Planning（规划）
 
-**Planning（规划）**基于历史经验（特别是成功的执行计划）**指导未来行动的序列生成**。形式化地，规划可以表示为函数 $\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$，其中 $\mathcal{M}\_{procedural}$ 是程序记忆库，$\mathcal{T}$ 是任务空间，$\Pi$ 是计划空间。规划的目标是生成计划 $\pi = [a_1, a_2, \ldots, a_n]$，使得执行计划能够完成任务。
+**Planning（规划）** 基于历史经验（特别是成功的执行计划）** 指导未来行动的序列生成**。形式化地，规划可以表示为函数 $\mathcal{P}: \mathcal{M}\_{procedural} \times \mathcal{T} \rightarrow \Pi$，其中 $\mathcal{M}\_{procedural}$ 是程序记忆库，$\mathcal{T}$ 是任务空间，$\Pi$ 是计划空间。规划的目标是生成计划 $\pi = [a_1, a_2, \ldots, a_n]$，使得执行计划能够完成任务。
 
 **核心机制**包括案例检索、计划复用、计划生成三个阶段：
 
@@ -378,17 +378,17 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 **技术实现**包括 Case-Based Reasoning、Hierarchical Planning、Plan Schema：
 
-- **Case-Based Reasoning（基于案例的推理）**：
+- **Case-Based Reasoning（基于案例的推理）** ：
   - **案例检索**：$\pi_{cases} = \mathcal{Q}\_{similar}(\text{task}, k) = \text{TopK}(\{\text{sim}(\text{task}, \pi_i)\}\_{i=1}^n)$，其中 $k$ 是返回数量
   - **计划适配**：$\pi_{adapted} = f_{adapt}(\pi_{best}, \text{task}\_{new})$，其中 $\pi_{best} = \arg\max_{\pi \in \pi_{cases}} \text{sim}(\text{task}\_{new}, \pi)$
   - **执行计划**：$\text{result} = \text{execute}(\pi_{adapted})$
 
-- **Hierarchical Planning（分层规划）**：
+- **Hierarchical Planning（分层规划）** ：
   - **高层计划**：$\pi_{high} = [\text{Search}, \text{Filter}, \text{Select}, \text{Book}]$
   - **低层动作**：$\pi_{low} = \{\pi_{Search}, \pi_{Filter}, \pi_{Select}, \pi_{Book}\}$，其中每个子计划 $\pi_i$ 包含具体动作序列
   - **计划组合**：$\pi = \text{compose}(\pi_{high}, \pi_{low})$
 
-- **Plan Schema（计划模板）**：
+- **Plan Schema（计划模板）** ：
   - **模板定义**：$\text{Schema} = \langle \text{task\_type}, \text{template}, \text{adaptation\_rules} \rangle$，其中 $\text{template} = [\text{step}_1, \text{step}_2, \ldots, \text{step}_n]$
   - **计划实例化**：$\pi = f_{instantiate}(\text{Schema}, \text{parameters})$，其中 $\text{parameters}$ 是任务参数
   - **适配规则**：$\text{adaptation\_rules} = \{\text{if\_no\_results}: \text{suggest\_alternative}, \text{if\_booking\_fails}: \text{retry\_backup}\}$
@@ -421,16 +421,16 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 #### Personalization（个性化）
 
-**Personalization（个性化）**根据用户的**历史行为、偏好、上下文**定制 Agent 的响应和行为，实现"千人千面"的体验。形式化地，个性化可以表示为函数 $\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$，其中 $\mathcal{P}\_{user}$ 是用户画像空间。个性化的目标是构建用户画像 $p_u$，使得 Agent 的响应 $a_t = f_{LLM}(s_t, p_u)$ 符合用户期望。
+**Personalization（个性化）** 根据用户的**历史行为、偏好、上下文**定制 Agent 的响应和行为，实现"千人千面"的体验。形式化地，个性化可以表示为函数 $\mathcal{U}: \mathcal{M}\_{episodic} \rightarrow \mathcal{P}\_{user}$，其中 $\mathcal{P}\_{user}$ 是用户画像空间。个性化的目标是构建用户画像 $p_u$，使得 Agent 的响应 $a_t = f_{LLM}(s_t, p_u)$ 符合用户期望。
 
 **核心组件**包括 User Profile 和 User Role Snapshot：
 
-- **User Profile（用户画像）**：$p_u = \langle p_{explicit}, p_{implicit}, p_{context} \rangle$
+- **User Profile（用户画像）** ：$p_u = \langle p_{explicit}, p_{implicit}, p_{context} \rangle$
   - **显式偏好**：$p_{explicit} = \{k: \text{user\_stated}(k)\}$，用户明确表达的偏好（如"我喜欢简洁的回答"）
   - **隐式偏好**：$p_{implicit} = f_{infer}(\mathcal{Q}\_{user}(u))$，从行为中推断的偏好（如频繁选择直飞航班），其中 $f_{infer}$ 是推断函数
   - **上下文信息**：$p_{context} = \{\text{timezone}, \text{language}, \text{device}\}$，时区、语言、设备类型等
 
-- **User Role Snapshot（用户角色快照）**：从稀疏的 episodic memory 中提取稳定的用户特征，形式化地可以表示为 $\text{snapshot}(u) = f_{MOOM}(\mathcal{Q}\_{user}(u))$，构建用户角色的高层次描述
+- **User Role Snapshot（用户角色快照）** ：从稀疏的 episodic memory 中提取稳定的用户特征，形式化地可以表示为 $\text{snapshot}(u) = f_{MOOM}(\mathcal{Q}\_{user}(u))$，构建用户角色的高层次描述
 
 **技术实现**包括 MOOM 方法、Preference Modeling、Role Prompting、Dynamic Adaptation：
 
@@ -439,14 +439,14 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
   - **Step 2**：提取高阶特征（LLM-based extraction），$p_u = f_{LLM}(\mathcal{E}_u, \text{prompt})$，其中 $\text{prompt} = \text{"Summarize this user's preferences and characteristics"}$，输出高阶特征如"prefers concise answers"、"values efficiency over detail"、"frequently books direct flights"
   - **Step 3**：构建稳定 Prompt Prefix，$\text{prompt}\_{prefix} = f_{construct}(p_u, u)$，形式为 "You are an assistant for [User], who: [preferences]"
 
-- **Preference Modeling（偏好建模）**：
+- **Preference Modeling（偏好建模）** ：
   - **Embedding-based**：将用户偏好编码为向量，$\mathbf{v}_u = f_{embed}(p_u) \in \mathbb{R}^d$
   - **Rule-based**：使用 IF-THEN 规则，$p_u = \{r: r = \text{IF } c \text{ THEN } a\}$
   - **Probabilistic**：使用概率模型（如贝叶斯网络），$P(a|s, u) = \text{estimate}(\mathcal{Q}\_{user}(u))$
 
-- **Role Prompting（角色提示）**：$\text{system\_prompt} = f_{construct}(u, p_u, \mathcal{E}\_{recent})$，其中包含用户名称、用户画像、用户偏好、最近交互上下文
+- **Role Prompting（角色提示）** ：$\text{system\_prompt} = f_{construct}(u, p_u, \mathcal{E}\_{recent})$，其中包含用户名称、用户画像、用户偏好、最近交互上下文
 
-- **Dynamic Adaptation（动态适应）**：
+- **Dynamic Adaptation（动态适应）** ：
   - **实时更新**：$p_u^{(t+1)} = f_{update}(p_u^{(t)}, e_{new})$，实时更新用户偏好
   - **变化检测**：$\text{change\_detected} = f_{detect}(p_u^{(t)}, p_u^{(t+1)})$，检测偏好变化
   - **冲突处理**：$p_u^{(t+1)} = f_{resolve}(p_u^{(t)}, p_{conflict})$，处理偏好冲突
@@ -493,7 +493,7 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 #### Collaboration（协作）
 
-**Collaboration（协作）**在**多 Agent 系统**中，Agent 之间**共享知识和经验**，实现协同工作。形式化地，协作可以表示为函数 $\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$，其中 $\{\mathcal{M}_i\}\_{i=1}^n$ 是多个 Agent 的记忆系统，$\mathcal{M}\_{shared}$ 是共享记忆系统。协作的目标是实现知识共享和协同工作，使得多 Agent 系统能够完成单个 Agent 无法完成的复杂任务。
+**Collaboration（协作）** 在**多 Agent 系统**中，Agent 之间**共享知识和经验**，实现协同工作。形式化地，协作可以表示为函数 $\mathcal{C}: \{\mathcal{M}_i\}\_{i=1}^n \rightarrow \mathcal{M}\_{shared}$，其中 $\{\mathcal{M}_i\}\_{i=1}^n$ 是多个 Agent 的记忆系统，$\mathcal{M}\_{shared}$ 是共享记忆系统。协作的目标是实现知识共享和协同工作，使得多 Agent 系统能够完成单个 Agent 无法完成的复杂任务。
 
 **核心挑战**包括知识同步、冲突解决、隐私保护：
 
@@ -505,30 +505,30 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 **架构模式**包括 Centralized、Decentralized、Federated：
 
-- **Centralized（中心化）**：所有 Agent 共享一个中心记忆系统，形式化地可以表示为 $\mathcal{M}\_{shared} = \bigcup_{i=1}^n \mathcal{M}_i$，其中所有 Agent 访问同一记忆系统
+- **Centralized（中心化）** ：所有 Agent 共享一个中心记忆系统，形式化地可以表示为 $\mathcal{M}\_{shared} = \bigcup_{i=1}^n \mathcal{M}_i$，其中所有 Agent 访问同一记忆系统
   - **优势**：简单、一致性强，即 $\text{consistency}(\mathcal{M}\_{shared}) = 1$
   - **劣势**：单点故障、扩展性差，即 $\text{availability} = \text{availability}(\text{central\_server})$
 
-- **Decentralized（去中心化）**：Agent 之间直接通信，形式化地可以表示为 $\mathcal{M}_i^{(t+1)} = f_{sync}(\mathcal{M}_i^{(t)}, \{\mathcal{M}_j^{(t)}\}\_{j \in \text{neighbors}(i)})$，其中 $\text{neighbors}(i)$ 是 Agent $i$ 的邻居集合
+- **Decentralized（去中心化）** ：Agent 之间直接通信，形式化地可以表示为 $\mathcal{M}_i^{(t+1)} = f_{sync}(\mathcal{M}_i^{(t)}, \{\mathcal{M}_j^{(t)}\}\_{j \in \text{neighbors}(i)})$，其中 $\text{neighbors}(i)$ 是 Agent $i$ 的邻居集合
   - **优势**：高可用、可扩展，即 $\text{availability} = \prod_{i=1}^n \text{availability}(\text{Agent}_i)$
   - **劣势**：需要一致性协议、复杂度高，即 $\text{complexity} = O(n^2)$
 
-- **Federated（联邦）**：本地记忆聚合为共享知识，形式化地可以表示为 $\mathcal{M}\_{shared} = f_{aggregate}(\{\mathcal{M}_i^{local}\}\_{i=1}^n)$，其中 $\mathcal{M}_i^{local}$ 是 Agent $i$ 的本地记忆
+- **Federated（联邦）** ：本地记忆聚合为共享知识，形式化地可以表示为 $\mathcal{M}\_{shared} = f_{aggregate}(\{\mathcal{M}_i^{local}\}\_{i=1}^n)$，其中 $\mathcal{M}_i^{local}$ 是 Agent $i$ 的本地记忆
   - **优势**：隐私保护、分布式，即 $\text{privacy} = f_{privacy}(\mathcal{M}\_{shared})$
   - **劣势**：聚合质量可能下降，即 $\text{quality}(\mathcal{M}\_{shared}) \leq \text{quality}(\bigcup_{i=1}^n \mathcal{M}_i)$
 
 **技术实现**包括 Memory Broadcasting、Consensus Protocols、Knowledge Fusion、Privacy-Preserving Sharing：
 
-- **Memory Broadcasting（记忆广播）**：Agent 将重要记忆广播给其他 Agent，形式化地可以表示为 $\text{broadcast}(m_i, \{\text{Agent}_j\}\_{j \neq i})$，使用消息队列（如 RabbitMQ、Kafka）实现
+- **Memory Broadcasting（记忆广播）** ：Agent 将重要记忆广播给其他 Agent，形式化地可以表示为 $\text{broadcast}(m_i, \{\text{Agent}_j\}\_{j \neq i})$，使用消息队列（如 RabbitMQ、Kafka）实现
 
-- **Consensus Protocols（一致性协议）**：
+- **Consensus Protocols（一致性协议）** ：
   - **Raft**：分布式一致性算法，形式化地可以表示为 $\text{consensus}(\{m_i\}\_{i=1}^n) = m_{agreed}$，其中 $m_{agreed}$ 是达成一致的记忆
   - **Paxos**：经典一致性算法，形式化地可以表示为 $\text{paxos}(\{m_i\}\_{i=1}^n) = m_{chosen}$
   - **CRDTs**：无冲突复制数据类型，形式化地可以表示为 $\text{merge}(\{m_i\}\_{i=1}^n) = m_{merged}$，其中 $\text{merge}$ 是合并函数
 
-- **Knowledge Fusion（知识融合）**：合并来自多个 Agent 的知识，形式化地可以表示为 $\mathcal{M}\_{fused} = f_{fusion}(\{\mathcal{M}_i\}\_{i=1}^n)$，解决冲突的方法包括时间戳 $\text{resolve}(m_1, m_2) = \arg\max_{m \in \{m_1, m_2\}} t(m)$、置信度 $\text{resolve}(m_1, m_2) = \arg\max_{m \in \{m_1, m_2\}} \text{confidence}(m)$、投票 $\text{resolve}(\{m_i\}\_{i=1}^n) = \arg\max_{m} |\{i: m_i = m\}|$
+- **Knowledge Fusion（知识融合）** ：合并来自多个 Agent 的知识，形式化地可以表示为 $\mathcal{M}\_{fused} = f_{fusion}(\{\mathcal{M}_i\}\_{i=1}^n)$，解决冲突的方法包括时间戳 $\text{resolve}(m_1, m_2) = \arg\max_{m \in \{m_1, m_2\}} t(m)$、置信度 $\text{resolve}(m_1, m_2) = \arg\max_{m \in \{m_1, m_2\}} \text{confidence}(m)$、投票 $\text{resolve}(\{m_i\}\_{i=1}^n) = \arg\max_{m} |\{i: m_i = m\}|$
 
-- **Privacy-Preserving Sharing（隐私保护共享）**：
+- **Privacy-Preserving Sharing（隐私保护共享）** ：
   - **Differential Privacy**：添加噪声保护隐私，形式化地可以表示为 $\mathcal{M}\_{private} = \mathcal{M} + \text{Laplace}(0, \epsilon)$，其中 $\epsilon$ 是隐私参数
   - **Federated Learning**：只共享模型参数，不共享原始数据，形式化地可以表示为 $\theta_{shared} = f_{aggregate}(\{\theta_i\}\_{i=1}^n)$，其中 $\theta_i$ 是 Agent $i$ 的模型参数
   - **Homomorphic Encryption**：加密状态下的计算，形式化地可以表示为 $\text{Enc}(\mathcal{M}\_{shared}) = f_{compute}(\text{Enc}(\mathcal{M}_1), \text{Enc}(\mathcal{M}_2))$
@@ -563,13 +563,13 @@ Hybrid Search 结合 dense 和 sparse 检索，使用 Reciprocal Rank Fusion (RR
 
 ## 5.记忆的动态机制（Dynamics of Memory）
 
-> **核心观点**：记忆不是静态仓库，而是**活的认知器官**，必须随经验增长而演化。记忆系统需要持续地**巩固（Consolidation）**、**更新（Updating）** 和 **遗忘（Forgetting）**，以保持其有效性和相关性。
+> **核心观点**：记忆不是静态仓库，而是**活的认知器官**，必须随经验增长而演化。记忆系统需要持续地**巩固（Consolidation）** 、**更新（Updating）**  和 **遗忘（Forgetting）** ，以保持其有效性和相关性。
 
 ### Consolidation（巩固）
 
 #### 定义
 
-**Consolidation（巩固）**是将碎片化、冗余的短期记忆整合为**连贯、高效、可泛化的长期知识**的过程。形式化地，巩固可以表示为函数 $\mathcal{CON}: \mathcal{M}\_{short} \rightarrow \mathcal{M}\_{long}$，其中 $\mathcal{M}\_{short}$ 是短期记忆集合，$\mathcal{M}\_{long}$ 是长期记忆集合。巩固的目标是压缩记忆规模 $|\mathcal{M}\_{long}| < |\mathcal{M}\_{short}|$，同时保持信息完整性 $\text{info}(\mathcal{M}\_{long}) \approx \text{info}(\mathcal{M}\_{short})$。
+**Consolidation（巩固）** 是将碎片化、冗余的短期记忆整合为**连贯、高效、可泛化的长期知识**的过程。形式化地，巩固可以表示为函数 $\mathcal{CON}: \mathcal{M}\_{short} \rightarrow \mathcal{M}\_{long}$，其中 $\mathcal{M}\_{short}$ 是短期记忆集合，$\mathcal{M}\_{long}$ 是长期记忆集合。巩固的目标是压缩记忆规模 $|\mathcal{M}\_{long}| < |\mathcal{M}\_{short}|$，同时保持信息完整性 $\text{info}(\mathcal{M}\_{long}) \approx \text{info}(\mathcal{M}\_{short})$。
 
 #### 动机
 
@@ -609,21 +609,21 @@ $$\mathcal{M}\_{long} = \mathcal{CON}\_{Global}(\mathcal{CON}\_{Cluster}(\mathca
 
 **三级巩固机制**：
 
-- **局部巩固（Local Consolidation）**：
+- **局部巩固（Local Consolidation）** ：
   - **输入**：同一会话内的多条记录 $\mathcal{E}\_{session} = \{e_i\}\_{i=1}^n$
   - **处理方式**：LLM 总结、聚类、压缩，形式化地可以表示为 $s = f_{summarize}(\mathcal{E}\_{session})$ 或 $s = f_{cluster}(\mathcal{E}\_{session})$
   - **输出**：会话摘要、关键事件 $\mathcal{M}\_{session} = \{s_j\}\_{j=1}^m$，其中 $m < n$
   - **时间尺度**：分钟-小时
   - **代表工作**：Context Folding (Zhang et al., 2025q)、AgentFold (Ye et al., 2025a)
 
-- **聚类融合（Cluster Fusion）**：
+- **聚类融合（Cluster Fusion）** ：
   - **输入**：跨会话相似事件 $\mathcal{E}\_{cross} = \bigcup_{i=1}^k \mathcal{E}\_{session_i}$
   - **处理方式**：嵌入聚类 + LLM 描述，形式化地可以表示为 $\mathcal{C} = \text{cluster}(\{\mathbf{v}_i = f_{embed}(e_i)\}\_{i=1}^n)$，然后 $p = f_{LLM}(\mathcal{C}, \text{prompt})$
   - **输出**：行为模式模板、用户画像 $\mathcal{M}\_{pattern} = \{p_j\}\_{j=1}^l$
   - **时间尺度**：天-周
   - **代表工作**：MOOM (Chen et al., 2025d)
 
-- **全局整合（Global Integration）**：
+- **全局整合（Global Integration）** ：
   - **输入**：全部历史记忆 $\mathcal{M}\_{all} = \bigcup_{t=1}^T \mathcal{M}\_{pattern}^{(t)}$
   - **处理方式**：迭代反思 + 原则提炼，形式化地可以表示为 $k^{(t+1)} = f_{refine}(k^{(t)}, \mathcal{M}\_{all})$，直到收敛
   - **输出**：任务无关世界观、通用原则 $\mathcal{M}\_{principle} = \{k_i\}\_{i=1}^m$
@@ -636,7 +636,7 @@ $$\mathcal{M}\_{long} = \mathcal{CON}\_{Global}(\mathcal{CON}\_{Cluster}(\mathca
 
 ##### Level 1: Local Consolidation（局部巩固）
 
-**Local Consolidation（局部巩固）**的目标是压缩单个会话内的多条记录，生成会话摘要。形式化地，局部巩固可以表示为 $\mathcal{CON}\_{Local}: \mathcal{E}\_{session} \rightarrow \mathcal{S}\_{session}$，其中 $\mathcal{E}\_{session} = \{e_i\}\_{i=1}^n$ 是会话内的事件集合，$\mathcal{S}\_{session} = \{s_j\}\_{j=1}^m$ 是会话摘要集合，满足 $m < n$。
+**Local Consolidation（局部巩固）** 的目标是压缩单个会话内的多条记录，生成会话摘要。形式化地，局部巩固可以表示为 $\mathcal{CON}\_{Local}: \mathcal{E}\_{session} \rightarrow \mathcal{S}\_{session}$，其中 $\mathcal{E}\_{session} = \{e_i\}\_{i=1}^n$ 是会话内的事件集合，$\mathcal{S}\_{session} = \{s_j\}\_{j=1}^m$ 是会话摘要集合，满足 $m < n$。
 
 **触发条件**包括固定间隔、容量阈值、任务完成：
 
@@ -679,13 +679,13 @@ $$\mathcal{M}\_{long} = \mathcal{CON}\_{Global}(\mathcal{CON}\_{Cluster}(\mathca
 
 **风险与缓解**：
 
-- **Information Smoothing（信息平滑）**：
+- **Information Smoothing（信息平滑）** ：
   - **问题**：独特事件被平均化，丧失个性，形式化地可以表示为 $\text{loss} = \text{uniqueness}(\mathcal{E}\_{session}) - \text{uniqueness}(\mathcal{S}\_{session})$
   - **缓解**：显式标记重要事件，避免压缩，即 $\mathcal{E}\_{important} = \{e: \text{important}(e)\}$，$\mathcal{E}\_{fold} = \mathcal{E}\_{session} \setminus \mathcal{E}\_{important}$；使用重要性评分 $\text{importance}(e)$ 指导压缩
 
 ##### Level 2: Cluster Fusion（聚类融合）
 
-**Cluster Fusion（聚类融合）**的目标是识别跨会话的相似事件模式，生成行为模板。形式化地，聚类融合可以表示为 $\mathcal{CON}\_{Cluster}: \mathcal{M}\_{session} \rightarrow \mathcal{M}\_{pattern}$，其中 $\mathcal{M}\_{session} = \bigcup_{i=1}^k \mathcal{S}\_{session_i}$ 是跨会话的摘要集合，$\mathcal{M}\_{pattern} = \{p_j\}\_{j=1}^l$ 是行为模式集合。
+**Cluster Fusion（聚类融合）** 的目标是识别跨会话的相似事件模式，生成行为模板。形式化地，聚类融合可以表示为 $\mathcal{CON}\_{Cluster}: \mathcal{M}\_{session} \rightarrow \mathcal{M}\_{pattern}$，其中 $\mathcal{M}\_{session} = \bigcup_{i=1}^k \mathcal{S}\_{session_i}$ 是跨会话的摘要集合，$\mathcal{M}\_{pattern} = \{p_j\}\_{j=1}^l$ 是行为模式集合。
 
 **技术流程**包括事件嵌入、时间窗口聚类、模式提取三个阶段：
 
@@ -723,7 +723,7 @@ $$\mathcal{M}\_{long} = \mathcal{CON}\_{Global}(\mathcal{CON}\_{Cluster}(\mathca
 
 ##### Level 3: Global Integration（全局整合）
 
-**Global Integration（全局整合）**的目标是从全部历史记忆中提炼**任务无关的通用原则**。形式化地，全局整合可以表示为 $\mathcal{CON}\_{Global}: \mathcal{M}\_{pattern} \rightarrow \mathcal{M}\_{principle}$，其中 $\mathcal{M}\_{pattern} = \bigcup_{t=1}^T \mathcal{M}\_{pattern}^{(t)}$ 是全部历史模式，$\mathcal{M}\_{principle} = \{k_i\}\_{i=1}^m$ 是通用原则集合。
+**Global Integration（全局整合）** 的目标是从全部历史记忆中提炼**任务无关的通用原则**。形式化地，全局整合可以表示为 $\mathcal{CON}\_{Global}: \mathcal{M}\_{pattern} \rightarrow \mathcal{M}\_{principle}$，其中 $\mathcal{M}\_{pattern} = \bigcup_{t=1}^T \mathcal{M}\_{pattern}^{(t)}$ 是全部历史模式，$\mathcal{M}\_{principle} = \{k_i\}\_{i=1}^m$ 是通用原则集合。
 
 **技术流程**（Matrix 方法）包括迭代反思循环、原则表示、原则质量评估：
 
@@ -804,7 +804,7 @@ Conflict Detected!
 
 **解决方案**：
 
-1. **置信度评分（Confidence Scoring）**：
+1. **置信度评分（Confidence Scoring）** ：
    ```
    old_confidence = calculate_confidence(old_memory)
    new_confidence = calculate_confidence(new_evidence)
@@ -815,7 +815,7 @@ Conflict Detected!
        Keep old memory, flag for review
    ```
 
-2. **时间衰减（Recency Weighting）**：
+2. **时间衰减（Recency Weighting）** ：
    ```
    weight = exp(-decay_rate * time_difference)
    effective_confidence = confidence * weight
@@ -823,7 +823,7 @@ Conflict Detected!
    # 更近期的证据权重更高
    ```
 
-3. **证据聚合（Evidence Aggregation）**：
+3. **证据聚合（Evidence Aggregation）** ：
    ```
    IF multiple_new_evidences support change:
        Update memory with higher confidence
@@ -969,7 +969,7 @@ FOR each memory:
 ```
 
 **参数设置**：
-- **TTL（Time To Live）**：根据记忆类型设置
+- **TTL（Time To Live）** ：根据记忆类型设置
   - Episodic memory: 30-90 天
   - Semantic memory: 1-2 年（或永久保留）
   - Procedural memory: 根据使用频率动态调整
@@ -996,7 +996,7 @@ def expire_memories(memories, ttl_days=30):
 
 ##### Access Frequency（访问频率）
 
-**机制**：使用 **LRU（Least Recently Used）** 或 **LFU（Least Frequently Used）** 算法。
+**机制**：使用 **LRU（Least Recently Used）**  或 **LFU（Least Frequently Used）**  算法。
 
 **LRU 实现**：
 ```
@@ -1131,7 +1131,7 @@ Algorithm:
 
 #### 代码实现
 
-**记忆清理任务（Memory Garbage Collection）**：
+**记忆清理任务（Memory Garbage Collection）** ：
 ```python
 def memory_garbage_collection(memory_db):
     """
@@ -1178,10 +1178,10 @@ def memory_garbage_collection(memory_db):
 - **记忆显式评估**：直接测试记忆的保留、检索、更新能力
 
 **评估指标**：
-- **记忆保留率（Memory Retention Rate）**：长期记忆的保留比例
-- **个性化准确率（Personalization Accuracy）**：Agent 行为与用户偏好的匹配度
-- **检索精度（Retrieval Precision）**：检索到的记忆与查询的相关性
-- **一致性（Consistency）**：Agent 在不同时间对同一用户的行为一致性
+- **记忆保留率（Memory Retention Rate）** ：长期记忆的保留比例
+- **个性化准确率（Personalization Accuracy）** ：Agent 行为与用户偏好的匹配度
+- **检索精度（Retrieval Precision）** ：检索到的记忆与查询的相关性
+- **一致性（Consistency）** ：Agent 在不同时间对同一用户的行为一致性
 
 **任务示例**：
 ```
@@ -1202,10 +1202,10 @@ Task: Personal Assistant
 - **多记忆形式支持**：Episodic、Semantic、Procedural
 
 **评估指标**：
-- **检索精度（Retrieval Precision）**：Recall@K、Precision@K、MRR
-- **更新一致性（Update Consistency）**：更新后记忆的一致性
-- **遗忘合规性（Forgetting Compliance）**：遗忘策略的正确性
-- **冲突解决（Conflict Resolution）**：新旧记忆冲突的处理能力
+- **检索精度（Retrieval Precision）** ：Recall@K、Precision@K、MRR
+- **更新一致性（Update Consistency）** ：更新后记忆的一致性
+- **遗忘合规性（Forgetting Compliance）** ：遗忘策略的正确性
+- **冲突解决（Conflict Resolution）** ：新旧记忆冲突的处理能力
 
 **测试场景**：
 ```
@@ -1740,7 +1740,7 @@ Search Algorithm:
 
 ##### 框架设计
 
-**状态空间（State Space）**：
+**状态空间（State Space）** ：
 ```
 State = {
   current_task,
@@ -1750,7 +1750,7 @@ State = {
 }
 ```
 
-**动作空间（Action Space）**：
+**动作空间（Action Space）** ：
 ```
 Actions:
   - READ(memory_id, query)
@@ -1761,7 +1761,7 @@ Actions:
   - NO_OP  # 不操作记忆
 ```
 
-**奖励函数（Reward Function）**：
+**奖励函数（Reward Function）** ：
 ```
 Reward = α * task_success_reward 
        + β * memory_efficiency_reward
@@ -1859,7 +1859,7 @@ class MemoryPolicyGradient:
 #### 研究动机
 
 **需求场景**：
-- **具身智能体（Embodied AI）**：机器人需要记忆视觉场景
+- **具身智能体（Embodied AI）** ：机器人需要记忆视觉场景
 - **AR/VR 交互**：虚拟助手需要记忆用户的视觉环境
 - **多媒体对话**：对话中包含图像、视频等多模态内容
 - **跨模态检索**：用文本查询图像记忆，或反之
@@ -2070,7 +2070,7 @@ Key Features:
   - Strong Consistency: 保证强一致性
 ```
 
-**CRDTs（Conflict-free Replicated Data Types）**：
+**CRDTs（Conflict-free Replicated Data Types）** ：
 ```
 Key Idea: 设计数据结构，使得任意顺序的更新都能收敛到相同状态
 
@@ -2170,10 +2170,10 @@ Allows computation without decryption
 #### 研究动机
 
 **可信性维度**：
-- **Factuality（事实性）**：记忆是否准确？
-- **Explainability（可解释性）**：为什么使用这个记忆？
-- **Robustness（鲁棒性）**：能否抵抗攻击？
-- **Ethics & Privacy（伦理与隐私）**：是否符合伦理和隐私要求？
+- **Factuality（事实性）** ：记忆是否准确？
+- **Explainability（可解释性）** ：为什么使用这个记忆？
+- **Robustness（鲁棒性）** ：能否抵抗攻击？
+- **Ethics & Privacy（伦理与隐私）** ：是否符合伦理和隐私要求？
 
 #### 关键技术
 
@@ -2183,7 +2183,7 @@ Allows computation without decryption
 
 **解决方案**：
 
-1. **Provenance Tracking（引用溯源）**：
+1. **Provenance Tracking（引用溯源）** ：
    ```
    Memory:
      Content: "User prefers coffee"
@@ -2193,7 +2193,7 @@ Allows computation without decryption
        - Supporting Evidence: [event_1, event_2, event_3]
    ```
 
-2. **Fact Verification（事实核查）**：
+2. **Fact Verification（事实核查）** ：
    ```
    Before storing memory:
      1. Extract claim from memory
@@ -2203,7 +2203,7 @@ Allows computation without decryption
      5. Store with verification metadata
    ```
 
-3. **Confidence Scoring（置信度评分）**：
+3. **Confidence Scoring（置信度评分）** ：
    ```
    Confidence = f(
        source_reliability,
@@ -2223,7 +2223,7 @@ Allows computation without decryption
 
 **解决方案**：
 
-1. **Memory Usage Logging（记忆使用日志）**：
+1. **Memory Usage Logging（记忆使用日志）** ：
    ```
    Log Entry:
      Timestamp: 2025-12-20 14:30:00
@@ -2235,14 +2235,14 @@ Allows computation without decryption
                      mem_456 as supporting
    ```
 
-2. **Attention Visualization（注意力可视化）**：
+2. **Attention Visualization（注意力可视化）** ：
    ```
    Show which parts of memory were most important:
      Memory: "User prefers direct flights"
      Attention: [0.1, 0.8, 0.1]  # "direct" has high attention
    ```
 
-3. **Explanation Generation（解释生成）**：
+3. **Explanation Generation（解释生成）** ：
    ```
    LLM-generated Explanation:
      "I retrieved this memory because it directly answers 
@@ -2264,7 +2264,7 @@ Allows computation without decryption
 
 **防御措施**：
 
-1. **Adversarial Training（对抗训练）**：
+1. **Adversarial Training（对抗训练）** ：
    ```
    Training with adversarial examples:
      - Generate adversarial memories
@@ -2272,7 +2272,7 @@ Allows computation without decryption
      - Improve robustness
    ```
 
-2. **Input Validation（输入验证）**：
+2. **Input Validation（输入验证）** ：
    ```
    Before storing memory:
      1. Validate format
@@ -2281,7 +2281,7 @@ Allows computation without decryption
      4. Sanitize content
    ```
 
-3. **Anomaly Detection（异常检测）**：
+3. **Anomaly Detection（异常检测）** ：
    ```
    Monitor for anomalies:
      - Unusual memory patterns
@@ -2306,7 +2306,7 @@ Allows computation without decryption
 
 **解决方案**：
 
-1. **User Control（用户控制）**：
+1. **User Control（用户控制）** ：
    ```
    Features:
      - View stored memories
@@ -2316,7 +2316,7 @@ Allows computation without decryption
      - Opt-out of memory collection
    ```
 
-2. **Privacy-Preserving Techniques（隐私保护技术）**：
+2. **Privacy-Preserving Techniques（隐私保护技术）** ：
    ```
    - Differential Privacy
    - Federated Learning
@@ -2324,7 +2324,7 @@ Allows computation without decryption
    - Data Minimization
    ```
 
-3. **Bias Mitigation（偏见缓解）**：
+3. **Bias Mitigation（偏见缓解）** ：
    ```
    - Regular auditing for bias
    - Diverse training data
@@ -2332,7 +2332,7 @@ Allows computation without decryption
    - Bias detection and correction
    ```
 
-4. **Compliance（合规性）**：
+4. **Compliance（合规性）** ：
    ```
    - GDPR compliance
    - CCPA compliance
