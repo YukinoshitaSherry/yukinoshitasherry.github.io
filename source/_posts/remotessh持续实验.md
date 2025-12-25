@@ -160,6 +160,50 @@ nvidia-smi dmon               # 监控GPU性能指标
 nvidia-smi topo -m            # 查看GPU拓扑结构
 ```
 
+**高级监控工具** ：
+
+**nvitop** - 交互式GPU监控工具（推荐）
+
+```bash
+# 安装
+pip install nvitop
+
+# 使用
+nvitop                      # 交互式监控界面，类似 htop
+nvitop -m                   # 监控模式，显示所有GPU
+```
+
+**nvtop** - 类似 htop 的GPU监控工具
+
+```bash
+# Ubuntu/Debian 安装
+sudo apt install nvtop
+
+# 或从源码编译安装
+git clone https://github.com/Syllo/nvtop.git
+mkdir -p nvtop/build && cd nvtop/build
+cmake .. -DNVML_RETRIEVE_HEADER_ONLINE=yes
+make
+sudo make install
+
+# 使用
+nvtop                       # 交互式监控界面
+```
+
+**watch 命令** - 定期执行并显示命令输出
+
+```bash
+watch -n 1 nvidia-smi       # 每秒刷新显示 nvidia-smi 输出
+watch -n 2 'nvidia-smi --query-gpu=index,name,temperature.gpu,utilization.gpu,memory.used,memory.total --format=csv'  # 自定义查询，每2秒刷新
+```
+
+**对比** ：
+
+- **nvidia-smi** ：基础工具，所有系统都有，功能简单。
+- **watch + nvidia-smi** ：适合简单监控需求，无需额外安装。
+- **nvitop** ：Python工具，安装方便，界面友好，功能丰富，推荐使用。
+- **nvtop** ：类似 htop，需要编译安装，功能强大。
+
 <br>
 
 ## VSCode 误删文件找回
