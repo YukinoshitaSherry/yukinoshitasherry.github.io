@@ -140,7 +140,7 @@ $$
 
 **数学表达**：
 $$
-\text{cons@k} = \frac{1}{n} \sum_{i=1}^{n} \mathbb{1}[\text{mode}(\{\text{answer}_{i,1}, \ldots, \text{answer}_{i,k}\}) \text{ is correct}]
+\text{cons@k} = \frac{1}{n} \sum\_{i=1}^{n} \mathbb{1}[\text{mode}(\{\text{answer}\_{i,1}, \ldots, \text{answer}\_{i,k}\}) \text{ is correct}]
 $$
 
 其中 $\text{mode}(\cdot)$ 表示众数（出现频率最高的值）。
