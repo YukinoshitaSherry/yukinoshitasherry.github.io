@@ -1,0 +1,14 @@
+---
+description: 博客 Markdown 文章格式规范
+globs: source/_posts/**/*.md
+alwaysApply: false
+---
+
+# 博客 Markdown 格式规范
+
+## 章节分隔
+
+- **不要**使用 `---` 作为章节分隔符
+- **使用** `<br>` 作为章节分隔符（可带空行：`<br>\n\n`）
+- **例外**：YAML frontmatter 的 `---` 必须保留
+- **例外**：Markdown 表格中的 `| :--- |` 对齐语法保留

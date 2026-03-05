@@ -62,10 +62,6 @@ friends:
     url: https://aboatwithflow.top
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/aboat.jpg
     desc: Aboat的小舟
-  - name: mem的小站
-    url: https://mem.ac
-    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/mem.png
-    desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
   - name: Memory Of Fish
     url: https://memoryoffish.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/memory%20of%20fish.jpg
@@ -74,18 +70,6 @@ friends:
     url: https://xuan-insr.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/xyx.png
     desc: 咸鱼暄的代码空间！
-  - name: DARSTIB
-    url: https://darstib.github.io/myworld/
-    avatar: https://darstib.github.io/myworld/img/avatar.jpg
-    desc: The only true wisdom is in knowing you know nothing.
-  - name: CYRUS
-    url: https://cyrus28214.top
-    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/cyrus.png
-    desc: Think twice,code once.
-  - name: Arrietty's Universe
-    url: https://arriettych.github.io
-    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Arrietty's%20Universe.jjpg.png
-    desc: Arrietty's Universe
   - name: LJY
     url: https://luo-jiayi.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/ljy.png
@@ -94,6 +78,27 @@ friends:
     url: https://gldym.github.io
     avatar: https://gldym.github.io/img/icon.png
     desc: 猫猫很可爱
+  - name: LadyGege
+    url: https://ladygege.github.io
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/dccb78b35d47e1bcaa58b27d272b347b.jpg
+    desc: 就是不拘一格！
+  - name: DARSTIB
+    url: https://darstib.github.io/myworld/
+    avatar: https://darstib.github.io/myworld/img/avatar.jpg
+    desc: The only true wisdom is in knowing you know nothing.
+  - name: CYRUS
+    url: https://cyrus28214.top
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/cyrus.png
+    desc: Think twice,code once.
+  - name: mem的小站
+    url: https://mem.ac
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/mem.png
+    desc: 在海月的虚空中，纵身飞过秋凉的时鸟。
+  - name: Arrietty's Universe
+    url: https://arriettych.github.io
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Arrietty's%20Universe.jjpg.png
+    desc: Arrietty's Universe
+
 
 
 
