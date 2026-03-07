@@ -396,6 +396,6 @@ $$W' = W + B \cdot A, \quad A \in \mathbb{R}^{r \times d}, B \in \mathbb{R}^{d \
 
 **延伸阅读**：
 
-- [大模型训练三阶段总览](SFT.md)（Pre-Training、SFT、RLHF 关系）
-- [大模型参数与显存](2602大模型参数与显存.md)（显存估算）
+- [大模型训练三阶段总览](Pretrain-SFT-RLHF.md)（Pre-Training、SFT、RLHF 关系）
+- [大模型参数与显存](大模型参数与显存.md)（显存估算）
 - [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 官方文档
