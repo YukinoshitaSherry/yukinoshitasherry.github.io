@@ -9,6 +9,12 @@ tags:
 desc: 从原理到上手的 SFT 完整教程：损失函数推导、只对 response 算 loss 的 mask 机制、Alpaca 数据格式、LLaMA-Factory 手把手配置与训练，以及 LoRA/QLoRA 选型与常见坑。
 ---
 
+参考：
+- [大模型训练三阶段总览](Pretrain-SFT-RLHF.md)（Pre-Training、SFT、RLHF 关系）
+- [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 官方文档
+
+<br>
+
 ## 定义
 
 **SFT（Supervised Fine-Tuning，监督微调）**：在预训练模型基础上，用**人工标注的高质量 (prompt, response) 数据**做有监督训练，让模型从「通用」转向「特定任务可用」。
@@ -36,7 +42,7 @@ desc: 从原理到上手的 SFT 完整教程：损失函数推导、只对 respo
 
 **目标**：最大化模型生成 $r$ 的似然，等价于最小化**负对数似然**：
 
-$$\mathcal{L}_{SFT}(\theta) = -\sum_{t=1}^{|r|} \log P_\theta(r_t \mid c, r_{1:t-1})$$
+$$\mathcal{L}\_{SFT}(\theta) = -\sum_{t=1}^{|r|} \log P_\theta(r_t \mid c, r_{1:t-1})$$
 
 其中 $r_{1:t-1}$ 表示 $r_1$ 到 $r_{t-1}$。
 
@@ -135,6 +141,25 @@ $$\mathcal{L} = -\sum_{t=k+1}^{n} \log P_\theta(s_t \mid s_{<t})$$
   ]
 }
 ```
+
+<br>
+
+### 格式对比
+
+| 维度 | Alpaca | ShareGPT |
+| :--- | :--- | :--- |
+| **结构** | 单轮：instruction + input → output | 多轮：conversations 列表，human/gpt 交替 |
+| **典型场景** | 指令跟随、单问单答、格式转换 | 多轮对话、追问、上下文依赖 |
+| **优势** | 结构简单，易于构造与清洗；单轮 loss 清晰 | 保留对话流，模型学会多轮交互、指代消解 |
+| **劣势** | 无多轮能力，复杂任务需拆成多单轮 | 数据来源多为爬取对话，质量参差；格式复杂 |
+| **数据来源** | 人工构造或 GPT 生成（如 self-instruct） | 用户与 ChatGPT 等产品的真实对话导出 |
+
+**为何需要两类**：
+
+- **Alpaca**：适合「一问一答」类任务（翻译、摘要、分类、简单推理）。训练快、数据易控，是 SFT 的起点。
+- **ShareGPT**：适合「对话式」产品，用户会追问、改需求、补充上下文。单轮数据无法学到「听懂上文」「承接上文回答」。
+
+**选型建议**：指令模型底座通常先用 Alpaca 类数据打指令能力，再混入 ShareGPT 提升多轮体验；纯单轮任务用 Alpaca 即可。
 
 <br>
 
@@ -394,8 +419,5 @@ $$W' = W + B \cdot A, \quad A \in \mathbb{R}^{r \times d}, B \in \mathbb{R}^{d \
 | **实践** | LLaMA-Factory：dataset_info → 配置 yaml → `llamafactory-cli train` |
 | **选型** | 显存紧张用 QLoRA；一般场景 LoRA 即可 |
 
-**延伸阅读**：
+<br>
 
-- [大模型训练三阶段总览](Pretrain-SFT-RLHF.md)（Pre-Training、SFT、RLHF 关系）
-- [大模型参数与显存](大模型参数与显存.md)（显存估算）
-- [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 官方文档

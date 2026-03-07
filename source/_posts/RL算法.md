@@ -13,6 +13,24 @@ desc: 系统梳理强化学习算法：从定义、马尔可夫、Q-learning 起
 - <a href="https://datawhalechina.github.io/easy-rl/#/">蘑菇书</a>
 -  <a href="http://xhslink.com/o/7jGW68bHvfl ">小红书@古希腊掌管代码的神 大模型RL总结：PPO、DPO、GRPO、DAPO、GSPO</a>
 
+
+论文与技术报告：
+- [PPO - Spinning Up](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
+- [DPO 原论文](https://arxiv.org/abs/2305.18290)
+- [DeepSeek-Math 技术报告](https://arxiv.org/abs/2402.03300)
+- [DeepSeek-R1 技术报告](https://arxiv.org/abs/2501.12948)
+- [VAPO 论文](https://arxiv.org/abs/2504.05118)
+- [GMPO 论文](https://arxiv.org/abs/2507.20673)
+- [From GRPO to DAPO and GSPO](https://huggingface.co/blog/NormalUhr/grpo-to-dapo-and-gspo)
+- [GFPO 论文](https://arxiv.org/abs/2508.09726)
+- [GAPO 论文](https://arxiv.org/abs/2503.20194)
+- [DAPO 论文](https://arxiv.org/abs/2503.14476)
+- [Phi-4-reasoning 技术报告](https://arxiv.org/abs/2504.21318)
+- [Qwen2.5-Math 技术报告](https://arxiv.org/abs/2409.12122)
+
+<br>
+
+
 ## 强化学习基础
 
 ### 定义与动机
@@ -835,17 +853,3 @@ GAPO (独立分支：GAN + PPO，约束学习)
 
 <br>
 
-## Links Referenced
-
-- [PPO - Spinning Up](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
-- [DPO 原论文](https://arxiv.org/abs/2305.18290)
-- [DeepSeek-Math 技术报告](https://arxiv.org/abs/2402.03300)
-- [DeepSeek-R1 技术报告](https://arxiv.org/abs/2501.12948)
-- [VAPO 论文](https://arxiv.org/abs/2504.05118)
-- [GMPO 论文](https://arxiv.org/abs/2507.20673)
-- [From GRPO to DAPO and GSPO](https://huggingface.co/blog/NormalUhr/grpo-to-dapo-and-gspo)
-- [GFPO 论文](https://arxiv.org/abs/2508.09726)
-- [GAPO 论文](https://arxiv.org/abs/2503.20194)
-- [DAPO 论文](https://arxiv.org/abs/2503.14476)
-- [Phi-4-reasoning 技术报告](https://arxiv.org/abs/2504.21318)
-- [Qwen2.5-Math 技术报告](https://arxiv.org/abs/2409.12122)
