@@ -42,7 +42,7 @@ $$L = -\sum_{n=1}^{N} \log p(x_n \mid x_1,\ldots,x_{n-1}; \theta)$$
 
 ## SFT 流程与要点
 
-> 公式推导、数据格式、Loss Mask 实现及 LLaMA-Factory 实践详见 [SFT 教程：原理与实践](SFT教程-原理与实践.md)。
+> 公式推导、数据格式、Loss Mask 实现及 LLaMA-Factory 实践详见 [SFT 笔记](../SFT)。
 
 **定义与目的**：SFT 是预训练模型的**定向优化**，本质是「教模型做具体的事」。用**带标签的监督数据**把通用能力收束为**特定任务能力**，即从通用（general）到可用（usable）。
 
@@ -61,7 +61,7 @@ $$L = -\sum_{n=1}^{N} \log p(x_n \mid x_1,\ldots,x_{n-1}; \theta)$$
 
 ## RLHF：为何需要
 
-> PPO、GRPO、GSPO、DPO 等 RL 算法的数学推导与伪代码详见 [RL 算法详解](RL算法.md)。
+> PPO、GRPO、GSPO、DPO 等 RL 算法的数学推导与伪代码详见 [RL 算法笔记](../RL算法)。
 
 **是什么**：RLHF（Reinforcement Learning from Human Feedback）用**人类反馈**驱动强化学习，微调语言模型，使行为更符合人类偏好与需求。
 
@@ -75,7 +75,7 @@ $$L = -\sum_{n=1}^{N} \log p(x_n \mid x_1,\ldots,x_{n-1}; \theta)$$
 
 <br>
 
-## 几种 RLHF 方法
+## 最常见 RLHF 方法
 
 | 特性 | PPO | GRPO | GSPO | DPO |
 | :--- | :--- | :--- | :--- | :--- |
