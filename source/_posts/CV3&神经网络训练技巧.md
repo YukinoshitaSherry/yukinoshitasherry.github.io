@@ -343,11 +343,11 @@ $$x_{t+1}=x_t+v_{t+1}$$
 现在令 $\tilde{x}_t =x_t+\rho v_t$，则：
 
 $$v_{t+1}=\rho v_t-\alpha \nabla f(\tilde{x_t})$$
-$$\begin{aligned} \tilde{x}_{t+1} &=x_{t+1}+\rho v_{t+1}\\ &=x_{t}+v_{t+1}+\rho v_{t+1}\\ &=\tilde{x}_{t}-\rho v_{t}+v_{t+1}+\rho v_{t+1} \end{aligned}$$
+$$\begin{aligned} \tilde{x}\_{t+1} &=x_{t+1}+\rho v_{t+1}\\ &=x_{t}+v_{t+1}+\rho v_{t+1}\\ &=\tilde{x}\_{t}-\rho v_{t}+v_{t+1}+\rho v_{t+1} \end{aligned}$$
 
 从而有：
 
-$$\tilde{x}_{t+1}=\tilde{x_t}-\rho v_t+(\rho+1)v_{t+1}$$
+$$\tilde{x}\_{t+1}=\tilde{x_t}-\rho v_t+(\rho+1)v_{t+1}$$
 
 - 只更新 $v_t$ 和 $\tilde{x}_t$ 即可
 

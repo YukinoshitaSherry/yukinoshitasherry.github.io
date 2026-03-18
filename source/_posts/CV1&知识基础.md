@@ -390,7 +390,7 @@ $$
 ##### 多类 SVM 损失完整表达式
 
 $$
-L = \underbrace{\frac{1}{N} \sum_{i} L_i}_{\text{data loss}} + \underbrace{\lambda R(W)}_{\text{regularization loss}}
+L = \underbrace{\frac{1}{N} \sum_{i} L_i}\_{\text{data loss}} + \underbrace{\lambda R(W)}\_{\text{regularization loss}}
 $$
 
 
@@ -777,7 +777,7 @@ $$
 设 $q = W x$，则
 $$
 \frac{\partial f}{\partial q_i} = 2q_i \implies \frac{\partial f}{\partial q} = 2q \\
-\frac{\partial q_k}{\partial W_{i, j}} = \mathbb{1}_{i=k} x_j \implies \frac{\partial f}{\partial W_{i, j}} = 2q_i x_j \implies \frac{\partial f}{\partial W} = 2q x^T \\
+\frac{\partial q_k}{\partial W_{i, j}} = \mathbb{1}\_{i=k} x_j \implies \frac{\partial f}{\partial W_{i, j}} = 2q_i x_j \implies \frac{\partial f}{\partial W} = 2q x^T \\
 \frac{\partial q_k}{\partial x_i} = W_{k, i} \implies \frac{\partial f}{\partial x_i} = \sum_{k=1}^n 2q_k W_{k, i} \implies \frac{\partial f}{\partial x} = 2W^T q
 $$
 

@@ -715,7 +715,7 @@ Word2Vec有SG/CBOW两个主要变体。
 - 真实标签$y^{(c+j)}$为one-hot向量。
 - 总损失：
   $$
-  J = - \sum_{j=-m, j\neq 0}^{m} \log P(w_{c+j}|w_c) = - \sum_{j=-m, j\neq 0}^{m} \log \hat{y}_{c+j}
+  J = - \sum_{j=-m, j\neq 0}^{m} \log P(w_{c+j}|w_c) = - \sum_{j=-m, j\neq 0}^{m} \log \hat{y}\_{c+j}
   $$
 - 展开得：
   $$
