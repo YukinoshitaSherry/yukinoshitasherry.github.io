@@ -1,0 +1,20 @@
+/* Mermaid 图表区域：与正文协调的蓝白风格 */
+.mermaid-chart-wrap {
+  margin: 1.25rem 0;
+  padding: 1rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.mermaid-chart-wrap .mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.post-content .mermaid-chart-wrap svg {
+  max-width: 100%;
+  height: auto;
+}

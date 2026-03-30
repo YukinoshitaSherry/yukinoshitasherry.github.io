@@ -82,7 +82,8 @@
         'gql': 'GraphQL',
         'diff': 'Diff',
         'plaintext': 'Text',
-        'text': 'Text'
+        'text': 'Text',
+        'mermaid': 'Mermaid'
     };
     
     /**

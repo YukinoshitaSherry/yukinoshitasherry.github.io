@@ -36,6 +36,9 @@ if theme.themeStyle == "dark"
     link(rel="stylesheet", href= url_for('css/style-dark.css'))
 //- 自定义代码高亮主题（蓝黑色系）
 link(rel="stylesheet", href= url_for('css/prism-custom.css'))
+//- Mermaid 图表样式：仅文章页需要，避免全站多一次请求与选择器干扰
+if is_post()
+    link(rel="stylesheet", href= url_for('css/mermaid-custom.css'))
 link(rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml")
 script(src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js")
 script(src= url_for('js/archive.js'))

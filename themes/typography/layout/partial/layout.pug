@@ -30,6 +30,10 @@ html(lang="zh-CN")
         script(src= url_for('js/jquery.appear.js'))
         script(src= url_for('js/google-analytics.js'))
         script(src= url_for('js/typography.js'))
+        //- Mermaid：须在 prism-language-label 之前执行，避免对已替换节点打标签
+        if is_post()
+            script(src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js")
+            script(src= url_for('js/mermaid-init.js'))
         //- 代码块语言标签脚本
         script(src= url_for('js/prism-language-label.js'))
         if is_post()
