@@ -50,13 +50,21 @@ desc: CS231n Lec14 笔记整合：语义分割与实例分割、评价指标 mIo
 
 1. **FCN**：将全连接改为 $1\times 1$ 卷积，输出低分辨率类激活图，再双线性上采样；可融合浅层细节（如 FCN-8s 跳连）。
 
+[![FCN demo visualization](https://raw.githubusercontent.com/shelhamer/fcn.berkeleyvision.org/master/demo/visualization.jpg)](https://raw.githubusercontent.com/shelhamer/fcn.berkeleyvision.org/master/demo/visualization.jpg)
+
 2. **SegNet**：编码器 max-pooling 时保存最大索引，解码器用 **反池化** 上采样，参数较少。
 
 3. **U-Net**：对称 U 形，编码器与解码器同尺度特征 **concat** 跳连，医学小样本场景常用。
 
+[![U-Net architecture](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/u-net-architecture.png)](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/u-net-architecture.png)
+
 4. **PSPNet**：金字塔池化模块聚合多尺度全局上下文。
 
+[![PSPNet structure](https://raw.githubusercontent.com/qubvel/segmentation_models/master/images/pspnet.png)](https://raw.githubusercontent.com/qubvel/segmentation_models/master/images/pspnet.png)
+
 5. **DeepLab 系列**：空洞卷积 + CRF 后处理（早期）$\rightarrow$ **ASPP** + 图像级特征（V3）$\rightarrow$ 编码器用 ResNet / Xception，逐步弱化 CRF；**DeepLabV3+** 引入轻量解码器细化边界。
+
+[![DeepLab visualization](https://raw.githubusercontent.com/tensorflow/models/master/research/deeplab/g3doc/img/vis1.png)](https://raw.githubusercontent.com/tensorflow/models/master/research/deeplab/g3doc/img/vis1.png)
 
 <br>
 

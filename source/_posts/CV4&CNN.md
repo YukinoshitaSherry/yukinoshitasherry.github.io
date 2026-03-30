@@ -31,6 +31,10 @@ $$W_{\mathrm{out}}=\left\lfloor\frac{W+2P-F}{S}\right\rfloor+1.$$
 
 当 $S=1$ 且希望保持空间尺寸不变时，常取 $P=(F-1)/2$（$F$ 为奇数）。
 
+[![卷积 worked example](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Convolutional_neural_network%2C_convolution_worked_example.png/500px-Convolutional_neural_network%2C_convolution_worked_example.png)](https://upload.wikimedia.org/wikipedia/commons/b/bd/Convolutional_neural_network%2C_convolution_worked_example.png)
+
+[![stride and boundary conditions](https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Convolutional_neural_network%2C_boundary_conditions.png/500px-Convolutional_neural_network%2C_boundary_conditions.png)](https://upload.wikimedia.org/wikipedia/commons/7/7f/Convolutional_neural_network%2C_boundary_conditions.png)
+
 > [!INFO]+ 参数量（单卷积层）
 > 若有 $K$ 个滤波器，每个滤波器 $F\times F\times C_{\mathrm{in}}$ 权重加 $1$ 个偏置，则总参数为 $K\cdot(F\cdot F\cdot C_{\mathrm{in}}+1)$。同一深度切片上所有空间位置共享同一组权重，因此参数量与特征图空间尺寸无关。
 
@@ -55,6 +59,8 @@ $$W_{\mathrm{out}}=\left\lfloor\frac{W+2P-F}{S}\right\rfloor+1.$$
 五、池化层与 1×1 / 空洞卷积
 
 1. 最大池化在局部区域取最大值，常取 $2\times 2$、步长 2，宽高各减半，通道不变；反向时将梯度传给前向选中最大值的索引位置。
+
+[![max pooling](https://upload.wikimedia.org/wikipedia/commons/e/e9/Max_pooling.png)](https://upload.wikimedia.org/wikipedia/commons/e/e9/Max_pooling.png)
 
 2. $1\times 1$ 卷积在通道维做线性混合，用于升维/降维（Network in Network、Inception 瓶颈）。
 

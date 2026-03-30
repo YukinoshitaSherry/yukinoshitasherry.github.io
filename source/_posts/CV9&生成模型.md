@@ -31,6 +31,8 @@ $$p(x)=\prod_i p(x_i\mid x_1,\ldots,x_{i-1}).$$
 
 2. **PixelRNN** 用自回归 RNN 建模条件分布，训练串行慢。**PixelCNN** 用 masked 卷积并行计算条件，训练快，但生成仍需逐步采样像素。
 
+（论文：https://arxiv.org/abs/1606.05328）
+
 3. 优点：似然可精确评估；缺点：生成慢，高维图像序列长。
 
 <br>
@@ -41,9 +43,13 @@ $$p(x)=\prod_i p(x_i\mid x_1,\ldots,x_{i-1}).$$
 
 2. **VAE** 引入潜变量：先验 $p(z)$（常为标准高斯），生成分布 $p_\theta(x\mid z)$ 与近似后验 $q_\phi(z\mid x)$（常为高斯，参数由网络输出）。
 
+[![VAE graphical model](https://lilianweng.github.io/posts/2018-08-12-vae/VAE-graphical-model.png)](https://lilianweng.github.io/posts/2018-08-12-vae/VAE-graphical-model.png)
+
 > [!INFO]+ ELBO（证据下界）推导要点
 > $$\log p_\theta(x)\ge \mathbb{E}\_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{\mathrm{KL}}(q_\phi(z\mid x)\,\|\,p(z)).$$
 > 第一项为重构似然期望，第二项使后验接近先验。对 $\log p_\theta(x)$ 的第三项含真实后验 $p_\theta(z\mid x)$，不可解，但因其 KL 非负，前两项之和仍为下界。**重参数化**：$z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon$，$\epsilon\sim\mathcal{N}(0,I)$，使梯度穿过采样。
+
+[![VAE reparameterization trick](https://lilianweng.github.io/posts/2018-08-12-vae/reparameterization-trick.png)](https://lilianweng.github.io/posts/2018-08-12-vae/reparameterization-trick.png)
 
 <br>
 
@@ -54,6 +60,8 @@ $$p(x)=\prod_i p(x_i\mid x_1,\ldots,x_{i-1}).$$
 四、生成对抗网络（GAN）
 
 1. 生成器 $G$ 将噪声 $z\sim p(z)$ 映为样本，判别器 $D$ 区分真伪。**极小极大**目标（标准形式）：
+
+[![GAN architecture](https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Generative_adversarial_network.svg/1280px-Generative_adversarial_network.svg.png)](https://upload.wikimedia.org/wikipedia/commons/8/83/Generative_adversarial_network.svg)
 
 $$\min_{\theta_g}\max_{\theta_d}\ \mathbb{E}\_{x\sim p_{\mathrm{data}}}[\log D_{\theta_d}(x)]+\mathbb{E}\_{z\sim p(z)}[\log(1-D_{\theta_d}(G_{\theta_g}(z)))].$$
 

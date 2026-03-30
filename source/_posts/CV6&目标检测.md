@@ -25,11 +25,17 @@ desc: CS231n Lec12-13 笔记整合：检测任务定义、两阶段 R-CNN 系列
 
 1. **R-CNN**：Selective Search 约 2000 个 proposal $\rightarrow$ 各自 warp 到固定尺寸 $\rightarrow$ CNN 提特征 $\rightarrow$ SVM 分类 + 线性回归修正框。缺点：重复卷积、慢；模块分训，非端到端。
 
+[![R-CNN architecture](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/RCNN.png)](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/RCNN.png)
+
 2. **SPP-Net**：整图一次卷积得特征图，将 proposal 映射到特征图上，用 **空间金字塔池化（SPP）** 得到固定长度向量再送全连接，避免对原图重复卷积。
 
 3. **Fast R-CNN**：单网络联合训练分类与框回归；**ROI Pooling** 把各 proposal 对应特征划成 $7\times 7$ 网格做 max pool，得到固定大小；多任务损失为分类交叉熵 + **Smooth L1** 框回归。瓶颈仍在 CPU 上的 Selective Search。
 
+[![Fast R-CNN architecture](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/fast-RCNN.png)](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/fast-RCNN.png)
+
 4. **Faster R-CNN**：用 **区域提议网络（RPN）** 在特征图上滑动小网络，对每个空间位置和 **Anchor**（多尺度、宽高比预设框）预测「前景/背景」二分类与相对 anchor 的偏移；NMS 后得到 proposal，再经 ROI 头精修。
+
+[![Faster R-CNN architecture](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/faster-RCNN.png)](https://lilianweng.github.io/posts/2017-12-31-object-recognition-part-3/faster-RCNN.png)
 
 > [!INFO]+ IoU（交并比）
 > 对两框 $A,B$，$\mathrm{IoU}(A,B)=\frac{|A\cap B|}{|A\cup B|}$。训练时常用 IoU 阈值划分正负样本（如 RPN 中 IoU$>0.7$ 为正，$<0.3$ 为负）。
@@ -54,7 +60,11 @@ desc: CS231n Lec12-13 笔记整合：检测任务定义、两阶段 R-CNN 系列
 
 1. **YOLO（v1 思想）**：将图像划成网格，每个 cell 负责中心落在其中的目标，预测边界框与类别概率，单次前向完成检测，速度快；早期版本对小物体与密集框处理较弱，后续版本改进骨干、锚框与损失。
 
+[![YOLO v1 workflow](https://lilianweng.github.io/posts/2018-12-27-object-recognition-part-4/yolo.png)](https://lilianweng.github.io/posts/2018-12-27-object-recognition-part-4/yolo.png)
+
 2. **SSD**：在多个尺度的特征图上用卷积做密集检测，浅层特征分辨率高利于小目标，深层语义强；默认框类似 anchor。
+
+[![SSD architecture](https://lilianweng.github.io/posts/2018-12-27-object-recognition-part-4/SSD-architecture.png)](https://lilianweng.github.io/posts/2018-12-27-object-recognition-part-4/SSD-architecture.png)
 
 3. **训练技巧共性**：难例挖掘、多尺度训练/测试、数据增强、Focal Loss（缓解前景背景极度不平衡）等。
 
