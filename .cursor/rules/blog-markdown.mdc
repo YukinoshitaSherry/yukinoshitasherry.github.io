@@ -12,3 +12,9 @@ alwaysApply: false
 - **使用** `<br>` 作为章节分隔符（可带空行：`<br>\n\n`）
 - **例外**：YAML frontmatter 的 `---` 必须保留
 - **例外**：Markdown 表格中的 `| :--- |` 对齐语法保留
+
+## Callout 卡片（INFO / EXAMPLE 等）
+
+- 本博客主题已支持 **Obsidian 风格** 块引用，**直接**写 `> [!类型]+ 标题` 与后续 `>` 正文行即可。
+- **不要**用 ` ```callouts ` 代码块包裹（模板文 `callouts.md` 里的演示 fence 仅作历史/对照，新文章不必照抄）。
+- 类型名用大写英文：`INFO`、`EXAMPLE`、`NOTE`、`WARNING` 等；`+` 表示默认展开（与 Obsidian 一致）。
