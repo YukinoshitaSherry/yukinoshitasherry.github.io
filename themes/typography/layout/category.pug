@@ -1,4 +1,5 @@
 extends partial/layout
+include mixins
 
 block site_title
     != page.category + " · " + config.title
@@ -33,10 +34,26 @@ block content
                         - var tagPath = site.tags.findOne({name: tagName}).path
                         a.tag-filter(href=url_for(tagPath))= tagName
             
-            //- 按年份和月份组织文章
-            - var posts = page.posts.sort('date', -1).toArray()
+            //- 分类页文章：先置顶（按日期降序），再普通文章（按年月归档）
+            - var posts = Array.isArray(page.posts) ? page.posts.slice() : page.posts.toArray()
+            - var pinnedPosts = posts.filter(function(post) { return !!post.category_pin; })
+            - var normalPosts = posts.filter(function(post) { return !post.category_pin; })
+            - pinnedPosts.sort(function(a, b) { return b.date.valueOf() - a.date.valueOf(); })
+            - normalPosts.sort(function(a, b) { return b.date.valueOf() - a.date.valueOf(); })
+            if pinnedPosts.length
+                .year-section
+                    h2.archive-year
+                        span(style="font-size:0.8em; vertical-align:0.02em;") 🔝
+                        span &nbsp;
+                        span(style="font-size:0.85em;") 置顶
+                    .month-section
+                        .month-container
+                            - pinnedPosts.forEach(function(post) {
+                                .post-item-wrapper
+                                    +make_post(post, false, true)
+                            - })
             - var years = {}
-            - posts.forEach(function(post) {
+            - normalPosts.forEach(function(post) {
             -   var year = date(post.date, 'YYYY')
             -   var month = date(post.date, 'MM')
             -   if (!years[year]) years[year] = {}
@@ -54,8 +71,7 @@ block content
                             .month-container
                                 - years[year][month].forEach(function(post) {
                                     .post-item-wrapper
-                                        include mixins
-                                        +make_post(post, false)
+                                        +make_post(post, false, true)
                                 - })
                     - })
             - })
