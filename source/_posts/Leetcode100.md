@@ -4708,7 +4708,7 @@ std::vector<std::vector<int>> verticalTraversal(TreeNode* root) {
 
 <br>
 
-## 二、回溯算法
+## 六、回溯算法
 
 ### 17. 电话号码的字母组合 (Letter Combinations of a Phone Number)
 
@@ -5410,7 +5410,7 @@ std::vector<std::vector<std::string>> partition(std::string s) {
 }
 ```
 
-## 三、贪心算法
+## 七、贪心算法
 
 ### 55. 跳跃游戏 (Jump Game)
 
@@ -6042,7 +6042,7 @@ int longestConsecutive(std::vector<int>& nums) {
 }
 ```
 
-## 四、图论
+## 八、图论
 
 ### 200. 岛屿数量 (Number of Islands)
 
@@ -6433,7 +6433,7 @@ int ladderLength(std::string beginWord, std::string endWord, std::vector<std::st
 }
 ```
 
-## 五、堆与优先队列
+## 九、堆与优先队列
 
 ### 215. 数组中的第K个最大元素 (Kth Largest Element in an Array)
 
@@ -6663,7 +6663,7 @@ ListNode* mergeKLists(std::vector<ListNode*>& lists) {
 }
 ```
 
-## 六、栈与队列
+## 十、栈与队列
 
 ### 20. 有效的括号 (Valid Parentheses)
 
@@ -7095,7 +7095,7 @@ int trap(std::vector<int>& height) {
 }
 ```
 
-## 七、字符串处理
+## 十一、字符串处理
 
 ### 14. 最长公共前缀 (Longest Common Prefix)
 
@@ -7558,7 +7558,7 @@ int minDistance(std::string word1, std::string word2) {
 }
 ```
 
-## 八、位运算
+## 十二、位运算
 
 ### 136. 只出现一次的数字 (Single Number)
 
@@ -7748,7 +7748,7 @@ std::vector<int> singleNumber(std::vector<int>& nums) {
 }
 ```
 
-## 九、其他重要题目
+## 十三、其他重要题目
 
 ### 41. 缺失的第一个正数 (First Missing Positive)
 
