@@ -141,6 +141,16 @@ prism_plugin:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ""
+# 版权与复制保护
+copyright:
+  enable: true
+  license: "CC BY-NC-ND 4.0"
+  license_url: "https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh"
+  allow_copy_categories:
+    - 上浙大
+    - 学CS/SE
+    - 学AI/DS
+
 # 添加博客分类
 categories:
   - 上浙大

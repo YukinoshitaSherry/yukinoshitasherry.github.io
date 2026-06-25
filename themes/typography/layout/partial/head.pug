@@ -39,6 +39,11 @@ link(rel="stylesheet", href= url_for('css/prism-custom.css'))
 //- Mermaid 图表样式：仅文章页需要，避免全站多一次请求与选择器干扰
 if is_post()
     link(rel="stylesheet", href= url_for('css/mermaid-custom.css'))
+if config.copyright && config.copyright.enable !== false
+    link(rel="stylesheet", href= url_for('css/copyright-protect.css'))
+    if config.copyright.license_url
+        link(rel="license", href=config.copyright.license_url)
+        meta(name="copyright", content=theme.author ? theme.author : config.author)
 link(rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml")
 script(src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js")
 script(src= url_for('js/archive.js'))

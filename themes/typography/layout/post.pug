@@ -2,6 +2,15 @@ extends partial/layout
 
 include mixins
 
+block copy_permission
+    - var allowCopyCategories = (config.copyright && config.copyright.allow_copy_categories) || ['上浙大', '学CS/SE', '学AI/DS']
+    - postCopyAllowed = false
+    - if (page.categories && page.categories.length > 0) {
+    -   page.categories.each(function(cat) {
+    -     if (allowCopyCategories.indexOf(cat.name) !== -1) postCopyAllowed = true;
+    -   });
+    - }
+
 block site_title
     != page.title + " · " + config.title
 

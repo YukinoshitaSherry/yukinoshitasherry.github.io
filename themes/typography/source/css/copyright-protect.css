@@ -1,0 +1,62 @@
+/* 复制保护：非豁免分类下禁止选中正文，代码块与评论区除外 */
+body[data-copyright-protect="true"]:not([data-post-copy-allowed="true"]) .post-content,
+body[data-copyright-protect="true"]:not([data-post-copy-allowed="true"]) .custom-content,
+body[data-copyright-protect="true"]:not([data-post-copy-allowed="true"]) .archive,
+body[data-copyright-protect="true"]:not([data-post-copy-allowed="true"]) .home-header {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+body[data-copyright-protect="true"] pre,
+body[data-copyright-protect="true"] code,
+body[data-copyright-protect="true"] figure.highlight,
+body[data-copyright-protect="true"] .highlight,
+body[data-copyright-protect="true"] input,
+body[data-copyright-protect="true"] textarea,
+body[data-copyright-protect="true"] select,
+body[data-copyright-protect="true"] [contenteditable="true"],
+body[data-copyright-protect="true"] #giscus-container {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+#copyright-copy-tip {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  z-index: 10000;
+  max-width: calc(100vw - 2rem);
+  padding: 0.55rem 1rem;
+  border-radius: 4px;
+  background: rgba(46, 64, 91, 0.92);
+  color: #fff;
+  font-size: 12px;
+  font-family: "Times New Roman", "楷体", serif;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#copyright-copy-tip.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+footer .copyright-license {
+  margin-top: 6px;
+  font-weight: normal;
+  line-height: 1.6;
+}
+
+footer .copyright-license a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

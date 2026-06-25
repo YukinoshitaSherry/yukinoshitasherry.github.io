@@ -4,6 +4,11 @@ footer
         !=currYear
         | &nbsp;
         a(target="_blank", href=config.url,  rel="noopener noreferrer")!=theme.author ? theme.author : config.author ? config.author : config.title
+    if config.copyright && config.copyright.enable !== false
+        p.copyright-license
+            | 除标注开放复制的分类外，本站原创内容采用&nbsp;
+            a(rel="license noopener noreferrer", href=config.copyright.license_url, target="_blank")= config.copyright.license || 'CC BY-NC-ND 4.0'
+            | &nbsp;许可，禁止转载与演绎。
     p Theme&nbsp;
         a(target="_blank", href="https://github.com/SumiMakito/hexo-theme-typography", rel="noopener noreferrer") Typography
         | &nbsp;by&nbsp;
