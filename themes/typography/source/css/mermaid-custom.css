@@ -1,20 +1,55 @@
 /* Mermaid 图表区域：与正文协调的蓝白风格 */
 .mermaid-chart-wrap {
   margin: 1.25rem 0;
-  padding: 1rem 0.75rem;
+  padding: 0.75rem 0.5rem;
   background: #ffffff;
   border: 1px solid #bbdefb;
   border-radius: 8px;
   overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  text-align: center;
 }
 
 .mermaid-chart-wrap .mermaid {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: inline-block;
+  min-width: 0;
 }
 
 .post-content .mermaid-chart-wrap svg {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
   max-width: 100%;
   height: auto;
+  overflow: visible;
+}
+
+/* htmlLabels 默认 nowrap + 固定 foreignObject 尺寸，中文多行会被裁切 */
+.mermaid-chart-wrap foreignObject {
+  overflow: visible;
+}
+
+.mermaid-chart-wrap foreignObject div {
+  display: block !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  max-width: 180px !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  padding: 4px 8px !important;
+  box-sizing: border-box !important;
+}
+
+.mermaid-chart-wrap .nodeLabel,
+.mermaid-chart-wrap .nodeLabel p {
+  margin: 0;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+}
+
+.mermaid-chart-wrap .node rect.label-container,
+.mermaid-chart-wrap .node rect.basic {
+  overflow: visible;
 }

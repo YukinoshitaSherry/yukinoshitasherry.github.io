@@ -13,6 +13,24 @@
     // ignore
   }
 
+  function extractSourceFromElement(el) {
+    if (!el) {
+      return '';
+    }
+
+    // hexo-prism 行号模式：每行是 span.line，行间用 <br> 分隔；直接读 textContent 会丢换行
+    var lineSpans = el.querySelectorAll('span.line');
+    if (lineSpans.length) {
+      return Array.prototype.map
+        .call(lineSpans, function (span) {
+          return span.textContent || '';
+        })
+        .join('\n');
+    }
+
+    return el.textContent || '';
+  }
+
   function stripLeadingLineNumbers(text) {
     // Prism/hexo-prism 可能把行号以纯文本方式塞进 code.textContent 前面，导致无法用 /^flowchart/ 判断
     // 这里尝试剔除形如： "1\n2\n3\n" 的前缀数字行。
@@ -85,13 +103,13 @@
       var fig = pre.closest('figure.highlight');
       candidates.push({
         pre: pre,
-        source: normalizeMermaidSource(code.textContent),
+        source: normalizeMermaidSource(extractSourceFromElement(code) || extractSourceFromElement(pre)),
         replaceFigure: fig || null
       });
     });
 
     document.querySelectorAll('figure.highlight td.code pre').forEach(function (pre) {
-      var src = normalizeMermaidSource(pre.textContent);
+      var src = normalizeMermaidSource(extractSourceFromElement(pre));
       if (!src || !isMermaidSource(src)) {
         return;
       }
@@ -110,7 +128,7 @@
       if (!pre || pre.tagName !== 'PRE') {
         return;
       }
-      var src = normalizeMermaidSource(code.textContent);
+      var src = normalizeMermaidSource(extractSourceFromElement(code));
       if (!src || !isMermaidSource(src)) {
         return;
       }
@@ -159,13 +177,90 @@
       },
       flowchart: {
         htmlLabels: true,
+        useMaxWidth: true,
         curve: 'basis',
-        padding: 10,
-        nodeSpacing: 28,
-        rankSpacing: 36
+        padding: 12,
+        nodeSpacing: 32,
+        rankSpacing: 28,
+        wrappingWidth: 160
       },
       fontFamily: 'system-ui, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif'
     });
+
+    function adjustMermaidNodeLabels(container) {
+      container.querySelectorAll('g.node').forEach(function (nodeEl) {
+        var fo = nodeEl.querySelector('g.label foreignObject');
+        var div = fo && fo.querySelector('div');
+        var rect = nodeEl.querySelector('rect.label-container, rect.basic');
+        if (!fo || !div || !rect) {
+          return;
+        }
+
+        div.style.setProperty('white-space', 'normal', 'important');
+        div.style.setProperty('overflow', 'visible', 'important');
+        div.style.setProperty('word-break', 'break-word', 'important');
+        div.style.setProperty('max-width', '180px', 'important');
+        div.style.setProperty('display', 'block', 'important');
+        div.style.setProperty('text-align', 'center', 'important');
+        div.style.setProperty('line-height', '1.4', 'important');
+        div.style.setProperty('padding', '4px 8px', 'important');
+
+        var contentW = Math.ceil(div.scrollWidth + 8);
+        var contentH = Math.ceil(div.scrollHeight + 8);
+        if (contentW < 48) {
+          contentW = 48;
+        }
+        if (contentH < 28) {
+          contentH = 28;
+        }
+
+        fo.setAttribute('width', String(contentW));
+        fo.setAttribute('height', String(contentH));
+
+        var boxW = contentW + 16;
+        var boxH = contentH + 16;
+        rect.setAttribute('width', String(boxW));
+        rect.setAttribute('height', String(boxH));
+        rect.setAttribute('x', String(-boxW / 2));
+        rect.setAttribute('y', String(-boxH / 2));
+
+        var labelGroup = nodeEl.querySelector('g.label');
+        if (labelGroup) {
+          labelGroup.setAttribute('transform', 'translate(' + String(-contentW / 2) + ', ' + String(-contentH / 2) + ')');
+        }
+      });
+    }
+
+    function fitMermaidToContainer(wrap) {
+      var svg = wrap.querySelector('svg');
+      if (!svg) {
+        return;
+      }
+
+      var viewBox = svg.getAttribute('viewBox');
+      if (!viewBox) {
+        return;
+      }
+
+      var parts = viewBox.split(/\s+/).map(Number);
+      if (parts.length < 4 || !parts[2] || !parts[3]) {
+        return;
+      }
+
+      var naturalW = parts[2];
+      var naturalH = parts[3];
+      var containerW = wrap.clientWidth || 700;
+      var maxH = Math.min(window.innerHeight * 0.7, 620);
+      var scale = Math.min(containerW / naturalW, maxH / naturalH, 1);
+
+      svg.style.display = 'block';
+      svg.style.margin = '0 auto';
+      svg.style.width = Math.round(naturalW * scale) + 'px';
+      svg.style.height = Math.round(naturalH * scale) + 'px';
+      svg.style.maxWidth = '100%';
+      wrap.style.minHeight = Math.round(naturalH * scale) + 'px';
+      wrap.classList.toggle('is-fitted', scale < 0.98);
+    }
 
     // 逐图渲染：避免单个图的语法错误导致整页渲染中断
     var renderPromises = [];
@@ -194,8 +289,14 @@
         var p = mermaid
           .render(graphId, item.source)
           .then(function (result) {
-            // mermaid.render 返回 { svg, bindFunctions }
             wrap.innerHTML = result && result.svg ? result.svg : '';
+            if (result && typeof result.bindFunctions === 'function') {
+              result.bindFunctions(wrap);
+            }
+            requestAnimationFrame(function () {
+              adjustMermaidNodeLabels(wrap);
+              fitMermaidToContainer(wrap);
+            });
           })
           .catch(function (e) {
             console.error('Mermaid render failed (idx=' + idx + '):', e);
