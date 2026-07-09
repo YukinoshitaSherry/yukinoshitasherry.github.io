@@ -6,10 +6,13 @@ html(lang="zh-CN")
         include head
 
     - var copyrightEnabled = config.copyright && config.copyright.enable !== false
+    - var isEncryptedPost = is_post() && page.password
+    - var effectivePostCopyAllowed = postCopyAllowed && !isEncryptedPost
     body(
         class=`${page.path.includes('about/') ? 'about-page' : ''} ${is_post() ? 'post-page' : ''} ${page.path === 'index.html' ? 'home' : ''}`,
         data-copyright-protect=copyrightEnabled ? 'true' : 'false',
-        data-post-copy-allowed=postCopyAllowed ? 'true' : 'false'
+        data-post-copy-allowed=effectivePostCopyAllowed ? 'true' : 'false',
+        data-post-encrypted=isEncryptedPost ? 'true' : 'false'
     )
         div#stage.container
             div.row

@@ -9,10 +9,31 @@ body[data-copyright-protect="true"]:not([data-post-copy-allowed="true"]) .home-h
   user-select: none;
 }
 
-body[data-copyright-protect="true"] pre,
-body[data-copyright-protect="true"] code,
-body[data-copyright-protect="true"] figure.highlight,
-body[data-copyright-protect="true"] .highlight,
+/* 主页导览：仅分类链接文字可选中复制 */
+body[data-copyright-protect="true"] .custom-content a {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* 加密文章：全文（含代码块）禁止选中 */
+body[data-copyright-protect="true"][data-post-encrypted="true"] .post-content,
+body[data-copyright-protect="true"][data-post-encrypted="true"] pre,
+body[data-copyright-protect="true"][data-post-encrypted="true"] code,
+body[data-copyright-protect="true"][data-post-encrypted="true"] figure.highlight,
+body[data-copyright-protect="true"][data-post-encrypted="true"] .highlight,
+body[data-copyright-protect="true"][data-post-encrypted="true"] .prism-show-language {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+body[data-copyright-protect="true"]:not([data-post-encrypted="true"]) pre,
+body[data-copyright-protect="true"]:not([data-post-encrypted="true"]) code,
+body[data-copyright-protect="true"]:not([data-post-encrypted="true"]) figure.highlight,
+body[data-copyright-protect="true"]:not([data-post-encrypted="true"]) .highlight,
 body[data-copyright-protect="true"] input,
 body[data-copyright-protect="true"] textarea,
 body[data-copyright-protect="true"] select,
