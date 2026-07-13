@@ -231,35 +231,33 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 
 ### 语料
 
-可复用的句式与段落结构（已脱敏）。英文 rebuttal 可直接改写填空；中文会议可译写，逻辑相同。
+可复用的句式与段落结构（已脱敏）。**按审稿人分开写**，每位审稿人一条完整回复；不单独另写 Global Response。多位审稿人问同一问题时，**把同一段文段复制到各自回复里**（可略改开头致谢），保证每条 thread 自洽、AC 不必跳读。
 
-#### Global Response 结构
+#### 单条回复结构
 
-开篇致谢 → **汇总审稿人认可的优点**（附原话引用）→ **共性问题统一回应**（标明哪些审稿人提出、修订稿何处可查）→ **分审稿人修订清单**（可写「详见 Reviewer X 的 WY」避免重复）→ **重述动机与贡献** → 收尾。
+对每位审稿人：**致谢并复述其肯定** → **逐条回应 W/C**（与原文 weakness / comment 编号对应）→ **收尾**。若多人质疑 novelty，可在相应审稿人处用编号重述贡献，文段可复用。
 
-> Thank you for your thoughtful and constructive reviews!
+> Dear Reviewer [X],
 >
-> We notice that several concerns are **shared across reviewers**. We summarize our unified responses here, and give per-reviewer details in the individual sections. **A revised manuscript has been uploaded with added content marked in [color].**
-
-#### 引用审稿人正面评价
-
-巩固支持者时，直接引用原话并归类，比泛泛感谢更有力：
-
-> We first sincerely appreciate the **positive comments** that recognize the value of our work:
-> - **[主题，如：问题建模清晰]**
->   - "[审稿人原话]" (Reviewer X)
->   - "[另一条原话]" (Reviewer Y)
-
-单条回复开头可复述该审稿人的肯定，再进入具体问题：
-
 > We are deeply grateful for your valuable time and for recognizing that [概括其正面评价]. Below are our detailed responses.
+>
+> **A revised manuscript has been uploaded with added content marked in [color].**
 
-#### 共性问题：先统一答，再分人展开
+#### 引用正面评价
 
-多位审稿人提同一问题时，Global 里写清**问题编号、提出者、核心结论、表格编号**；个人回复里写「见 Global Response (N)」即可。
+巩固支持者时，直接引用**该审稿人**的原话，比泛泛感谢更有力：
 
-> **(1) [共性问题，如：计算开销 / 公平对比]** (raised by X, Y, Z).
-> We now report [新增分析内容]. The key takeaway: [一两句结论，尽量可独立读懂]. (See Tab. R-XX.)
+> We are deeply grateful for your valuable time and for recognizing that "[审稿人原话概括]" and that [另一条肯定]. Below are our detailed responses.
+
+若需在回复中顺带提及他人正面评价（如借力其他审稿人），只引一句即可，不必集中汇总所有人好评。
+
+#### 共性问题
+
+多位审稿人提同一问题（如开销、可复现性、与某类方法的区别）时，**在同一段落模板写好，分别贴进各审稿人的对应条目下**。每位审稿人处仍写完整论证与表格，不要写「见 Global Response」或「详见 Reviewer Y 的回复」。
+
+效率分析、能力对比表、prompt 附录等**同一套表 / 同一套说明**可在各回复中重复引用编号（如 Tab. R-E1），正文段落宜复制粘贴，仅调整「Thank you for raising…」等开头。
+
+> Thank you — this is a **fair point** [该审稿人若也在 Limitations 中暗示过，可写 we also flagged in our Limitations]. We now report [新增分析]. The key takeaway: [一两句结论]. (See Tab. R-XX.)
 
 #### 承认批评合理
 
@@ -269,7 +267,7 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 
 > We fully agree that [审稿人的具体要求，如：单一指标应交叉验证]. We therefore [具体补救措施].
 
-#### 效率与「花算力换分数」质疑
+#### 效率质疑
 
 回应开销时，除绝对 token/延迟外，强调**自适应机制**与**单位收益成本**（如 tokens per accuracy point）：
 
@@ -277,7 +275,9 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 >
 > Most importantly, to isolate whether our gains come from *structure* rather than *budget*, we report **[单位收益指标]** (lower = more efficient). [方法] achieves the **best (lowest) [该指标]**, indicating that improvements stem from [设计层面] rather than from spending a larger inference budget.
 
-#### 可复现性：承诺 + 正文落地
+#### 可复现性
+
+【承诺 + 正文落地】
 
 > We commit to **open-sourcing the full code, all prompts, and configuration files** upon acceptance. In the revision we add (i) [模板/规则清单], and (ii) a **hyper-parameter table** ([关键超参枚举]).
 
@@ -287,17 +287,21 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 > - **[条件 A]** → *[失败类型]* → **[操作 1]**.
 > - **[条件 B]** → *[失败类型]* → **[操作 2]**.
 
-#### 创新点：能力对比表
+#### 创新点
+
+【列能力对比表】
 
 与既有工作的区分，用表格比长段文字更清晰；列维度按领域自定（结构、更新机制、是否用反馈、是否连接级/单元级编辑等）：
 
 > Thank you. We add a **capability-comparison table** and make the distinction explicit. Prior methods largely (i) [共性局限 1], or (ii) [共性局限 2]. **[本文方法]** is different in that [核心差异，一两句].
 
-个人回复可交叉引用，避免重复贴表：
+个人回复中贴表后，其他审稿人处**复用同表、同段说明**，不必写「见 Reviewer X」：
 
-> Please see the **capability-comparison table** (Reviewer X, WY, Tab. R-XX). In one sentence: [一句话贡献].
+> We add a **capability-comparison table** (Tab. R-XX) and make the distinction explicit. Prior methods largely (i) [共性局限 1], or (ii) [共性局限 2]. **[本文方法]** is different in that [核心差异，一两句].
 
-#### 机制质疑：规格说明 + 细粒度消融
+#### 机制质疑
+
+【规格说明 + 细粒度消融】
 
 重要机制问题宜**两段式**回应：
 
@@ -307,7 +311,7 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 >
 > **(b) Direct validation via fine-grained ablation.** To validate the mechanism itself (not just whole modules), we ablate each [操作/组件]: [Tab. R-XX]. This directly quantifies each operation's contribution.
 
-#### 指标定义混淆与过度宣称
+#### 定义混淆与过度宣称
 
 逐条澄清符号、阈值、缩放因子；承认原文表述不当并已改写：
 
@@ -315,29 +319,38 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 > - **[符号/阈值]** The stopping threshold is **ε = [value]**; the reported **[另一数值] is the converged [指标名], not ε**. We agree the original text conflated the two and have rewritten it.
 > - **Leakage / 过度宣称.** We agree that [原表述的问题]. We therefore (i) **soften [位置]** from "[原表述]" to "[更准确表述]," and (ii) add a **held-out evaluation** where [设定].
 
-#### 实验协议：为何不强行统一 backbone
+#### 实验协议
 
 需要解释时，语气尊重、给理由、仍回应对方关切的精神：
 
 > We would like to **respectfully clarify** why a *fully* shared backbone is not the fairest option here. The backbone choices are **dictated by each benchmark's evaluation ecosystem**: [各基准的官方/常用设定]. **Forcing every baseline onto one shared model would run them outside their tuned regime**, introducing *unfair* comparisons rather than removing them. Within each benchmark we already fix a common backbone for all methods. To honor the *spirit* of your request, we additionally report **[折中方案，如：同一 backbone 下的补充结果]**.
 
-#### 感谢审稿人发现笔误
 
-> **We also thank you for catching the [Table X] anomaly** ([具体矛盾]); this is a **table-typesetting error** that we have identified and corrected in the revision.
 
-#### 失败模式归因
+#### 失败归因
 
 补充分析「方法何时、为何失败」，显得诚实且指向改进方向：
 
 > When [方法] fails, we categorize the cause into [Stage-I / II / III 等], over a sample of failed cases: [Tab. R-XX]. This localizes where the remaining errors come from and points to concrete future improvements.
 
-#### 交叉引用其他审稿人回复
+#### 同一文段在多处的用法
 
-同一内容只写一遍，其余用指针：
+同一问题被多人提起时：
 
-> Please see **Global Response (1)** and **Tab. R-E1/R-E2**. In short: [两三句摘要].
->
-> (Details in Reviewer X, WY/CZ.)
+1. **首选**：在各审稿人对应条目下粘贴**同一段完整回答**（含表或核心数字），保证单条 thread 可读。
+2. **可裁剪**：第二位审稿人处可删重复长表，但须保留**结论句 + 表号**，并写一两句摘要，仍不指向 Global 或其他审稿人的回复正文。
+3. **不宜**：`Please see Global Response (1)`、`Details in Reviewer X, WY`（迫使 AC 跳读）。
+
+若前文已在本条回复中写过该点，后文可写：
+
+> As detailed above (Tab. R-XX), [两三句摘要].
+
+
+#### 笔误
+
+
+> **We also thank you for catching the [Table X] anomaly** ([具体矛盾]); this is a **table-typesetting error** that we have identified and corrected in the revision.
+
 
 #### 收尾与涨分请求
 
@@ -348,9 +361,9 @@ Cao, Z.-J. & Gao, G. Multi-omics single-cell data integration and regulatory inf
 > Best regards,
 > Authors of [Paper]
 
-#### 重述贡献（Global 末尾可用）
+#### 重述贡献
 
-当多位审稿人质疑 novelty 时，Global 末尾用编号重述，与 Related Work 表格呼应：
+当该审稿人质疑 novelty 时，在**其回复**中用编号重述，文段可在多位审稿人处复用：
 
 > Existing [领域] treat [对象] as [旧范式], which is brittle when [局限]. **[方法名]** reframes [核心视角], and makes three distinct contributions:
 > 1. [贡献 1]
