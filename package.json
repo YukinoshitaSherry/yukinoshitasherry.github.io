@@ -32,7 +32,7 @@
     "hexo-tag-aplayer": "^3.0.4",
     "hexo-tag-dplayer": "^0.3.3",
     "hexo-theme-landscape": "^1.0.0",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.1",
     "postcss-cli": "^11.0.0",
     "yamljs": "^0.3.0"
   }
