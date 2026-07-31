@@ -1,0 +1,2285 @@
+
+
+===== IMAGE 1: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-cac618f1-aaad-41ae-90b2-2830908beac8.png =====
+全文2214字 阅读需7分钟
+_0
+Agent Skill是 什么?从原理到 使用
+Agent Skill将大模型能力封装为可复用模 块。 助力智能体高效执行复杂任务与协作。
+
+
+===== IMAGE 2: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-de36d322-8e9b-474a-b0b2-5f83c6b3e522.png =====
+Agent Skill = 大模型 Agent 的 「可复用小能 力模块」 用来把"会聊夭的模型"娈成"能办事的智能 体。
+先搞清概念: Agent Tool Skill 有啥 区别?
+先把三个容易混的词摆在一起:
+Agent (智能体)
+有目标 有记忆 会自己规划和调用工 具的大模型应用。
+比"单轮大模型 API多了决策和执行。
+Tool Function (工具/函数调用)
+一般指 一个具体能力的底层接口:
+
+
+===== IMAGE 3: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-ff625099-06f3-44bc-b44b-a04c1e4228e2.png =====
+查数据库 调用某个 HTTP API 执行一 个脚本等。
+更接近"原子操作"。
+Skill (技能)
+站在 Agent 层的抽象:
+把若千工具+规则 + Prompt 封装成 《对 Agent 来说一键可用的能力单元"。
+更像"可以直接拿来用的技能包",对上 层屏蔽复杂细节。
+Tool: 锤子。螺丝刀 (最低层的工具)
+Skill: 会"安装书架"这门手艺
+Agent: 一个会根据你需求决定"要不要 装书架"的装修工
+
+
+===== IMAGE 4: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-38d77436-d716-4108-82dd-f058a08f5012.png =====
+Agent Skill 的原理: 从「调用函数」到 「组合能力」
+1.大模型怎么知道有哪些 Skill?
+主流做法是: 把 Skill 作为"可调用选项"暴露 给模型, 并描述清楚:
+技能名: query_user profile
+功能描述: 用来根据 user_id 查询用户 画像
+入参 schema: 需要什么字段。类型是什
+返回 schema: 返回数据的结构
+使用场景:  什么时候该用这个技能
+这些信息在"系统 Prompt 工具列表"里提 供给 Agent。
+
+
+===== IMAGE 5: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-90dbea73-e1c5-4988-b986-875ca3a8d49a.png =====
+模型在推理时就能做两步事:
+判断:  当前任务需不需要某个 Skill
+如果要用:  构造合规的调用参数 > 执行 再基于结果继续推理
+这就是 OpenAl Anthropic 等现在的 functi On calling tool calling 机制的底层逻辑。
+2.Skill 不只是"一个函数" , 而是"一段策略"
+比较新的实践里, Skill 会包含:
+一个或多个底层工具
+一个专门给这个 Skill 用的 Prompt 模板
+必要的前后处理:
+
+
+===== IMAGE 6: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7131e3bc-8b38-4c8f-bef4-7eb777a92d71.png =====
+入参校验 默认值处理, 输出结构化封装 异常兜底
+可选的"小状态": 比如分页游标 上一次查 询结果缓存等
+对 Agent 来说:
+它只需要知道"有一个分析日报  的 Skill 可以用"
+至于底下是查了3次数据库 +调了一个 LLM 做总结, 它不用管
+三 为什么要引入 Skill: 不是多此一举。而 是工程必需
+1.避免"胖 Prompt, 一锅乱炖"
+如果不用 Skill 所有逻辑都写在 Prompt 里
+
+
+===== IMAGE 7: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-71b295da-78c1-4bad-8cb5-d3b32ec91125.png =====
+一堆"当用户这样说就先查 A, 再判断 8, 然后: 。99
+Prompt 越写越长 越写越乱, 很难维 护 也难复用
+引入 Skill 之后:
+Prompt 负责"高层意图和策略"
+Skill 负责"具体执行步骤"
+类似:
+把 if-else 逻辑从自然语言里抽出来, 娈成 可测试。可复用的代码模块。
+2.能支持多 Agent 协作 &复杂任务编排
+在多 Agent 架构里 (Planner Worker Cri
+
+
+===== IMAGE 8: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e8606a78-34fe-4b13-9368-e221ec5ac05f.png =====
+tic 等)
+Planner 只负责规划"需要哪些 Skill, 以 什么顺序"
+Worker 只管把对应 Skill 跑完 返回结果
+Critic 用自己的 Skill 去做质量检测。重 写   过滤
+一旦 Skill 抽象稳定:
+新任务 二 组合已有 Skill + 少量新 Skill
+不需要每次从零写流程
+3.方便"权限控制"和"可观测性"
+企业落地时很现实的问题:
+
+
+===== IMAGE 9: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9dbb3676-3f99-4c84-a5be-9263a51d67e6.png =====
+哪些 Skill 尤许哪个业务线 /哪类用户使 用?
+每个 Skill 被调用了多少次 平均耗时多 少 失败率如何?
+某次错误是模型决定错了, 还是 Skill 本 身挂了?
+如果 Skill 是一等公民:
+可以在 Skill 维度做  权限 Quota  监 控。熔断 审计,
+而不是在散乱的 USer prompt 里猜问 题。
+从0到1:  怎么设计和使用一个 Agent Skill?
+第一步:  从用户任务里拆出"稳定的子能力"
+
+
+===== IMAGE 10: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-32af7dad-8b42-4ef6-bc5d-f2798befbcb0.png =====
+问自己3个问题:
+1
+这是不是一个会被多次复用的能力?
+2
+能不能明确写出"输入是什么  > 输出是 什么"?
+3
+能不能在业务上单独监控它的效果?
+如果答案是 YES, 就值得抽一个 Skill。
+举例:
+「根据用户行为生成个性化推荐理由」
+「根据用户问题选择合适部门工单并创 建」
+「把原始日志转换成结构化字段」
+第二步:  封装 Skill 的"接口 +内部逻辑"
+
+
+===== IMAGE 11: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2c0c17fd-4e64-4070-a2c8-880d9c08cb00.png =====
+通常包括3块:
+1.接口定义 (面向 Agent)
+Vname create_support_ticket"_ "description" '根据用户问题创建客服工单。并返回工单I" Iparameters "type "object" 'properties' user_id" "type "string" }, "issue_summary { "type "string" }, 'priority "type string' enum ["Iol" medium' "high"] } }, "required" ["user_id" _ "issue summary ]
+2.内部实现 (面向工程)
+入参校验 >风险过滤
+调业务 API 创建工单
+接口错误重试 /兜底处理
+返回规范化结果 (如 {ticket_id, statu S})
+
+
+===== IMAGE 12: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2a301c79-bbff-4f64-a503-077605fdbc96.png =====
+3.Skill 级 Prompt (如需要模型参与)
+比如先用模型把用户自由文本压缩成 iss Ue_ summary 和 priority
+这个过程也可以被视为 Skill 内部的一步
+第三步: 在 Agent 侧"注册"和"使用"Skill
+在 Agent 配置中, 把该 Skill 暴露为可用工 具
+在 System Prompt 中告诉模型:
+什么时候优先使用这个 Skill (触发条 件)
+用完 Skill 后要如何向用户解释结果
+运行时链路大概是=
+
+
+===== IMAGE 13: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2d0ec0c2-2508-42b1-9048-6ee6b01245a1.png =====
+1。 用户提问
+Agent 分析意图
+2
+决定调用 create_support_ticket Skill
+9。 构造参数 执行 Skill > 拿到 ticket_ id
+4 结合上下文。 生成最终对话回复给用户
+前端 /业务方看到的, 只是"一句自然语言娈 成一个工单", 中间的 Skill 调用细节被隐藏。
+五 最新趋势: Skill 正在往「图」和 「市 场」两个方向发展
+1.基于图的 Skill 编排 (Skill Graph Workflo W Graph)
+Skill 不再只是"横着铺一排工具,
+而是组成有条件分支 循环 回退的有向图
+
+
+===== IMAGE 14: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-588abf5c-9a91-4582-9f31-87c010aaccc0.png =====
+1。 用户提问
+Agent 分析意图
+2
+决定调用 create_support_ticket Skill
+9。 构造参数 执行 Skill > 拿到 ticket_ id
+4 结合上下文。 生成最终对话回复给用户
+前端 /业务方看到的, 只是"一句自然语言娈 成一个工单", 中间的 Skill 调用细节被隐藏。
+五 最新趋势: Skill 正在往「图」和 「市 场」两个方向发展
+1.基于图的 Skill 编排 (Skill Graph Workflo W Graph)
+Skill 不再只是"横着铺一排工具,
+而是组成有条件分支 循环 回退的有向图
+
+
+===== IMAGE 15: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-c3ebab08-2148-463d-8dc4-b9482abc6990.png =====
+首先;我们要建立一个直观的认知。
+在传统的对话模式里; 模型的能力完全依赖于训练 数据和你当前的 Prompt。 但是 Agent Skills 不 一样; 它是模块化的。
+你可以把 Agent Skills 想象成是给 Claude 这 个 "大脑 安装了一个个外部的工具包。这个工具 包里不仅有 说明书" (Instructions), 还有 "工 具 CodelScripts 和 e  参  考  资 料' (Reference Data)
+Anthropic 官方给出的定义里; 有一个非常关键的 词: Filesystem-based (基于文件系统)。
+这利咱们平肘写的 Python 库非常像。当你 import numpy 的肘候。你并没有把 numpy 所 有的源码都背下来;你只是告诉环境 "我有这个能 力"= Agent Skills 也是同理。它是一组存储在虚 拟文件系统里的文件, Claude 可以像操作电脑一 样去读取。执行这些文件。
+这就带来了三个核心优势:
+
+
+===== IMAGE 16: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a2e83a70-2217-4de4-9188-b4592497a146.png =====
+专业化 (Specialize) : 你可以把通用的 Claude 瞬间变成 "法律顾问"  或者 "Python 资深工程师
+2
+减少重复 (Reduce repetition ) : 写一次技 能; 无限次复用。
+3. 能力组合 (Compose capabilities ) : 你可以 同时挂载 "PDF 读取技能' 和 "Excel 绘图技 能 ,让 Claude 自己把它们串起来工作。
+核心架构:  渐进式披露 (Progressive Disclosure)
+这是 Agent Skills 设计得最精妙的地方, 也是很 多初学者容易晕的地方。
+大家知道 , ILM 的上下文窗口 ( Context Tindow ) 虽然越来越大,但依然是昂贵的资源。 如果你把几百个技能的详细文档全部塞进 System Prompt 里, 不仅 Token 费用爆炸,模型的注意 力也会分散。导致幻觉。
+Agent Skills 采用了一种叫做  "渐进式披露" 的
+
+
+===== IMAGE 17: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-1082d474-7f0e-4ce9-9ea7-24b13afcaa08.png =====
+策略。简单来说。就是 "按需加载'
+我们可以把这个过程看作是 Claude 在图书馆找资 料的过程:
+这个架构分为三个层级; 我们一层层来看:
+Level 1: 元数据 (Metadata) 图书馆的 索引卡片
+当你的应用启动时, 或者你打开 Claude 的时候; 系统只会加载 Skill 的元数据。 这通常写压 SKILL.md 文件的头部 (YAML 格式)。
+这一步; Claude 只知道:"哦; 我有一个叫 pdf processing 的技能。它的功能是处理 PDF。 这 占用的 'Token 非常少, 大概就 100 个 Token。 所 以你哪怕挂载 100 个技能。也不会对上下文造成太 大压力。
+Level 2: 说明书 (Instructions)
+翻开
+
+
+===== IMAGE 18: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-da055d8a-b4d9-4337-bd95-f1a737ccd2f6.png =====
+书本
+当用户说: 帮我提取这个 PDF 的内容"  时, Claude 意识到这跟 pdf-processing 的描述匹配 了。
+这肘候; Claude 会在它的虚拟环境里执行一个 bash 命令,去读取SKILL.md 的正文内容。
+只有在这个时刻, 具体的 怎么做" 的知识才会被 加载进匕下文窗口。这就是 ^按需加载'
+Level 3: 资源和代码 (Resources) 查阅附 录和工具
+这是最强的一层。 Skill 文件夹里不仅有 Markdown 文档 , 还可以包含 Python 脚本 (.Py)  模板文侏 甚至数据库 Schema。
+比如技能里有一个复杂的表单验让逻辑; 你可以写 validate:Py 放在文件夹里。
+当 Claude 需要验证数据时 , 它不会把 Validate py 的源代码读出来 (那样太费
+
+
+===== IMAGE 19: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-99d2c5bc-3097-471b-9b8e-7c6cc7221540.png =====
+Token ) 它会苴接在终端里运行这个脚本: python validate:py。
+Claude 只需要看到脚本输出的 Success 或 Error 就行了。
+大家看上面这张图就能理解; 这种机制让 Skill 几 乎拥有了无限的扩展能力,因为存放在硬盔 (Flesystem ) 上的代码和资料是不占 Token 的。只有被读入内存 (Context) 的那一瞬间才计 费。
+三 实战:  怎么用?
+对于咱们小白用户或者开发者; 怎么上手呢?  其实 非常简单。主要分为 "自嫖版"和 "定制版"
+1.预置技能 (Pre-built Skills) : 开箱即用
+Anthropic 官方已经帮我们写好了一些最常用的技 能; 这也是对标微软 Copilot 的核心能力。日前主 要包括:
+
+
+===== IMAGE 20: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-c03b57ab-60b1-4b7c-865c-fc6786aacca1.png =====
+PowerPoint (Pptx): 做 PPT, 改 PPT。 Excel (xlsx): 数据分析。画图表。
+Tord (docx): 写文档。
+PDF (pdf): 读论文;填表单。
+在 Claude.ai 网页版或者 API 里, 这些通常是自 动启用的。比如你在 API 里调用时。只需要声明你 要用 Pptx 这个 ID 的 skill, 模型就能无师自通地 帮你写 PPT 了。这就像 Python 的标准库。不需 要你 pip install, 直接 import 就行。
+2。自定义技能 (Custom Skills) : 你的独门绝技
+这才是最好玩的部分。你可以把你自己的工作流封 装成一个 Skill。
+一个标准的 Skill 结构看起求是这样的:
+举个例子, 假设你是 SEO 内容编辑。你可以 做一个 seo-writer 技能。
+
+
+===== IMAGE 21: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-89c9fd19-1ed7-47cf-9a60-6e3e4af6493a.png =====
+SKILL.md: 里面写清楚你的文章结构要求 (H1,H2  怎么排) 关键词密度要求 以及必 须要遵守的风格指南。 reference.txt: 放一些优秀的样稿作为 Few- shot 的例子。
+当你把这个文件夹上传给 Claude (通过 API 或 Claude.ai 的设置)后, 下次你只需要说 "用 SEO 风格写一篇关于咖啡的文章" Claude 就会自动加 载这个技能; 严格按照你的 SO卫 (标准作业程序) 执行,而不需要你每次都把那些复杂的规则粘贴一 遍。
+呀 哪里可以跑 这些技能?
+日前 Skill 的支持覆盖了 Claude 的全家桶, 但稍 微有一点点区别, 大家要注意:
+Claude API: 这是给开发者用的。你需要通过 API 参数把 Skill 的定义传进去。注意这里有 一个安全沙箱的概念; API 里的 Skill 是不能 联网的 (为了安全), 也不能随意安装 Pip 包;
+
+
+===== IMAGE 22: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-f4e7f953-7ba7-4add-9cb6-49accd7ab5a6.png =====
+只能用预装的库。
+Claude.ai: 网页版用户 你可以在设置里上传 你的 Skill (Zip 包)。这里稍微灵活一点;根据 设置可能拥有部分联网能力。
+Claude Code: 这是一个基于终端的编码助 手。 它的 Skill 权限最大, 因为是在你本地 跑。它甚至可以直接操作你电脑上的文件, 进 行全网访问。适合做那种深度集成的开发工 具。
+五 安全小贴士
+最后, 作为一名 "老司机",必须得提醒大家一点 安全问题
+Agent Skills 赋予了 Claude 执行代码和  读取文 件 的能力。这就像给孙悟空解除了封印, 虽然能 打, 但也可能闯祸。
+1 不要随便用别人的 Skill: 如果有人给你发了 个 Zip 包; 说这是 超级无敌赚钱 Skill" , 请 务必先解压看看里面的 SKILL.md 和 .Py 脚本 在干什么。恶意的 Skill 可能会诱导 Claude 读取你电脑里的敏感文件 (比如 .env 里的秘
+
+
+===== IMAGE 23: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a013ba03-2da1-4f75-ab2d-4dfddad157ab.png =====
+钥)  然后发给攻击者。
+2 API 使用者的沙箱意识:  如果你是在生产环境 用 API 记得官方的 API 环境是无网络的。这 其实是一种保护4 如果你自己搭建环境运行 Agent SDK, 一定要做好隔离。
+六  总结:  从 Chatbot 到 Copilot 的质变
+我们回头看, Agent Skills 的意义到底是什么? 以前我们用 LLM, 是在跟一个 "懂很多的闲聊机 器人" 对话。
+有了 Agent Skills, 我们是在指挥一个 "带着工具 箱和操作手册的专业工种
+它通过文件系统实现了知识的持久化。通过渐进式 披露实现了 Token 的高效利用,通过代码执行实 现了逻辑的确定性。
+对于想要入门 AI 应用开发的同学, 我强烈建议你 们动手试着写一个最简单的 Skill。 哪怕只是一个
+
+
+===== IMAGE 24: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-db68c887-b58c-4c97-9109-57d4eb08ea31.png =====
+帮你自动整理周报格式的 Skill, 你也会发现。这 种 "定义一次。到处运行"  的感觉。真的非常爽。
+好了, 关于 Agent Skills 的科普就先聊到这。 如 果大家感兴趣; 后面我们可以找机会实操一下。手 写一个具休的 Skill 看看效果。
+
+
+===== IMAGE 25: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-acab2f28-fe42-42f1-bc87-12c825d8f40a.png =====
+'
+什么是Agent Skill, 与 MCP 有什么区别 最近 Anthropic 推出了一个 Agent Skill 概念, 前段时间挺火的, 今天终于有时间来瞅瞅这是个 啥。
+什么是 Skill 就像名字表明的一样, Skill 就是 Agent 的技能, 通过文本 脚本将技能描述出来供 Agent 调用。
+在 Claude Code 中  增  加 Skill 就  是 在 Claude/skills 路径下面添加一个文件夹, 比如 frontend-design 里面存放 Skill 所有
+本文使用 Notion Exporter 导出
+1 /9
+
+
+===== IMAGE 26: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-651f3973-d1c6-4543-ad34-ea00c8f78b70.png =====
+内容。最简单的 Skill只 需要包含一个 SKILL:md 文件,这个 Markdown 文件必须包含一个 YAML 格  式  的 front matter 包  括 name description tools (可选)等元信息。
+simple SKILL.md file
+pdfISKILL.md
+YAML Frontmatter
+nane: pdt description: Comprehensive POF tootkit Tor extpacting text and tables nerging/splitting docunents and filling out forms。
+Markdown
+Overview
+This guide Covers PSSential PDF processIng operations Using Python libraries and command-line T0O1C Fop 0NONCR featupes Javascript libraries and detailed etamples S8e Ipeference ,md VOU need tO f122 out POF form read /foros.nd and follon its instructions
+Quick Start
+python fron Dypdf Import PdfReador PdfWriter
+Read PDF peader PdfRoader(docunent pdf ) print(frpages: {len(reader.pages)}" )
+Skill 采用了-种渐进式加载的方式。 一开始 Claude Code 只加载 front matter 里的元信息, Claude Code 只根据元信息决定调用什么 Skill。 因此 Skill 占用的上下文会很小 ,但也要求 description 必须写得非常精确 , 最好一个 Skill 只做一小块功能。
+当 Skill 变得复杂之后 , 可以将 Skill 的内容拆分
+本文使用 Notion Exporter 导出
+2/9
+
+
+===== IMAGE 27: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-4bd693c2-dfc5-4bc1-8ab4-c22f94b91ab6.png =====
+成多个文件。这样可以有效减少上下文占用 , Claude 会渐进式加载分拆的 skill 文件。
+Bundling additional content
+pdf /SKILL .md
+pdf/reference .md
+YAML Frontmatter
+PDF Processing UOIAMCeO Reference
+This documont Contains advanced PDF procossing foatupos detaited eranpzes ano H0dtlOIal libraries not COVOPe0 the naln SKIlT Instructlons
+name ; pdf description; Corprehensive PDF toolkit for extracting tet and tab1e5 Merging/sptitting docunents and tilting out Torms
+pypdfiuaz Library (Apache/BSD Licensej Oyerview pypdfiunz 1s Python binding for PDFIUI (Chromzum POF library) It'5 OxColent for fast PDF rendering lmage generation  |
+Markdown Oyerview
+This guide CoVops Cssential PDF processing Oporations USing Python librarios and Comano-line toos For adyanccd foatures Javascript libraries and detailed examples SPe RRLPCencR VOU need to fi21 out PDF form Tp FNTMs rd and follow its Instructions
+pdf /fors I0
+If VOU need to fi11 out PIF forn first check to SeP If the PDF hos fi2LoblC forn fiolds。 RUn this script Tron this Tle dipector; python SCpipts /check_filtable_flelds Cf17e,pdfs Ond deponding On tho posult 90 to eithor the RFillablc Tields "Non-fillable fields" and follow those Instructions
+quick Stort
+python
+from pypdf Iport PdfReader Pdflriter
+Read POF peader PdtReader docunent .pdf ) print(f"pages {len(reader.pages)}" )
+FIZlahTe flelds It the PDF has +ilLable Topn flelds: Run this script Trom this file directory python scripts/extract_Torm_field_info .py sinput.pdt> cfiolds. 1500>
+Extroct text text page in peader pages: tot page.extract_text()
+除了文本文件外, Skill 中也可以包含脚本, 只要 在 SKILL:md 文件中写明怎么调用脚本即可。如 上图所示。
+所以理论上, Skill 能容纳的上下文是无限的,比 如你提供一个16  的 data 文件和一个按给定条件 查询的 python 脚本, 就能够实现 data 文件的查 询。
+本文使用 Notion Exporter 导出
+3/9
+
+
+===== IMAGE 28: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d4272399-b4cc-449a-8551-bf675df53b57.png =====
+Level
+File
+Context Wincow
+# Tokens
+SKILL.md Metadata (YAML)
+Always loaded
+~100
+SKILL.md Body (Markdown)
+Loaded when Skilltriggers
+<5k
+Bundled files (text files; scripts; data)
+Loaded as-needed by Claude
+unlimitedx
+「为什么要使用 Skill
+目前 Claude Code 已经 subagent mcp, 为什 么还需要 Skill 呢?  从官方文档已经我自己总结来 看,有以下原因:
+1 Skill 是给所有人用的, 而不是只给 developer 用的 , 所以叫 Agent Skill , 而不是 Claude Code Skill。 任何有专业技能的人都可以把技 能沉淀到 Skill 中来让 Agent 调用。 2 Skill 能执行一些精确的操作。 比如生成 PPT, 如果最终要转成 pptx 格式, 这个转换过程脚 本来做是最合适的。
+Skill 和 MCP 有什么区别 Skill 和 MCP 有本质区别: Skill 是面向所有人的 而 MCP 是面向开发者的 , Skill 更偏向上层应 用。而 MCP 偏向底层协议。
+本文使用 Notion Exporter 导出
+419
+
+
+===== IMAGE 29: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-53ba69be-a8a6-404b-8097-c30ed6880038.png =====
+但两者也有重叠的地方 , 以前很多人用 local MCP 来写工具, 但是 Skill 出来之后这部分工作用 Skill 来写比较合适。 MCP 的作用是负责 Agent 与外部服务之间的通信。
+使用 Skill 来写工具相比 mcp的一个好处是减少上 下文消耗, MCP 的一个问题是对上下文消耗特别 严重, 因为它是一次性加载完整定义, 而 Skill 是 渐进式懒加载。我平时写代码的时候使用 MCP 极 少,基本只用 Playwright 或者 Google DevTool 来调试前端。
+Skill 样例
+Anthropic 已经提供了一系列 Skill, 详见 GitHub 仓库
+https:Lgithub comlanthropicslskillsltreelmgn Iskills
+其中有一个前端设计的 Skill, 可以一起来赏析一 下 (本来想用 Claude Code 试一下, 今天 Anthropic 好像又大封号, 买的中转用不了了) , 可以结合这篇博客一起看一下:
+本文使用 Notion Exporter 导出
+5/9
+
+
+===== IMAGE 30: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e07ab07b-5d7a-4486-9056-a38f38ca6f6d.png =====
+httes:llwww.claudecomlbloglimproving frontend-design-through-skills
+name: frontend-design description: 创建独特。生产级的前端界面。具备高 设计质量。当用户要求构建网页组件。页面。制品。海报 或应用程序时使用此技能 (例如网站 着陆页。仪表板。 React  组件 HTML/CSS 布局。或对任何网页U1进行美 化/美化) 。生成创意。精致的代码和U工设计,避免通用AI 美学。 license: 完整条款请参见LICENSE.txt
+此技能指导创建独特 生产级的前端界面。避免通用 的"AI垃圾"美学。实现真正可用的代码,对美学细节和创 意选择给予极致关注。
+用户提供前端需求:  要构建的组件 页面_ 应用程序或界 面。他们可能包含关于目的 受众或技术约束的上下文信 息
+##  设计思维
+在编码之前,理解上下文并确定大胆的美学方向:
+*目的*:  此界面解决了什么问题?  谁使用它?
+本文使用 Notion Exporter 导出
+6 /9
+
+
+===== IMAGE 31: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-4da23c00-65f6-4c3a-bdbf-e8310a85d27c.png =====
+*基调**:  选择极致:  极致简约。极繁混乱。复古未来 主义有机/自然 奢华 /精致。顽皮/玩具风。编辑/杂志 风。原始/粗犷。艺术装饰/几何。柔和7粉彩。工业/实用 主义等等。有太多风格可供选择。使用这些作为灵感。但 要设计出真正符合美学方向的设计。 **约束**:  技术要求 (框架。性能。可访问性) *差异化**:  什么让它令人难忘?  人们会记住的一个特 点是什么?
+**关键**:  选择清晰的概念方向并精确执行 大胆的极繁 主义和精致的简约都能发挥作用关键在于意图性。而不 是强度。
+然后实现可用的代码 (HTML/CSS/JS React Vue 等) ,这些代码:
+生产级且功能完整 视觉震撼且令人难忘 具有清晰美学观点的一致性 在每个细节上都经过精心打磨
+##  前端美学指南
+专注于:
+*字体排版*:  选择美丽。独特。有趣的字体。避免通 用字体如Arial和Inter; 相反选择能提升前端美学的独 特选择;  出人意料。富有个性的字体选择。将独特的展示 字体与精致的正文字体配对。
+本文使用 Notion Exporter 导出
+7 /9
+
+
+===== IMAGE 32: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-061c9452-fc3b-4d8d-80b3-6f3df7506089.png =====
+*色彩与主题*:  致力于-致的美学。使用C55变量保 持一致性。主导色彩配以锐利点缀胜过胆怯。平均分布的 调色板。 *动效*:  使用动画实现效果和微交互。优先为HTML 使用纯C55解决方案。在可用时为React使用Motion库 专注于高影响时刻: 一 个精心编排的页面加载配合交错显 示 (animation-delay) 比分散的微交互创造更多愉 悦。使用滚动触发和悬停状态来带来惊喜。 **空间构成**:  出人意料的布局。不对称。重叠。对角 流动。打破网格的元素。慷慨的负空间或受控密度。 *背景与视觉细节**:  创造氛围和深度。而不是默认纯 色。添加符合整体美学的上下文效果和纹理。应用创意形 式如渐变网格。噪音纹理 几何图案 分层透明度。戏剧 性阴影 装饰性边框。自定义光标和颗粒叠加。
+切勿使用通用的A1生成美学。如过度使用的字体系列 (Inter, Roboto  Arial, 系统字体) 。陈词滥调的色 彩方案 (特别是紫色渐变在白色背景上)。可预测的布局和 组件模式;以及缺乏上下文特定特色的模板化设计。
+创造性解读并做出真正适合上下文的不出所料的选择。没 有设计应该是一样的。在浅色和深色主题。不同字体。不 同美学之间变化。切勿在多代设计中收敛于常见选择 (例 如Space Grotesk)
+*重要*:  将实现复杂度与美学愿景相匹配。极繁主义设 计需要复杂的代码配合广泛的动画和效果。简约或精致的 设计需要克制。精准和对间距 字体排版和微妙细节的精 心关注。优雅来自对愿景的出色执行。
+本文使用 Notion Exporter 导出
+8/9
+
+
+===== IMAGE 33: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5aeff416-d025-48be-9c2c-d4347bf28f4d.png =====
+记住: Claude具备卓越的创意工作能力。 不要保留,展示 当跳出框框思考并完全致力于独特愿景时真正能够创造什 么。
+本文使用 Notion Exporter 导出
+9/9
+
+
+===== IMAGE 34: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-fe9d130d-27e6-4a82-b55c-5da0f37a719c.png =====
+Agent Skill = 大模型 Agent 的 「可复用小能 力模块」 用来把"会聊天的模型"娈成"能办事的智能 体。
+先搞清概念: Agent Tool Skill 有啥 区别?
+先把三个容易混的词摆在一起:
+Agent (智能体)
+有目标 有记忆 会自己规划和调用工 具的大模型应用。
+比"单轮大模型 API多了决策和执行。
+Tool Function (工具/函数调用)
+一般指 一个具体能力的底层接口:
+
+
+===== IMAGE 35: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3e08dba6-8785-42e6-990d-bae8d4d48535.png =====
+查数据库 调用某个 HTTP API 执行一 个脚本等。
+更接近"原子操作"。
+Skill (技能)
+站在 Agent 层的抽象:
+把若千工具+规则 + Prompt 封装成 "对 Agent 来说一键可用的能力单元"。
+更像"可以直接拿来用的技能包",对上 层屏蔽复杂细节。
+Tool: 锤子。螺丝刀 (最低层的工具)
+Skill: 会"安装书架"这门手艺
+Agent: 一个会根据你需求决定"要不要 装书架"的装修工
+
+
+===== IMAGE 36: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5486333c-0c33-4e28-a30f-90fe6e091c01.png =====
+Agent Skill 的原理: 从「调用函数」到 「组合能力」
+1.大模型怎么知道有哪些 Skill?
+主流做法是: 把 Skill 作为"可调用选项"暴露 给模型, 并描述清楚:
+技能名: query_user profile
+功能描述: 用来根据 user_id 查询用户 画像
+入参 schema: 需要什么字段。类型是什
+返回 schema: 返回数据的结构
+使用场景:  什么时候该用这个技能
+这些信息在"系统 Prompt 工具列表"里提 供给 Agent。
+
+
+===== IMAGE 37: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-8e2c99d4-68c3-402a-befb-6b9c970f536b.png =====
+模型在推理时就能做两步事:
+判断:  当前任务需不需要某个 Skill
+如果要用:  构造合规的调用参数 > 执行 再基于结果继续推理
+这就是 OpenAl Anthropic 等现在的 functi On calling tool calling 机制的底层逻辑。
+2.Skill 不只是"一个函数" , 而是"一段策略"
+比较新的实践里, Skill 会包含:
+一个或多个底层工具
+一个专门给这个 Skill 用的 Prompt 模板
+必要的前后处理:
+
+
+===== IMAGE 38: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-ea969aed-4e46-4e28-9a44-2e222473830d.png =====
+入参校验 默认值处理, 输出结构化封装 异常兜底
+可选的"小状态": 比如分页游标 上一次查 询结果缓存等
+对 Agent 来说:
+它只需要知道"有一个分析日报  的 Skill 可以用"
+至于底下是查了3次数据库 +调了一个 LLM 做总结, 它不用管
+三 为什么要引入 Skill: 不是多此一举。而 是工程必需
+1.避免"胖 Prompt, 一锅乱炖"
+如果不用 Skill 所有逻辑都写在 Prompt 里
+
+
+===== IMAGE 39: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b8f951db-538e-4ef4-a3e1-29934747b1a2.png =====
+一堆"当用户这样说就先查 A, 再判断 8, 然后: 。99
+Prompt 越写越长 越写越乱, 很难维 护 也难复用
+引入 Skill 之后:
+Prompt 负责"高层意图和策略"
+Skill 负责"具体执行步骤"
+类似:
+把 if-else 逻辑从自然语言里抽出来, 娈成 可测试。可复用的代码模块。
+2.能支持多 Agent 协作 &复杂任务编排
+在多 Agent 架构里 (Planner Worker Cri
+
+
+===== IMAGE 40: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b5ad9bb2-ba4b-4da1-b196-26537798e080.png =====
+tic 等)
+Planner 只负责规划"需要哪些 Skill, 以 什么顺序"
+Worker 只管把对应 Skill 跑完 返回结果
+Critic 用自己的 Skill 去做质量检测。重 写   过滤
+旦 Skill 抽象稳定:
+新任务 二 组合已有 Skill + 少量新 Skill
+不需要每次从零写流程
+3.方便"权限控制"和"可观测性"
+企业落地时很现实的问题:
+
+
+===== IMAGE 41: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d704cc83-e898-45b5-8a7f-22ec88690884.png =====
+哪些 Skill 尤许哪个业务线 /哪类用户使 用?
+每个 Skill 被调用了多少次 平均耗时多 少 失败率如何?
+某次错误是模型决定错了, 还是 Skill 本 身挂了?
+如果 Skill 是一等公民:
+可以在 Skill 维度做  权限 Quota  监 控。熔断 审计,
+而不是在散乱的 USer prompt 里猜问 题。
+从0到1:  怎么设计和使用一个 Agent Skill?
+第一步:  从用户任务里拆出"稳定的子能力"
+
+
+===== IMAGE 42: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7385e994-d473-456a-aedf-ce78b34cd2fe.png =====
+问自己3 个问题:
+1
+这是不是一个会被多次复用的能力?
+2
+能不能明确写出"输入是什么  > 输出是 什么"?
+9
+能不能在业务上单独监控它的效果?
+如果答案是 YES, 就值得抽一个 Skill。
+举例:
+「根据用户行为生成个性化推荐理由」
+「根据用户问题选择合适部门工单并创 建」
+「把原始日志转换成结构化字段」
+第二步:  封装 Skill 的"接口 +内部逻辑"
+
+
+===== IMAGE 43: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-95f44eae-1bcf-4d4d-8b5b-48b9f3f8a15c.png =====
+通常包括3块:
+1.接口定义 (面向 Agent)
+Iname create_support_ticket"_ "description" '根据用户问题创建客服工单。并返回工单I" Iparameters "type "object"_ 'properties' user_id" "type "string" }, "issue_summary { "type "string" }, 'priority "type string' enum ["Iol" medium' "high"] } }, "required" ["user_id" _ "issue summary]
+2.内部实现 (面向工程)
+入参校验 >风险过滤
+调业务 API 创建工单
+接口错误重试 /兜底处理
+返回规范化结果 (如 {ticket_id, statu S})
+
+
+===== IMAGE 44: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9cf1ad6a-9d3a-4c8b-baac-cb14076a8a29.png =====
+3.Skill 级 Prompt (如需要模型参与)
+比如先用模型把用户自由文本压缩成 iss Ue_ summary 和 priority
+这个过程也可以被视为 Skill 内部的一步
+第三步: 在 Agent 侧"注册"和"使用"Skill
+在 Agent 配置中, 把该 Skill 暴露为可用工 具
+在 System Prompt 中告诉模型:
+什么时候优先使用这个 Skill (触发条 件)
+用完 Skill 后要如何向用户解释结果
+运行时链路大概是=
+
+
+===== IMAGE 45: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-50f32e1a-3d67-45ed-90b7-d8c28c5fc4e2.png =====
+1。 用户提问
+Agent 分析意图
+2
+决定调用 create_support_ticket Skill
+9。 构造参数 执行 Skill > 拿到 ticket_ id
+4 结合上下文。 生成最终对话回复给用户
+前端 /业务方看到的, 只是"一句自然语言娈 成一个工单", 中间的 Skill 调用细节被隐藏。
+五 最新趋势: Skill 正在往「图」和 「市 场」两个方向发展
+1.基于图的 Skill 编排 (Skill Graph Workflo W Graph)
+Skill 不再只是"横着铺一排工具",
+而是组成有条件分支 循环 回退的有向图
+
+
+===== IMAGE 46: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-413180d5-a9c5-46d7-a6a1-d6ea640eaab1.png =====
+(workflow)
+Planner Agent 负责在图上走哪条路,
+每个节点就是一个 Skill。
+2.Skill 市场 /生态
+越来越多平台开始把 Skill 标准化成"可分发 的插件":
+Skill 包含:  接口描述 +运行镜像/代码 十 安全策略 +计费方式
+和早年的"云函数 / API 市场"类似, 未来很可能会有" Agent Skill 市场" , 企业只需装配和编排, 而不必所有 Skill 自己 写。
+
+
+===== IMAGE 47: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-1fc8a0b3-ad15-48a5-963b-3d1ea243ed7e.png =====
+Pre-Training Fine-Tuning SFT LORA RLHF之间 有什么关系?
+Alignment
+Pre-Training
+SFT
+RLHF
+NDUUIN CMTNUwhnMT
+|
+1+
+NLbl (mnnTTIL 4ACUUUIIN |
+0000
+TMImo
+1+
+UIIAI TarInl
+
+
+===== IMAGE 48: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-88cf624c-cd34-484a-8dd3-decf59c0b0fc.png =====
+Pre-Training: SFT。 LORA。 RLHF之间有什么 关系?
+Pre-Training
+1.什么是 Pre-Training? Pre-Training (预训练) 是一种深度学习技术。指的是在大型数据集上对模型进行初步训练,使其学 习通用的特征和知识。为下游任务 (如分类。生成。翻译等)  提供一个良好的初始状态。 预训练的模型往往是一 通用的模型,能够提取各种通用模式和特征,为后续的Fine-Tuning (微 调)  提供进一步优化。 2.为什么要进行 Pre-Training?
+节约数据和计算资源效率
+更快的收敛和泛化能力
+预训练可以在大规模通用数据上训练出一个通用 的基础模型。而在下游任务时只需在较小的数据 集上微调。降低了对每个任务的大数据需求。
+预训练使得模型在下游任务中可以更快地收敛 因为模型已经学习到了很多通用的表示 (如语言 结构。视觉特征) 减少了随机初始化带来的不 稳定性。从而提高了模型在不同领域上的表现。
+3.Pre-Training 的流程
+Autoencoding TLN
+EncoderOrly
+Targot
+The catis IMASKthe
+The cat15 climbing the
+LLII
+Original Toal
+Autoregresslon CLI
+Decoder-Only
+The Cat is climbing thetree
+The cat1s Clmbnq
+ThC Catls climbing
+Seqto Seq; Span Corruption
+Encoder Decoder
+The Catl5 Climbing the tree
+The Cal I <
+1。数据准备:  收集大量无标注的通用数据 (如文 本。图像。音频)  并进行数据清洗和预处理。 2。模型架构设计
+训练过程
+使用高效分布式训练技术在大规模数据集上进 行训练。 优化器:  通常采用 Adam 或其娈种。
+3 目标函数设计
+语言建模任务:
+学习率调度:  使用 warm-up 和 decay 策略。
+
+
+===== IMAGE 49: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-4a8e60aa-73f3-466b-97b7-eb4c0f3dd97e.png =====
+自回归语言建模 (如 GPT)
+5。检查点保存与评估
+自编码语言建模 (如 BERT) 图像任务: 对比学习 (Contrastive Learning) 多模态任务:
+定期保存模型检查点。确保模型训练过程可恢 复。
+通过评估 (如 perplexity: BLEU, 精度等) 监控模型性能。 6。微调 (Fine-Tuning) 接口设计 将预训练好的模型开放用于下游任务的微调。
+对齐不同模态的表示 (CLIP)
+Fine-Tuning
+1.什么是 Fine-Tuning? Fine-Tuning (微调) 是在预训练完成后。对模型进行任务特定的调整的过程。预训练阶段生成的模 型通常学习了通用的特征表示。而通过微调,可以进一步在较小的。有标注的特定任务数据集上优化 模型。使其更好地完成目标任务 (如分类。生成。翻译等) 目标函数: Fine-Tuning 的主要目标是最小化目标任务的损失函数。通常为监督学习任务。如分类或回 归。
+对于分类任务: C = N CCyijlogJij i1 j1
+对于回归任务: C= C(yi - J)2 il
+其中:
+其中: yi 是真实值
+N 是样本数量;C  是类别数; Vij 是真实标签的 one-hot 编码; Fij 是模型预测的概率分布。
+gi 是预测值
+正则化目标: C = Ctask + AIlO Opretrained 其中: Ctask 是任务相关的损失; 是模型的当前参数;   Opretrained 是预训练模型的参数; 入是正则化 强度。 冻结层与解冻层 部分层可能会被冻结,部分层会被解冻以更新参数。冻结层的参数保持不娈:   Deltagiozen 解冻层则会参与梯度更新: ABunfrozen -NVoC 2.为什么要进行 Fine-Tuning?
+解决特定任务需求
+小数据集优化
+
+
+===== IMAGE 50: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e73b644a-1d40-45ee-9683-5a88e0ae241a.png =====
+预训练模型虽然学到了通用的特征,但未必能直 接适应特定任务 (如情感分类。医学文本生成)
+可以利用少量的标注数据实现优异的性能。因为 模型已经通过预训练学到了通用的特征。
+降低训练成本
+增强迂移能力
+微调相比从零开始训练成本更低。既节省了数据 需求。也大幅减少了时间和计算资源。
+Fine-Tuning 能使模型适应新领域的数据分布, 例如从通用语言模型微调到法律或医学领域。
+3.Fine-Tuning 的流程
+Fine-Tuning
+Model
+prediction
+Fine-tune same model On Downstream task
+Model
+prediction
+1 准备任务数据
+5。设置优化器与学习率
+收集并清洗任务相关的标注数据。
+使用优化器 (如 AdamW)
+格式化数据。确保符合输入需求。 2 加载预训练模型
+调整学习率 (通常设置较小的学习率。如 le 5或1e-4) 防止对预训练权重的破坏。
+使用开源的预训练模型 (如 GPT BERT T5 ViT 等)
+学习率调度策略:  可采用 warm-up 和 decay。 6。训练模型
+加载基础模型的权重作为初始化参数。 3。定义任务特定的架构 文本分类任务:  在预训练模型顶部添加一个全 连接层。 文本生成任务:  调整解码头 (decoder) 图像任务:  添加特定分类头或调整输出层。 4。冻结部分参数 (可选) 对于数据量较少的场景。可以冻结预训练模型 的大部分参数。只微调顶部层的权重。以避免 过拟合。
+使用标注数据对模型进行训练。优化目标函数 (如交叉熵损失 MSE 等)
+监控训练过程中的评估指标 (如准确率 BLEU Fl-score 等)
+7。模型验证与评估
+在验证集上评估模型性能。确保模型对下游任 务的适配性。 防止过拟合: dropout: 早停等 8 模型保存与部署
+4.微调的两种典型模式
+
+
+===== IMAGE 51: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9a4a70cb-69e6-426f-ab04-af58214e65db.png =====
+全参数微调
+高效微调
+对模型的所有参数进行优化。
+优化部分参数或添加轻量化模块 (如 Adapter LORA: Prefix Tuning 等) 适用于数据量少  计算资源受限的场景。
+适用于任务数据充足的场景。效果最佳但计算成 本较高。
+5.Pre-Training Vs Fine-Tuning
+Large Language Model Pretraining Fine-tuning
+Fine-uned Iodel
+Baso Model
+Large dala
+Small data
+SFT
+1.什么是 SFT (Supervised Fine-Tuning, 监督微调)
+Summanze
+Tast adapodIodul
+Classif
+Pre-training
+PLN
+Superised fne-tuning
+Pretralned Language Nodol
+Task adapled model
+Concrate
+Annolaled tast specific dalasel
+Task adapted modal
+Large generic COrpUS
+SFT 用于明确指导模型调整权重 核心思想是让预训练模型利用标注数据进一步调整和学习。适配特 定的下游任务,如分类。生成。问答等。
+2.为什么需要 SFT?
+提升模型在特定任务上的性能
+为 RLHF 提供基础
+预训练模型具有强大的通用能力,但其未经过任 务特定的优化。 SFT 利用带标签的监督数据调整 模型。使其在特定任务上表现最佳。
+在 ChatGPT 等对话模型中, SFT 是强化学习微调 (RLHF) 的第一步。为后续的对话质量优化打下 基础。
+LORA
+1.什么是 LoRA (Low-Rank Adaptation of Large Language Models)?
+
+
+===== IMAGE 52: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3aed0ff8-1c2b-442b-bd36-388f05b17e50.png =====
+勿  f  &
+Pretrained Weights W E Rdxd
+B=0
+W
+J(0 02
+Figurel
+Figure2
+LORA 是一种高效的参数微调技术。旨在大幅降低训练和存储成本。 将模型权重的调整限制在低秩矩阵 上, LORA 允许模型适应新任务。而无需更新原始模型的全部参数。 具体来说。引入了低秩矩阵分解的思想。用较少的新增参数实现对模型的微调。 2.为什么需要 LORA?
+降低计算成本
+减少存储需求
+LORA 通过限制微调范围到低秩矩阵。只需更新极 全参数微调需要为每个任务保存一套完整的权 少量的新增参数。大幅减少计算量和显存占用。 重。而 LORA 只需保存新增的低秩矩阵。
+提高适应性
+加速训练
+LORA 的设计让原始模型权重保持冻结状态,而适 更新的参数大幅减少后,优化速度明显加快。 可 配新任务只需优化小规模的新增参数。 在消费级硬件 (如单 GPU) 上运行。而无需昂贵 的算力。
+3.LORA 的流程
+预训练模型冻结
+4。适配目标任务
+加载大规模预训练模型) 并冻结其原始权重
+使用任务相关的数据训练 LoRA 模块。目标任 务可以是文本分类。生成。翻译等。
+2 低秩矩阵替代 在预训练模型的权重矩阵 W 上。插入低秩矩 阵分解:
+5。组合权重输出
+推理时,模型将原始权重 W 和微调后的增量 权重 AT 叠加使用: y = f(W'c) = f((V + AW)r) 这里, 4T 由 LoRA 训练得到。 6。保存 LoRA 权重
+T' = T + AT, AT = A. B
+其中, A和 B是低秩矩阵, A C Jnxr , B E Rrxm 且 min(n; m)。 3 训练低秩矩阵
+
+
+===== IMAGE 53: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-cc55e3fc-33d1-4fb2-8180-8da2892b9e60.png =====
+仅优化新增的 A和B,而冻结原始权重 W。 这种分解形式减少了优化参数的规模。
+只保存 A 和 B的权重文件。而无需保存整个 模型的完整权重。
+4.Fine-Tuning Vs SFTVs LORA Fine-Tuning 是底层概念:  所有参数都可更新。适配新任务。 SFT 是 Fine-Tuning 的一种实现方式:  强调使用有监督数据对模型进行任务特定微调。目标是让模型 的输出行为更符合人类期望。 LORA 是对 Fine-Tuning 的高效优化:  通过限制参数更新范围,优化微调效率,同时保留性能。
+方法
+是否调整全部参数
+存储成本
+训练成本
+适合场景
+Fine-Tuning
+是
+高
+高
+高性能单任务场景
+SFT
+是
+高
+高
+有监督任务的高性能需求
+LORA
+否 (仅低秩矩阵)
+低
+低
+资源受限。多任务切换: 个 性化
+RLHF
+1。什么是 RLHF?
+Ranking Dala Convened ImhChuman COm0ansons SCalal SCOIOS Using tE E Iorthm
+Walmng
+Reward Model
+Human Annotators
+Prompt Data Pairs prompts TESh585
+n
+Aligned Model Tha Iaampd RL policy nferspplng RLHF
+Superised Model
+IalzalaI
+RLHF (Reinforcement Learning with Human Feedback) 是一种结合强化学习与人类反馈的技术, 主要用于微调语言模型以使其行为更符合人类的需求或偏好。 它利用人类提供的反馈数据指导模型优化,生成更符合预期的响应。 2.为什么要用 RLHF?
+改进模型的输出质量: 预训练模型基于大规模文本数据。但其输出可能不符合实际应用中的人类需求 (如不准确。不相关。不道德等) RLHF 通过人类反馈引导模型优化。提升输出质量。
+SN Oom Tesponse
+
+
+===== IMAGE 54: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-886daafd-12a5-47f1-b3eb-24264aa6c3fc.png =====
+引入主观偏好: RLHF可J 以将用户或组织的偏好融入到模型中。例如提高内容的礼貌性。精确性或创造 性。
+减少负面行为: 它帮助模型减少生成有害。不符合道德或不符合规范的内容。
+3. RLHF 的流程
+Step 1: 预训练 (Pre-training) 语言模型在大规模无监督数据上进行预训练,学习自然语言的语法。语义以及基本推理能力。
+预训练目标为最大化语言模型的对数似然: Cpretrain
+log Polyilyci) i1
+其中:
+Vi 是目标序列中的第'个 token。 Po(yilyci ) 是给定前序 token 时预测 yi 的条件概率。 Step 2: 人类反馈模型训练 目标: 训练一个奖励模型 (Reward Model, RM) 通过人类反馈对生成的文本进行打分。作为强 化学习的奖励信号。 流程: 人类评估员会对模型生成的多种响应进行排序。例如从最优到最差。 2 使用这些排序数据训练奖励模型。使其学会预测文本的优劣。
+3 奖励模型的损失函数为: CRM -3(;y;y )~D [log O (Ro(I; Yw) Ro(a, H))] 其中:
+是输入。 Yw , V 分别是人类评估中被认为较优和较劣的输出。 Rd(3,3) 是奖励模型对 (2,3)  的评分。 是 sigmoid 函数。 Step 3: 强化学习优化语言模型 目标:  使用强化学习基于奖励模型优化语言模型。使其生成更符合人类偏好的文本。 策略优化:  使用策略优化算法调整模型参数。 奖励信号:
+奖励信号来自训练好的奖励模型  Ro(?;3) ,表示生成文本的质量。 强化学习的目标是最大化预期奖励: CRI 卫y~Pa [R。(心,3) - B . Dk (Poll Fpretrained )] 其中:
+
+
+===== IMAGE 55: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7e013f46-4ada-43e8-b660-b5f94d2c81a7.png =====
+Pa 是当前模型的策略。
+Fpretrained 是预训练模型的分布。 DK 是 KL 散度。用于约束模型的生成分布不要偏离预训练分布。 是控制 KL 惩罚项的权重。
+DPO
+1。什么是 DP0?
+Reinforcement Learning from Human Feedback (RLHF) TTIe TC Dpoem about the histony otjaz label rewards
+Direct Preference Optimization (DPO) Wite me Dom 00ut the history 01j2
+reward model
+LM policy
+final LM
+preference data maximum likelihood
+sample completions reinforcement learning
+preference data maximum lkelihood
+DPO (Direct Preference Optimization) 是一种用于微调语言模型的强化学习方法,旨在让模型的输 出更加符合用户偏好。 与 RLHF 相比, DPO不使用强化学习算法。而是直接基于人类反馈优化模型的输出。简化了训练过程 并提升了效率。 DPO通过将人类的偏好数据转化为直接优化目标。避免了强化学习中复杂的策略更新和奖励设计问 题。这种方法保留了偏好信息,同时减少了优化过程的难度。
+2.为什么要使用 DPO?
+简化训练过程: RLHF 需要强化学习和奖励模型的结合。而 DPO 简化了流程。直接优化偏好目标。
+稳定性更高: RLHF 中的强化学习过程可能导致策略不稳定, DPO 则直接优化损失函数。更加稳定。 减少计算开销: DPO 不需要复杂的强化学习算法 (如 PPO) 从而降低了计算成本。 直接优化偏好: 人类的偏好被明确建模为优化目标,更容易实现。 3. DPO 的核心流程 Step 1: 收集人类偏好数据 从人类评估中获取偏好数据,通常包含输入 X;以及两种输出 Yw (优选项)  和 % (劣选项)
+这些偏好数据用来训练语言模型。使其更倾向于生成符合偏好的结果。 Step 2: 构建偏好概率模型 DPO 假设用户偏好可以通过一个概率模型表示,模型学习到的分布定义为: Po(ylz) c exp (fo(z,3)) 其中: fo(c;y) 是语言模型对输入 X 和输出y的评分函数。 该概率分布通过软性对数函数表示更偏好的选择。
+
+
+===== IMAGE 56: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e8e1f003-5221-4521-9945-54b0d6f3687a.png =====
+Step 3: 目标函数的构建 根据人类偏好数据 D = {(", Vw, ? )} ,定义优化目标。对于每对 Vw (优选)  和 %l (劣选) ,模 型希望 yw 的得分更高: P(Vw ?) > P(Fl 2 ) exP(fo(c, yw ) ) 将此转化为目标函数: CDPo 卫(;Vu;yl)~D log eXP(fo(?, Hw 一 + exp(fo(?, 聊」 这表示模型需要最大化优选输出 Vw 相对于劣选输出 yi 的概率。 具体优化过程中, DPO 可以视为一个二分类问题。在 yw (优选)  和 Y 之间进行比较。 Step 4: 优化语言模型 使用随机梯度下降 (SGD) 或其他优化方法。直接优化语言模型参数 0 = 以最小化上述损失函数 CDPo 不需要额外的奖励模型。也不需要 KL 散度惩罚项 (与 RLHF 的强化学习不同) 4.DPO 与 RLHF 的邓比
+特性
+DPO
+RLHF
+优化方法
+直接优化人类偏好目标
+通过强化学习优化 (如 PPO)
+是否需要奖励模型
+不需要
+需要训练单独的奖励模型
+计算复杂度
+较低
+较高 (强化学习过程需要更多计算资源)
+稳定性
+更高
+强化学习中可能存在策略不稳定性
+是否使用 KL 惩罚
+不需要
+通常需要
+PPO
+1。什么是 PP0?
+Update with the Bradlent DLCLIP+VF+s(8) by SGD
+T(A(ISU))
+S[oI(s)
+Ta(CISO) Teal (AAO)ISC))
+LCUPtVF+S(0 )
+T(0)
+PpO Aent (Acor CrII
+Tor
+timestepJ
+Envlronment
+LCuP (0)
+S() Rf)
+S(+ 1
+Va(SO)) Vrorq
+(0)
+Tralecory Memor (5,,R5 )
+Mnibatch
+PPO (Proximal Policy Optimization) 是强化学习中一种流行的策略优化算法,由 OpenAl 提出。用 于在策略梯度方法中平衡训练稳定性和效率。
+
+
+===== IMAGE 57: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-f7311705-d009-4278-9e37-9f4e45f88f19.png =====
+PPO 是一种基于策略梯度的算法,它通过限制策略更新的步幅。避免策略更新过大引发的不稳定性, 同时保持简单和高效。
+与其他强化学习算法相比, PPO 的计算成本更低。易于实现。且性能优异。
+2.为什么需要 PP0? 避免策略崩塌 (Policy Collapse) 直接优化策略梯度可能导致策略更新幅度过大。使得训练不稳 定。
+高效的优化: 相比于复杂的约束优化算法 (如 TRPO) PPO 通过引入裁剪机制实现更简单且高效的 更新。
+训练稳定性: 通过限制策略的娈化范围, PPO 在优化过程中更加稳定。
+3. PPO 的核心思想
+PPO 的目标是最大化以下目标函数: I(O) = Dt |min(rt(0) . At, clip(rt(0),1 - E,1+E) . _ N To (atlst) 旧策略和新策略的比率: r(0) = TOold ( Qt |St_ 这里, To (at|st ) 是新策略的概率, TOold (atlst_ 是旧策略的概率。 优势函数: At 是优势函数。用于衡量当前动作 at 相对于状态 st 的好坏。 裁剪机制: clip(rt(0),1- E,1+E) 裁剪比率 rt(0)  的值到范围 [1 - ,1+e ,防止策略更新过大。 通过引入裁剪, PPO 避免了策略更新过程中对旧策略分布的破坏。提升了训练稳定性。 4.PPO 的优化目标 PPO 的优化目标结合了以下两方面: 1。策略改迸:  新策略需要在当前策略的基础上获得更高的奖励。 2 限制更新幅度: 防止策略更新步幅过大。保持与旧策略的相似性。 综合目标函数为: L(0) = } [min(ri (0) . 4t, clip(rt (0),1 -6,1+e)'甸 其中, 是超参数。用于限制策略的更新幅度。通常取值如0.1或0.2。 5.PPO 的流程 PPO 的流程可以分为以下几个步骤: 采样数据: 使用当前策略 To 与环境交互。采集样本数据 (状态 st 动作 Qt - 奖励 rt ` 下一个状态 8t+1 ) 使用奖励计算回报 (Return) 和优势函数 At一 2 计算旧策略比率: 对采样数据,计算旧策略和新策略的比率 rt(0) :
+
+
+===== IMAGE 58: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-328b9ddb-1cb6-4a16-bf5f-e08e676d206c.png =====
+To (at|8t) rt(0) = TOold Qt lSt _ 3。构建目标函数:
+构建裁剪后的目标函数: I(O) = lt |min(rt(0) . 4t, clip(rt (0),1 一 E,1+E) . d 优化目标函数: 使用随机梯度下降 (SGD) 或 Adam 优化器,最大化目标函数 L(0)。 5。更新策略: 将优化后的参数 O  更新到当前策略中,形成新策略。 6。重复循环: 使用新策略与环境交互。采样新的数据,重复上述过程,直到策略收敛。
+
+
+===== IMAGE 59: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7781970c-c741-4b76-900c-40ef1e80bfff.png =====
+CEFREE 瀚
+技术精进 1.大模型训练为什 么要分 3 个阶段? 2.Pre-Training SFT RLHF 之 间是什么关系?
+
+
+===== IMAGE 60: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-66eade90-d36d-462d-9ccd-a29b2da11268.png =====
+小红书 @ A1有温度 概念介绍 新 Pre-Training & Post-Training 大家常看的 paper 中会把大模型训练分为 Pre-Training 阶段 和 Post-Training 阶段。  Pre Training A1有溟 在 Bert 时期, 就指的是 Mask 训练和相似度训练方法 在 LLM 时期 指的是用连续文本对模型进行自监督训练过 程。是 RLHF 训练大模型的第一阶段
+Post-Training
+Post-Training 在 Bert 时期叫叫 Fine-Tuning  在 LLM 时期, Post Training 的意义就是与人类偏好对齐。 所以训练奖励模型 强化学习和使用全参 LORA 等方法 对模型进行微调都属于 Post-Training 阶段的事情 Pre-Training 的两层含义 第-是预训练方法。如 Bert 和大模型的预训练使用的方法。 第二是预训练模型。 比如 Bert 预训练模型, 预训练大语言 模型,但这里的预训练大语言模型指的是经过强化学习后 的模型; 而不只是经过预训练方法训练后的模型, 很多垂 类领域需要用已训好的大模型再进行 SFT 进行微调。
+
+
+===== IMAGE 61: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-feeb11a8-0e76-4827-b658-b671ab8452e9.png =====
+小红书 @ Al有温度
+CEFREE
+Pre-Training 预训练方法
+淼 什么是 Pre-Training? 预训练是大模型训练的第一阶段,指的是使用大型数据集对 模型进行自监督训练。思想是让模型学习掌握世界通用的规 律与知识; 为后续优化打下基础。 为什么要进行 Pre-Training? 学习通用知识:  在预训练阶段。模型接触到的是海量的各类 数据, 对于不同类型的任务之间都存在- 些通用的底层特征。 比如我们上学期间的幼儿园到高中 就是学习通用知识的过 程。模型的学习就是模拟人类学习的过程。  节约计算资源:  从头训练大模型需要大量的计算资源和时间。 预训练阶段虽然也需要消耗大量计算资源。但其是在通用数 据上进行的, 一旦预训练模型完成。后续针对不同下游任务 进行微调时就可以在这个基础上进行。 加快下游任务收敛和有更好的泛化能力:  在预训练过程中, 模型学习到了大量通用的特征表示 当将预训练模型应用到 下游任务时, 可以基于已经学到的通用表示, 更快地适应新 任务。模型在面对新的。末见过的数据时, 更好地进行推理 和预测 在训练过程中更快地收敛到一个较好的性能状态。
+
+
+===== IMAGE 62: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-c93780e1-fd86-49a1-b8b3-1e7c8aad1544.png =====
+小红书 @ Al有温度 0 如何进行 Pre-Training
+CEFREE 泖
+BOS
+关
+注
+爱
+有
+EOS
+Dccodcr
+BOS
+关
+注
+爱
+有
+度
+EOS
+大模型预训练聚焦大量无标签语料, 采用自监督学习, label 与 data 错位构造训练数据集。借下-个token 当标签开展自监督, 公式为: A[有 温+ N [ = logp (Xn X1,X2' '' ) Xn-I; 0 ) 1二1
+模型依据上下文预测下一个最可能单词, 通过计算预测 对数似然损失, 让模型精准预测下一个单词 进行连续 文本的自回归预测, 以确保训练全面有效。这个训练过 程无需人工标注。借文本自身构造监督标签, 实现模型 训练, 让模型有 generate 能力, 突破数据与知识瓶颈。
+
+
+===== IMAGE 63: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-8dc2d5d1-f5f1-4e5e-a6b9-37d318985942.png =====
+小红书 @ Al有温度
+CEFREE P
+SFT 有监督微调
+什么是 SFT
+SFT 是预训练模型的定向优化 本质是教模型做具体的事  用带标签的监督数据调整模型, 把通用能力转化为任务能力, 是模型从通用到可用的优化过程。
+SFT 实现的方法
+你 好 吗 end ItIi start 我 很 好 Im_Start EOS 有溘 ` Decoder 有温W  l_start 你 好 吗 i_end W_start 我 很 好 IIi_start
+SFT 需要人工整理标签进行学习。 模型结构与预训练模型相同。 但预训练使用的数据为连续的文本, SFT 要人工梳理问题与对 应的答案, 并且数据 般是特定任务数据集。标注数据内容围 绕特定任务展开。 需要注意的是 SFT -般只需要对 response 部分进行 Ioss 计 算。无需对 prompt 部分计算 Ioss SFT 具体实现方法有可以进行全参微调, 也可以使用少量参数 对大型模型进行微调 比如 LoRA/QLORA 方法。
+
+
+===== IMAGE 64: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-07c579af-7ead-4ecf-af6e-933cd539831e.png =====
+小红书 @ A1有温度
+ICEFREE Fine-Tuning 和 SFT 有什么区别 灞
+Fine-Tuning (微调)  是一个较为宽泛的概念,指在预训练模 型的基础上,  通过在特定数据集上进行训练来调整模型参数; 使其适应特定任务或领域,而 SFT 是 Fine-Tuning 的一种具 体实现方式。它们的差异体现在:
+数据标注情况
+数据标准情况 
+使用的数据不一定都经过人工标注。 在一些半监督或无监督的微调场景 中。也会结合无标注数据或少量标注 数据与大量无标注数据一起使用。
+明确使用有标注的任务特定数据集, 标注内容围绕特定任务展开。 ^红书 训练监督方式  有温 采用有监督学习的方式进行训练; 通 过标注数据明确告诉模型输入与输出 之间的对应关系。让模型学习特定任 务的规则和模式。
+训练监督方式 
+监督方式较为多样。除了有监督学习 外。还包括半监督学习 无监督学习 等方式的微调。 例如:  在无监督微调 中。会使用自编码器等技术。让模型 在无标注数据上学习数据的潜在表 示。以适应特定领域的数据分布。
+适用场景和目的侧重
+小红d 适用场景和目的侧重
+适用场景更广泛, 目的不仅是提升模 型在特定任务上的性能。还可能包括 让模型适应不同领域的数据分布。提 高模型的泛化能力等。
+更侧重于让预训练模型快速适配具体 的下游任务, 提升在特定任务上的表 现。
+
+
+===== IMAGE 65: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b185258a-db3f-454c-9aa3-f068b3262b61.png =====
+小红书 @ A1有温度 RLHF 人类反馈强化学习
+CEFREE 
+什么是 RLHF
+RLHF (Reinforcement Learning with Human Feedback) 是。它-种结合强化学习与人类反馈的技术。主要用于微调 语言模型以使其行为更符合人类的需求或偏好利用人类提供 的反馈数据指导模型优化。生成更符合预期的响应。 为什么要 RLHF?
+弥补 SFT 的回答的局限性 在 SFT 阶段, 模型虽然通过标注数据学 会了执行特定任务, 给出符合任务规则 的回答, 但这些回答往往只是正确。却 不一定能满足人类的个性化需求和价值 观。例如。在对话任务中。对于如何减 肥的提问, SFT 后的模型可能只是机械 地罗列减肥方法。不能根据提问者的潜 在需求 (如时间紧迫 不想运动等)  提 供针对性建议。
+提高模型综合思考的能力
+用户的需求是复杂多样且不断变化的, 很难通过有监督微调阶段的固定标注数 据完全覆盖。
+RLHF 具有动态优化的能力。能够根据 实时的人类反馈。综合调整输出,更好 地满足不同场景下的多样化需求。
+提升用户体验
+对于实际应用中的大模型, 用户体验是 关键。即使模型在任务准确性上表现良 好; 但如果输出的回答冗长 难以理 解 过于生硬规则, 不能满足用户的交 互期望。
+RLHF 利用人类对模型输出的偏好反 馈。训练奖励模型。让模型学习到人类 对回答的质量判断标准。模型在生成回 答时。会朝着更受人类欢迎的方向优 化;不仅能给出正确答案。还能以更综 合的符合人类期望的方式呈现。
+RLHF 可以让模型学习到人类在交互过 程中的各种偏好, 如回答的简洁性。语 气的友好度 信息的时效性等。
+
+
+===== IMAGE 66: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-8d07547c-6973-4814-8d6e-486eb6403e65.png =====
+小红书 @ A1有温度 RLHF 常用方法 PPO 流程
+ICEFREE J
+Reference Model
+Reward Model
+Policy Model
+GAE
+Value Model
+输入问题 q, 经过策略模型(Policy Model) , 生成回答 O。接着输出 o 被输入到3个模型: 参考模型(Reference, 冻结):  计算输出 o与 训练数据之间的 KL 散度, 用于限制策略更新 奖励模型(Reward 冻结):  生成奖励,是实 际分数 小红J 价值模型(Value; 更新):  输出 。的预期分数
+小红书 @_
+
+
+===== IMAGE 67: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-998fc539-4d01-4ee9-9021-4f9700dd1034.png =====
+小红书 @ A1有温度 RLHF 常用方法 PPO 流程
+ICEFREE 瀚
+Reference Model
+Reward Model
+Policy Model
+GAE
+Value Model
+GAE 优势=实际分数『 预期分数 V
+在输出时生成了某个 token, 如果这个 token的优势大于0,那么我们应该增加生 成该 token 的概率 反之,如果token的优势小于0,就减少生 成该token的概率 ^红书 @AI 最终, 模型通过强化具有正优势的token, 使 得生成结果更加符合预期目标。
+T红-
+
+
+===== IMAGE 68: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-531caa66-de03-49ce-bfc5-84c3d65684c1.png =====
+小红书 @ A1有温度
+ICEFREE B
+RLHF 常用方法 GRPO 流程
+K Reference Model
+01
+Ti
+AI
+02
+Reward Model
+72
+A2
+Policy Model
+Group Computation
+06
+TG
+AG
+GRPO的核心就和它的名字一样。创新点是使用组间关 系去重塑优势的计算方法: @A1有 温度 输入问题q,  经过策略模型(Policy Model), 针对同一 个9生成多个回答0,02...,06, 接着输出0被输入到2 个冻结的模型: 参考模型(Reference): 计算输出0与训练数据之间的 KL散度 AI 奖励模型(Reward): 生成每个回答的分数11,72, ,T
+A 一
+
+
+===== IMAGE 69: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-32ba1b4d-12a8-4f0d-bb17-42557e6afdab.png =====
+书 @ A1有温度
+ICEFREE 
+RLHF 常用方法 GRPO 流程
+K Reference Model Reward Model
+01
+Ti
+e Group Computation
+A1
+Policy Model
+02
+12
+A2
+06
+TG
+AG
+计算这组回答 〈,r2,. . .,rG 分数的均值 MG 和标准差 % ! 二 ri_ LG 计算每个样本的相对优势 4G 06 十 模型通过强化优势大于0的token生成 抑制优势小于0的token生成, 使生成结 果更加符合预期目标。 T红 GRPO 在模型训练时利用群体统计量计算 相对优势。更关注群体,而且无需加载 Critic 模型, 能更节省 GPU 内存。
+
+
+===== IMAGE 70: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-bb9ff4a1-d5e3-4870-9bec-615c1330cece.png =====
+1[书@ Al有温度 PPO 与 GRPO 存在的问题
+ICEFREE 溯
+PPO 与 GRPO 在 token 级别进行优化 在实际中我们通常用回复的完整内容来评价模型, 但Pp0与6RPO却用逐词的方法来训练。 PPO 和 GRPO 是对模型输出的 token 逐个优化。这种做法的本意是更精细的优化。但论文指出在太 模型长文本的场景下, 就容易引入噪声和奖励偏差;导致模型训练迷失方向。GSPO 的核心思路 就是把奖励和优化目标重新对齐。从给每个 token 打分。改为直接对整个句子打分。这种切换带 来的好处具体为:
+一是更稳定, GSPO 直接对整句迸行训练。减少了词级波动带来的训练噪声  二是更高效; GSPO 根据句子的分筛选样本。仅保留高质量纯净的样本参与优化。让 模型更快收敛。效果更好。  - GRPO 在 MoE 网络上难以收敛 由于 MoE 每次推理只激活少数几个专家模块, 虽然效率更高。但新旧策略的 Router 可能发生变 化。导致新旧策略激活了不同的专家。比如:
+在旧策略下; Router 激活了 (专家 AJ 和 (专家C)
+在新策略下 Router 激活了 (专家 BI 和 (专家01
+模型更新后。实际参与计算的专家组合可能完全不同, 导致两个概率的生成基础存在结构差异, 重要性比率失真急剧上升 所以 Clip 会被频繁地触发。导致梯度也严重失真。当高方差噪声渗 入训练梯度后; 还会模型不可逆崩溃。即使回退到历史检查点。调整裁剪范围或者修改生成长度 后也无法恢复训练稳定性。 理想的重要性比率本应仅反映同一模型结构下参数变化带来的输出差异。但此时的比率还混入了 不同专家组合的影响, 就会带来高方差导致训练奔溃。为了在训练时复现这种推理路径 传统算 法往往需要引入 Routing Replay 的机制:  即把推理时的专家模块调用记录下来; 再还原到训练 中使用。以保证前后一致。这种做法虽然有效。但大大增加了工程成本 还制约了模型性能。
+
+
+===== IMAGE 71: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e2985627-3d11-43ef-8fbc-d8c5164cecb3.png =====
+纤书 @ A1有温度
+ICEFREE 泖
+RLHF 常用方法 GSPO 流程
+GSPO分组序列策略优化 ~3 基于上述单token策略存在的问题 N5出分冼5#曰i化 `赉 (GSPO) GSPO采用如下序列级优化目标: Jcspo(0) 卫_~D, {3}@1 ~Tvold () G min s;(0)Ai, clip(s;(O); 1 - E, 1+6)4) |
+GSPO采用基于分组的优势估计: r(z, Ii) Ieal ({r(;」)}@) 4i = std ({"(;y:)}@1) 并基于一句完整的话来定义重要性权重 $;(0) @A1有 温度 lyl To(yi To(yit 2, yi:<t) 8;(0) = 二 eXD log TOod (yi Iyl TOal" (yt C, Ii:ct)
+可以看到65P0是对整句话而非单个词进行裁剪。这既符合序列级奖励机制。也 与优化目标一致。同时在 $;(0) 中引入长度归-化以降低方差并将 $;(0)约束在 统一数值范围; 且不同长度响应的重要性比率需适配不同裁剪范围。 二者的区别主要在于; 如何给 tokens 的似然的梯度赋予权重。GRPO 针对每个 To(yit 2, %i:<t) token 迸行重要性采样; 而此公式 所修正的分布对每个 Tdold (yit -; yi: < token 不一致 用同一标准裁剪也不合理。GSPO 升级为对 tokens 赋予 sequence 级别重要性采样权重。
+
+
+===== IMAGE 72: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-518dbd4d-a213-4f33-bfeb-f30335e4fa54.png =====
+GSPO (Group Sequence Policy Optimization) 定义:  将 GRPO 的 token 级优化改为序列级, 对整句做重要性采样与 clip。 序列级权重: si(0) TO(gil2) I/lyi/ TOold (yil? - 目标: LGsPo 二 卫 min(siAi, clip(si,1 一 E,1+e)4i)]
+与 GRPO 区别: 优化粒度序列级, 方差更低, 尤其适合 MOE
+
+
+===== IMAGE 73: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0c224d4b-f88a-45fb-8e2c-2fac055936cf.png =====
+数学形式
+句  推导: GMPO 目标
+GRPO: lol
+min(ptA, clip(pt, Elow; Ehigh )4)
+GMPO:
+Bj {Irod_ t Ibigllmin(rho_ tlhat{A} , Itext{clip}(rho_t, lepsilon_{low} , lepsilon_{high}) Uhat{A})lbigllBig}^{1/ol} Icdot Itext
+关键设计: token 级 clip (非序列级) clip 范围 (e-04, ,e0.4)较 GRPO 更宽, 平衡探索与稳定。
+
+
+===== IMAGE 74: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e23278f3-34c5-44cd-9716-6279043501db.png =====
+数学摊导
+日推导: Q-learning 更新规则
+贝尔曼最优性方程: $Q^(s,a) 二 Imathbb{E}_{s '}big[r + Igamma Imax_{a'} QNs',a ) Ibig]s
+用样本 (8,a,r, $')做蒙特卡洛近似, ID 目标为:
+
+
+===== IMAGE 75: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b7b7be2c-c368-436b-a7d1-fec9f89e68a8.png =====
+最优价值函数:
+SSVA(s) 二 Ia Ii VNpi(s), Iquad @~s,a) 二 Imax_Ii QNpi(s,a)8S
+臼 推导:  贝尔曼最优性方程
+最优策略必然在每个状态选择使 $Q^最大的动作: SVN(s) = Wax_ 3 Q(s,a)
+@~8,a) = Isum_{s' } P(s |s,a) |Big[ R(s,a,s') + Igamma V^(s ') IBi8] Isum_{s '} P(s Is,a) IBig[ R(s,a,s ') + Igamma Imax_{a'} QOs',a ) IBig]sS 这是 Q-learning 等算法的理论基石=
+
+
+===== IMAGE 76: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-1a819ab4-be2d-4c8c-b366-c87bbd37c781.png =====
+以 LLaMA / GPT 这类 DecoderOnly 架构为准, 记:
+工:  层数
+几:  隐藏维度 (hidden size)
+V: 词表大小
+注意力头数0,  单头维度 dk = hla (参数量与是否多头无关, 只是拆分方式不同 ) 单层结构:
+1.自注意力块: WQ; TK, UV; Vo 各几 X几 参数量: 4.h2
+偏置若存在: +4h
+2. MLP 块:  通常几〉4 >几
+第-层: Vi E Rhxqh_ 4h2 第二层: Wz E R4xh 4h2 共8k2 (偏置相对可忽略)
+3. LayerNorm: 注意力前。注意力后 MLP 前 MLP 后 共4个, 各2几
+8h
+单层总计 (主导项)
+Player 42 862 8h 12h2 8h 12h2 (h》1)
+
+
+===== IMAGE 77: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-be028924-250a-4506-a269-cd7c75943803.png =====
+职场英语
+外企沟通100个实围短透
+2. Circle back 回头联系 ,再次确 1 Touch base 联系一下, 沟通 ) 认 ) Let's touch base later this week 川 circle back with you once | to go over the plan. 我们这周晚些 get the numbers from finance 时候联系一下,过-遍计划。 我从财务拿到数据后会再联系你。
+3. On the same page 达成共 识 意见-致 ) 4. Get the ball rolling 开始行 Before we move forward,| 动,启动项目 ) Let's get the ball Want to make sure We re on rolling on the new campaign.让 the same page.在推进之前 ,我想 我们开始推进这个新活动吧 确认我们达成了一致。 49
+5 Back to square one ( 回到原 点,重新开始 ) If they reject the proposal, We re back to square one. 如果 他们拒绝提案 ,我们就得从头再来。
+6 Think outside the box 跳出思 维定势 ,创新思考 ) We need to think outside the box to solve this issue. 我们需要打破常规思考 , 解决这个问题。
+7. Keep me in the Ioop 让我知 情 ,保持沟通 ) Keep me in the loop on any updates from the client. 客户那边有任何更新都要让我 知道。
+8 Take i offline 私下讨论 会后 再说 ) Good point. Let S take 计 offline and circle back after the meeting. 说得好  我们会后再私下聊 一下这个问题。
+
+
+===== IMAGE 78: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-671b7aa6-7db8-4a35-a27a-138df6db9244.png =====
+9. Low-hanging fruit 容易完成的 10. Move the needle ( 产生影 任务 ,低难度目标 ) Let S focus 响 ,推动变化 ) This strategy on the Iow-hanging fruit before could really move the needle on tackling the complex stuff 我们 our Q2 results. 这个策略可能会对我 先处理那些容易完成的任务,再解决 们第二季度的结果产生重大影响 难的。
+12. Ahead of the curve 走在前 11. Call the shots 做决策 = 下指 沿,领先-步 ) We want to stay 令 ) At the end of the day, 计' $ ahead of the curve in the client Who calls the shots.说 innovation. 我们希望在创新方面保持 到底,还是客户说了算 领先。
+13. Table the discussion 暂时搁 14. In the loop 掌握情况 ,知情 ) 置讨论 ) Let = S table this She S not in the Ioop on this discussion and revisit it next project yets 她还不了解这个项目的 week 我们先搁置这个话题 下周再 讨论。 3 |畹  16. No-brainer 轻而易举的事,毫 15. Ballpark figure 粗略估计 ) 无疑问的选择 ) Hiring her Was a Can you give me a ballpark no-brainer. She's perfect for figure for the cost?你能给我-个 the role.聘用她是毫无疑问的选择 , 大概的成本估算吗? 她非常合适。
+17. Crunch time 关键时期 ,冲刺 阶段 ) It' $ crunch time - the deadline is tomorrow!现在是关键 时刻 ,明天就是最后期限了 !
+18.On my radar 关注中,留意 着 ) That issue is already on my radar  | m tracking 比.我已经在 关注那个问题了
+
+
+===== IMAGE 79: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-df11cc5e-fcb5-4ce1-a82d-4bb5fc452705.png =====
+19. Game plan 计划,策略 ) Do 20. Put a pin in 计 暂时搁置 ,稍 we have a game plan for the 后再谈 ) Let = S put a pinin that product launch?我们有产品上线的 and come back to it later. 我们先 策略了吗? 放-放,之后再讨论。
+22. Stay in the Ioop 保持了解 , 与信息同步 Make sure to stay in the loop with project updates and deadlines .确保与项目的最新进 展和截止日期保持了解。
+21. Touch base with ( 与:::联系 ) 川l touch base with the vendor later today. 我今天晚点会联系-下 供应商。
+23. Step Up to the plate 挺身而 24. Throw in the towel ( 认输, 出。承担责任 ) We need 放弃 ) We re not going to someone to step up to the throw in the towel just because plate and lead this initiative. 我们 We faced a setback 我们不会因为 需要有人挺身而出,领导这个倡议。 遇到挫折就认输
+25. Pick someone's brain 请教 某人 ,向某人请教意见 ) need to pick John's brain about the technical aspects Of this project. 我需要向约翰请教这个项目 的技术问题
+26. Put all your eggs in one basket 弧注一掷 = 冒险 ) It's risky to put all your eggs in one basket when i comes to investment. 在投资方面弧注一掷是 很冒险的。
+27. Read between the lines 看 懂言外之意 ) Sometimes yoU 28. Cut corners 走捷径 = 偷工减 need to read between the lines 料 ) We can't afford to cut to understand What someone is corners when it comes to really saying.有时候你需要看懂言 product quality .在产品质量方面我 外之意 才能理解别人真正想说的 们不能走捷径。 话。
+
+
+===== IMAGE 80: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0b7cacf9-1cac-4a83-a140-0ee4e1dc0ffe.png =====
+19. Game plan 计划,策略 ) Do 20. Put a pin in 计 暂时搁置 ,稍 we have a game plan for the 后再谈 ) Let = 5 put a pinin that product launch?我们有产品上线的 and come back to it later 我们先 策略了吗? 放-放,之后再讨论
+22. Stay in the Ioop 保持了解 , 与信息同步 Make sure to stay in the loop with project updates and deadlines.确保与项目的最新进 展和截止日期保持了解。
+21. Touch base with ( 与:::联系 ) 川 touch base with the vendor later today. 我今天晚点会联系一下 供应商。
+23. Step Up to the plate 挺身而 24. Throw in the towel ( 认输, 出。承担责任 ) We need 放弃 ) We re not going to someone to step up to the throw in the towel just because plate and lead this initiative. 我们 We faced a setback 我们不会因为 需要有人挺身而出,领导这个倡议。 遇到挫折就认输
+25. Pick someone's brain 请教 某人 ,向某人请教意见 ) need to pick John's brain about the technical aspects Of this project. 我需要向约翰请教这个项目 的技术问题
+26. Put all your eggs in one basket 弧注一掷 = 冒险 ) It's risky to put all your eggs in one basket when i comes to investment. 在投资方面弧注一掷是 很冒险的。
+27. Read between the lines 看 懂言外之意 ) Sometimes you 28. Cut corners 走捷径 ,偷工减 need to read between the lines 料 ) We can't afford to cut to understand What someone is corners when i comes to really saying. 有时候你需要看懂言 product quality .在产品质量方面我 外之意 才能理解别人真正想说的 们不能走捷径。 话。
+
+
+===== IMAGE 81: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-f120bd85-70c8-4beb-9c86-8453f42c435c.png =====
+29. Think on your feet 机智应 30. Give someone a heads-up 对 即兴思考 ) In this job, you 提前通知某人 ) Just wanted to need to be able to think on your give you a heads-up that the feet and make quick decisions。 client may reschedule. 只是想提前 在这个工作中,你需要能够机智应 告诉你 = 客户可能会改时间 对 ,做出快速决策
+31 Get up to speed 跟上进度 , 熟悉情况 ) We need to get the new hire up to speed quickly.我 们需要让新同事尽快熟悉情况。
+32. At the end of the day 归根 结底,说到底 ) At the end of the day; results are What matter most. 说到底 结果才是最重要的。
+33. Hit the ground running 立即 34. Keep your eye on the ball 开始并全力投入 ) We need (集中注意力 ) Let 5 keep our someone Who can hit the eye on the ball and not get ground running 我们需要一个可以 distracted .我们要专注于重点 ,别被 立即上手的人。 其他事情干扰。 一 35. Raise the bar 提高标准 ) 36, Off the radar 不在关注范围 This project really raises the bar 内 ) That issue has been off the for future campaigns.这个项目确 radar for a While 那个问题我们已 实提高了以后活动的标准  经一阵子没关注了。
+38. Play it by ear 见机行事 ,随 机应变 ) We don t have a fixed plan yet 一 let S just play it by ear.我们还没有固定计划,见机行事 吧
+37. In full swing 全面展开,进人 高潮 ) The campaign is nowin full swing. 活动现在已经全面展开 了。
+
+
+===== IMAGE 82: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-986fd2ae-5cac-40b6-971d-5d8cc5198145.png =====
+39 Touch and go 情况不稳 ,充 满不确定 ) It Was touch and go for a While, but we finally secured the deal.一 度情况很不稳 定,但我们最终拿下了这笔生意。
+40. Take ownership 主动负责 , 承担责任 ) We need everyone to take ownership of their part of the project. 我们需要每个人都对自 己负责的部分承担责任。
+41 Run something by someone 42. Stay on top of 紧跟  掌握进 (向某人请示/征求意见 ) Can TUn 展 ) You need to stay on top of this idea by you later?我可以等会 your emails during the rollout .在 跟你说说这个想法吗? 上线期间你要及时跟进邮件。
+43. Win-win 双赢 ) Let = S find a win-win Solution that Works for both sides. 我们要找^个对双方 都有利的解决方案。
+44.In a nutshell 简单来说 ,概括 一下 ) Ina nutshell, we need more time and budget. 简单来 说,我们需要更多时间和预算。
+45. Fast track 加速推进 ) 46. Bottom line ( 核心 ,最终结 We re fast-tracking this 果 ) The bottom line is, We need request due to urgency.因为情况 better performance.最重要的是 , 紧急 ,我们正在加快这个请求的处 我们需要更好的业绩 。 理。
+47. Put out flires 救火,应急处理 48 Think big 有大局观 想得远 ) 问题 ) She s been putting out It' $ tme to think big and aim fires all morning.她一早就在处理各 for global markets.是时候放眼全 种紧急问题 球市场了。
+
+
+===== IMAGE 83: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-fbc1c89e-b37f-4527-8a4f-a28aca406a4f.png =====
+49. Play hardball 强硬对待 ,采取 50. Give i a Shot 试一下,尝试 强势策略 ) They = re playing 一下) |' Ve neVer done 计 hardball in the negotiation 他们 before, but | ' I give it a Shot 我 在谈判中态度很强硬 以前没做过 但我可以试试看。 元怠^
+
+
+===== IMAGE 84: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e03ad06f-79c5-4c53-8008-09e8da4b7208.png =====
+带宽/精力/容 don't have the bandwidth 我没有精力承担新任务 量 to take on a hew task。
+Bandwidth
+
+
+===== IMAGE 85: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-82aa0858-7bed-4838-bc8c-8960f0ce7bd2.png =====
+后勤,具体安 川l handle the logistics for 排 the meeting。
+Logistics
+我来负责会议的具体安排
+
+
+===== IMAGE 86: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-ea08606b-0711-43da-81f4-828d47b06bd7.png =====
+对齐,保持一 We need to ensure 致 alignment between teams。
+Alignment
+我们需要确保团队之间的步调-致
+
+
+===== IMAGE 87: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-21726e8b-17b3-482f-b4bb-d48d96c42b26.png =====
+The merger will create great 这次合并将产生巨大的协同效应 synergies
+Synergy
+协同效应
+Our product solves major 我们的产品解决了客户的-一个主要 pain point for customers。 痛点
+Pain point
+痛点
+Value 价值主张 proposition
+What is our unique value proposition?
+我们独特的价值主张是什么?
+We should adopt industry best practices。
+Best practice 最佳实践
+我们应该采用行业的最佳实践
+
+
+===== IMAGE 88: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-905477b6-1b33-4d3e-a8a6-5bfb2fa0890f.png =====
+Let's do deep dive into the sales figures。
+Deep dive
+深入探究
+我们来深入分析一下销售数据
+We are building partner ecosystem。
+我们正在建立一个合作伙伴生态系 统
+Ecosystem
+生态系统
+整体的,全面 We need a holistic approach 我们需要个整体的方法来看待 的 to the problem 个问题
+Holistic
+Is this business model scalable?
+Scalable
+可扩展的
+这个商业模式是可扩展的吗?
+
+
+===== IMAGE 89: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-4eb52d1c-3d94-4d81-91f6-b0fa7f118adc.png =====
+Let's put that idea in the parking lot for now。
+我们暂时把这个想法放在待议事项 里
+Parking lot 待议事项
+The action items from the meeting are listed below.
+Actionitem
+行动项
+会议的行动项如下所列
+
+
+===== IMAGE 90: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3e87ad4c-ac98-420d-8d4f-d9a21368c2f0.png =====
+We need to manage stakeholder expectations。
+Stakeholder 利益相关者
+我们需要管理利益相关者的期望
+We need to get buy-I in from 我们需要获得高层管理的支持 upper management。
+Buy-in
+支持。认可
+
+
+===== IMAGE 91: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-939313a0-e044-4005-aa2e-48326f2b693e.png =====
+Please submit your deliverables bv FridaV。
+Deliverable
+可交付成果
+请在周五前提交你的可交付成果
+
+
+===== IMAGE 92: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-61f8c4e6-669b-4c64-83f6-9652d68a6c25.png =====
+"积夯上册公式汇总
+预备知 | 和荛化积 2. 秘比*差 Sin& + sinB = 2sin 些 CY- 梦 Sindop_ Csintdtp) + snld-p)] Sind 5in 2093 si OsiNp = 〉 [sincte) - sin  P OSd + Qe- 20 岑o些 O dOR = 5[a Ldtp )+ Oold- 网 Osd ORs -ZSn竺 G 竺 Casinp = CosCdtB) - Oc p] 二 极限台连H 1 常数列酌极限 bm l Ck> bman_ 0 (lalcI) h30 l '=0 Ca ER) bm 竹=1laso〉 h>o Hom I〉0 bm 匆 -1 bm 颛= ho hSo 2 两'重要极限 bm { =| bim X CIt S)* Te X0 V捱广 埘} bm 詈1 Gm CIt 吉)"e lim CIt 长 ed Um CItx)丈_e 030 b30 NO X0 3 扳限运算7: }嗟昀极限等寸极限酌和差。 aoxm + axm-+... +am mcn bm (上下同除2) # Xo boxn + bIxhH + .. . +bn bp I=囚 0 (不』) m >几 (上下b除xm)
+4:笃元务从 当230时 有 SnX 2 X tanx ~ 入 CX1n % aXI2 XIna 1- Ovsx ^ x [ 婴 ~Ina)
+arcsinx ~X arctanz~X In (ItA)~X 匆乙-1 ~尤兀 f匕 (1+X)q-1 ^ AX
+
+
+===== IMAGE 93: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5909f254-97bd-42e9-8cb4-e72df6dc43a1.png =====
+三.导粼岁微分 1 导数岌 bm & Um flxoteX)-f) f'(X》 = oxm- AX AXSD AX
+f'CXo) = Cand 2 导数运算泌则 (UtV+W)' U+D' + w'  Cuvw) UVW + UV'W + UDW f'(x) =   (反数^4)酌导笥直函数+)豸昀俐数 ) 铉式法则: 数-&:& 3.基鹌数赋 (tanx〉' = S X (Otx)' 二- CSC 3X CCX〉 = SeCX' tanx Ccscx)' 二- CSCX' OtX (arcsinx) - (OCCsx ) (octanx) ' T Carcctx〉 = 1X (Sinhx〉- Oshx COshx〉' Sinhx Ctanhx >'= CShx (oothX)=- Sinhx (secty = Ittan  k OSCY 二1 ctx) 4商心 Cxdoen) A(d-少:-  (d-nt) Xa-h Lsinx)l) _ Sin CX+几 多 (sinkx)en)=Knsinlxtn'` (cnx〉C] _ CY CXtn' !) Lcoskx) Cn) = K"aLXtn:圣) (a) C〉 二0 X(Ina)n 牝列地 _ leX〉cn)_ eX ClnCItX))C Cn) = C-In+ CLI CItXF (X>-1 ) [)(=()"U 5 莱布屁莰式 晷 cuo-k)_ D() CUD)C) = UCnD + nu ln-DD' 一 n(lUU-DD" + . hln-' 十 Ch-ktvucn-ik + 一 +uV(n] 2 ! 卜!
+
+
+===== IMAGE 94: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a0e2c688-6d51-4069-8a62-cff18aa8f317.png =====
+似分迈似心 GnX 8 2 tanx 32 arcsinx 2 2 arC ;tanX RX eXA 1t2 In LItX 2x CItX)Na ItaX
+凹_ "分中值总谩 卜 费r理 `NGNLXI  Stflx ) sflo). 则 f)=o flx)Xfl) 刿f 20 2 . 罗尔e理 则阃内 f[x)龙闵区阃上遵[,花升B间上可导-区[)函数随绥等_ 驴栝龙-n3 佼俜寸[3)20 3 扩袼翩日邋 Ib-j f'lz) = b0 fb-fla) >f'63) Cb-a) 36(ab) flb) - fla >f' [a + 8 Cb-a] Cb-O) OCloi) flXtox) - fu = f+ 8a*) . 62 8匕Lo)) 少
+X
+Roll 芡逻
+lagrange 兮识
+4 柯西'理 连 土B_fla2 趁 f)- 砑 劲右龙 -点3 . 使9 3Cb-gla 963) 5. 十式的报限 告型。器型 %怂渊则 k一 鼎 4』 Im 0"型 ` 1 D 型。 O" 型:取对粼轼 6 荔-I-》fI龙X89升[阃 (a'b)内有i Cntl) 阿夺邪小对[倦XC) ,有 Rno)= Almi CX-o)NH ( 执榕翩日/〉 Rn(X) = OL(X-X) (皮2诺'颍) Cnt) )! fW)= flx) + fCX)CX-XotKf"LXo) Cx-Xst Rfuh () (X-Xo〉" + Gflhtc): Cn 阿B勒Jd ) CX-Xb)ntl flX) = flo)+f'[0)2+{f"[])x+ -+R fln) (叮)XT+RnLX) ( 兢劳*)
+
+
+===== IMAGE 95: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b90aff3a-1e7f-4377-abe2-ab0ebd2ab739.png =====
+7 基本祁当函数昀焘勒c e3 e'= I+X+g+  +岚"_ 十 Xht) Chtn! C36Corl〉 SnX = 2-』2?一 十 G~_一 CDmI 十 C2m-I)! X2m-I + Rm (X OXs |- (x t CD" 22m C2m)} 十 Rzmtl (x) CltX)a 二 I+dx+ *" X2+ XUd-' 。十 C-ntY x"+ Oln) n! In CH) = %-誉 十 孑_ 十 (-Ih-l  +0") fanx 14: arcSin X ;6表古T3 Sih X ShX = V- 古2 arctanx
+8. 西数临态 上:f(`) > flx)tfX 9. 蟀k  |-磐 | 二 LLIL CItyr)芒 ks LlbNtH-rt)wct)l [zt) + 4)] 匕= 1r+2r'2+rr| Crtr')乏 P- 卡 |0 弧徵5式 ds TIy dx ds = JCocts7'+ Zwltji dt ds= Np(a)+Ip'lo] do
+
+
+===== IMAGE 96: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-988c75fa-e6a5-4b6b-a45e-694acbfc7692.png =====
+丑-元函数种#学 1 炱狈分的岌 Jb fwdx = Wm 孓fL )ax AD 诊 Jdflxdx= -Jfrdx JAWdx-n JCaflx)+ Cglx] dX = QJbfwdx + Ckoixdx Jbfwxdx-JAflxdx 十 Jfxdx Jidx =Jhdx = b-a 茗fx 291x) .刎 [ ADdxzJrgcdx _ 茗fX2  叫 Jbfwdxzo Jbfl)ax = f[)Cb-a) 3CCarb] 2.一 徽秋分募本岌 茗[) =Jafut) 刈 $L= fW 茗4W= Jftdt: 划 $[) =fL9[))9W)-fhlx))ho)  8牛顿-莱屁莰2式: Jflxdy =FIXl 3 桉l5 「@dx- fanxt0 sdx arCSIhXtC 「-』=-otxtc T+xzdx 二 OIC Janx+C SeCX: tonx dX= SX+C Jsinhxdy Chxtc JcscX.ootxdx 二 CSCX+C jonhxdx = Snhxtc 2aX) & Jxadx = Q+1 +C O丈dx = Inlxltc 4. 笫-类挨元泫。 Jfludu  FLu)t C 习 JfIwl]yrx)ox = Jf [ylx]dyW FToCX)T +C dX AX $|a# 占arctan  +C 」 a'人2 aTSIh- ] +C AseoXdx= In l sexttonxltC Jcscxdx = In lCsCX- cotx| +C d2 」芄 Inl aX atX| +C
+
+
+===== IMAGE 97: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d397b501-6a40-49a1-92cd-d6e950488715.png =====
+笫娄换元法 Jflb)dx = JfCCt)) (Ltdt Jgltdt _ AX 央」]a Tln lx + Jzazl+C (今X=aSt〉 AX 「1 Sln (Xt JHa) TC C令X =atant > 6 ^部秩分泫 Judv = UD-Jvdu _ 反对龠猜三" 7. 有函数的秧F `劢用多D求泓痧1陬分式1为颠戎 形式 8 笕狈分按元I式 Jfdx- JfLplt》 ortdt tECX, p]. Ola)-8.re)=b 9.茗fx)4[-a,a]  上轧}为 l数 灿 JafWdx= >Jfwdx k敞-则 Jafwdx 二0
+Iofx) 员阂堋为T酌函敝。}[+T fwdx= JfWdx 奶Iw火式 兕 - '乞i Ln为1) Sjnnxdx Jeosnxdx [兕 - 号1 Cnd奇) I.i辛浦生赋 JbfWdx "NSn= 号[fa+ 4曷f(Xi-) +>(fCX)+fb] 1 祆积分众式 报限右龙。t敛 Jdofwdx= Wm Jafrxdx b>to 扳)不庇 .发敬. fl)dx 右龙。4敏 flx)t[a,b>上&0, !-f) = Oo 则 [kflx)dx = 干』 不1灰 .发敬 1 平阕形的面秘式 A=JHfrx) -gl)dx A= [ CCy) -wCy》dy A= JeSzlo)do Is 2矽琳孜忒 V= JhAI)dx V=兀Jflx)dx
+
+
+===== IMAGE 98: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-05ade54d-496c-4001-a3eb-ddbc64ad7a65.png =====
+1 .殇。公式 8二 JkJItCysdx JaJICfTSsdx S= JNICt)FOLSdt 0 J JpTto)ttecoss do 物理k用式 WN =$ 广p.5 F=kH 穴c徽G方程。("狎乔 =礼+#芥 1  -阿饯性`方程通辟 I= Ce-Jpodx 2 -阿饧{}袱3珞臼w辟 y- epoolx [JaW)epdy dx +e] 3. 1努利方程 畿+ CI-D p(u =CI-nDRCD CAu-yrn> Jplx)dx 朱刘缝尔么式 grlds IIlXJ_e d V 古 俅烂常尔敝乔坎方穆通辟 Ti 十ry g Qehx_ + Genx p=r U- CCIt OY)BTX p=rz =AtBi I= Celtipx +Czecd-ip)q 〉 Ieoccozpx +Cgpx) (瓯抄/式: eix = OrsXtinx) 6 饯憷岸乔敝}弁似方穆通解 W '+ aIWtaf0 y= RACX) ewx_ (box" + b2n- 十 +bn)ewx: Wztawt arzo 但 eW+a 扌 . Iz XRnLXeWx_ % Cboxn+bxntt 十 bn)ewx +O)W +02 且 ZtaI 20 _ y= c@ncewx X' Cboxh+hxtt +bn)ewx
+
+
+===== IMAGE 99: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7c885c67-3439-4ca7-a716-f91f22009652.png =====
+Mem8豳 常见的微分 积分公式 Differentiation Formulas: Integration Formulas:
+1 C()=1 2 & (ax) =4 3 & (2") = TA"1 (cosx) 二 一Sinx ^ 5. (sin x) = COS X 6 (can x) =seczx ^ 7 (corX) = TCSCX 8 & (secx) =secA [311 1 9 少(cscx) = d TCSC X(cot x)
+1. |Idx=x+c 2 」adx=axtc 1+1 3 |"dx= +C;1 牛 -] 12十1 4. sin x dt = -  cosX + C
+5.
+COS X dx = sinx + C
+6
+secx dx = tanx + C
+7.  | csc X dx = 一 corx 十 C
+8
+sec x(ra r) dx =secx + C
+9
+CSC X(cOCX) dx = -cscx + C
+10
+& (In 1) = I 1 11. ] (e)二e 12. & (0^) = (In ^)0 13. d(sin-'x) = dx 4 14 (c | A)= A 1十22
+10.
+Ldx=Inlxl +c 1 11.  |edx=e+c 12. |odx= 一十Ca > 0,n广1 In ^
+13.
+d = Sjn1 X+C
+dx= C | x + C 1 +2
+14.
+
+
+===== IMAGE 100: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b0fa54b6-b8c2-415f-93b7-9b4aea859ee1.png =====
+tanx arcsinX ^ ;0表古123 Sin X ShX = X- 舌2 arctanx e:
++4:
+
+
+===== IMAGE 101: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-86bd2e17-84e5-4e35-b9b2-1817d6a58e48.png =====
+4:笃元务从 当2)0时 有 eX12 X arcsinx NX arctanz~X In(ItA)~2 SnX 2 X tanx ~ 入 aX12 XIna 1 Ox ^ 芒 幼灭-1~尤兀 It  (1+X)0-1 ~ dX [ 婪 几 Ina)
+
+
+===== IMAGE 102: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0c210ae2-82e0-417d-8d9e-e839b5e130ed.png =====
+5
+0.0
+0.5
+y 0 w O(XS)《
+
+
+===== IMAGE 103: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b3ec9ddc-dd7b-4841-9e43-399b1a9766c2.png =====
+什么是方差分析?
+组A:
+核心思想
+组8
+均值
+总体变异
+组C:
+均值
+组间差异 >组内差异?) 如果是。说明分组有意义! 组内娈异 SSW (Within Groups) 同组内数据的差异  来自随机误差
+组间娈异 SSB (Between Groups) 各组均值之间的差异 〉来自分组效果
+核心逻辑 : 组间娈异 F= 组间娈异 组内娈异 F= 组内娈异 F值越大>分组越有意义! 使用前提 各组数据正态分布 各组方差相等 (方差齐性) 样本相互独立
+
+
+===== IMAGE 104: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d273f23d-3f40-4c54-89cb-54c9ba637097.png =====
+方差分析 操作步骤 方差分析怎么做? 提出假设 Ho: M = 42 = 43 (各组均值相等) HYPOTHESIS Hi: 至少有一组均值不同
+计算娈异量 SST = SSB + SSW 总变异 = 组间 +组内 dfB = k-1 (组数-1) dfw = N-k (总样本-组数)
+SSB (组间)
+SST 总娈异)
+SSW (组内)
+计算F 统计量 MSB = SSB /dfB MSW = SSW / dfw MSB F= C重点! MSW
+F-Statistic ! MSB F= MSW
+查表 &下结论 若F >F临界值 或p值<0.05 ) 拒绝Ho, 组间有显著差异!
+Significant Difference!
+小贴士 ANOVA只能告诉你"有差异 想知道哪两组不同? Post-hoc Tests 还需要做事后检验 (Post-hoc) 哦~
+
+
+===== IMAGE 105: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-412d80c6-f9bf-49a7-8900-73ed9cbf21eb.png =====
+方差分析 .应用场景
+医学研究 比较不同药物 对血压的效果
+农业实验 比较不同施肥方案 对产量的影响
+教育研究 比较不同教学方法 对成绩的影响
+$
+市场营销
+比较不同广告方案 对销量的影响
+记忆口诀焱
+多组比均值? 用ANOVA ! F大p小>有差异 ! 事后检验>找是谁 !
+t检验 ANOVA 比较2组 * 比较3组及以上 简单直接 避免多重比较误差
+多组首选!
+恭喜你学完啦 ! 0 统计学不难,理解逻辑最重要~ 加油 !你是最棒的 !
+
+
+===== IMAGE 106: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-204539a3-828b-4cb0-8a6d-a6c92caffb4c.png =====
+定义 (几乎必然收敛) Almost sure convergence 0.3 称 Yn 几乎必然收敛到  X, 记 Kn >X
+Pleft(left {lomega:llim_{nltolnfty}X_n(omega)=X(omega)light} Iight)=l.
+定义 (依分布收敛) Convergence in distribution 称 Xn 依分布收敛到 X, 记 Xn >X,若对一切 ? (F的连续点)有
+Fxi (3) > F().
+
+
+===== IMAGE 107: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a9b9e9be-5fd0-40c7-8d5a-2bf4a641763c.png =====
+39 40 41
+ZeRO/ FSDP
+Syntax errorin text mermaid version 11.6.0
+
+
+===== IMAGE 108: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-35fdc43a-7723-42a1-b0a5-8a0aa7a384ea.png =====
+
+
+===== IMAGE 109: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e4c469ad-c636-4ccb-8bd4-1ce8848d60fa.png =====
+〈html Iang= Zh-CN" View SOurCe SCrolI 〈head〉 Thead> 〈body class= post-page data-new-gr-C-s-check-loaded="14.1135.0" data-gr-ext- installed> 〈div id="MathJax_Message style="display: none; 〈/div〉 〈div class="container" id="stage 〈/div〉 〈script src="/js/jquery- 3.1.0.min.js">/script> 〈script src="/js/bootstrap.min.js">/script〉 〈script src="/js/jquery-migrate-l.2.1.min.js">〈/script〉 〈script src="/js/jquery.appear.js' >/script〉 〈script src=" /js/google-analytics .js">/script> 〈script SPC= /js/typography.js">〈/script> 〈script SPC= "https: / /cdn.jsdelivr net /npm /mermaid@l1 . 6.o/dist /mermaid.min.js"> 〈/script〉 〈script src="/js /mermaid-init.js">/script〉 〈script src=" /js /prism-Ianguage-Iabel.js">/script> 〈script src="/js/toc.js >/script> 〈div id="dmermaid-chart-8"> 〈sVg id="mermaid-chart-0" Width="100%" Xmlns="http: WWW . W3 .org/ 288O/ sVB ViewBox= "0 2412 512" style= max-Width: 512PX; role= graphics-document document aria- roledescription= error 〈style〉 〈/style〉 〈B〉/8〉
+
+
+===== IMAGE 110: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-62002e8b-3bf1-4add-8834-fc6566f43a24.png =====
+〈〉 〈path class= error-icon" d="n411.313,123.313C6.25-6.25 6.25-16 375 0-22.62' 6.375-6.25-22.625,01-32,32-9.375,9.375-20.688-20.688C-12.484-12.5-32.766-12. 45.25,01-16,16C-1.261,1.261-2.304,2.648-3.31,4.051-21.739-8.561-45.324-13.426- 70.065-13.426-105.867,0-192,86.133-192,192586.133,192192,192 192-86.133 192-1 92c0-24.741-4.864-48.327-13 426-70.065 1.402-1.007 2.79-2.049 4.051-3.31116-16 C12.5-12.492 12.5-32.758 0-45.251-20.688-20.688 9.375-9.375 32.001-31.9992m-21 9.313,180.687C-52.938,0-96,43.063-96,96 0,8.836-7.164,16-16,165-16-7.164-16-16 C8-70.578 57 422-128 128-128 8.836,0 16,7.164 16,165-7.164,16-16,167 >/path> 〈path CIass= error-icon d="m459.02,148.98C-6_ 25-6.25-16.375-6.25-22.625,0s-6 25,16.375 0,22.625116,16C3.125,3.125 7.219,4.688 11.313,4.688 4. 094,0 8.188-1 563 11.313-4.688 6.25-6.25 6.25-16.375 0-22.6251-16.001-162">〈/path> 〈path CIass= error-icon d="n340.395,75.605C3.125,3.125  7.219,4.688 11.313,4.6 88 4.094,0 8.188-1.563 11.313-4.688 6.25-6.25 6.25-16.375 0-22.6251-16-16C-6.2 5-6.25-16.375-6.25-22.625,05-6.25,16.375  0,22.625115.999,162">〈/path〉 〈path class= error-icon d="m480,64c8.844,0 16-7.164 16-16V-32c0-8.836-7.156-1 6-16-16-8.844,0-16,7.164-16,16V32c0,8.836 7.156,16 16,162">〈/path〉 〈path class="error-icon d="m496,96.586h-32c-8.844,0-16,7.164-16,16  0,8.836 7 156,16  16,16h32c8.844,0 16-7.164 16-16 0-8.836-7.156-16-16-162">/path〉 〈path cIass="error-icon d="n436.98,75.605C3.125,3.125 7.219,4.688 11.313,4.68 8 4.094,0  &.188-1.563 11.313-4.688132-32C6.25-6.25 6.25-16.375 0-22.6255-16.37 5-6.25-22.625,01-32,32C-6.251,6.25-6.251,16.375-0.001,22.6252">〈/path〉 〈text CIass= error-text X="1440 y="250" font-size="l5OpX style="text-ancho
+
+
+===== IMAGE 111: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b647c425-b189-4e5d-8d24-3a57ca0c1632.png =====
+"0 2412 512 style= max-Width: 512pX; role="graphics-document document aria- roledescription= error"> 〈style〉 #mermaid-chart-I{font-family: system-ui, "Segoe UI" , Roboto, "PingFang SC" "Microsoft YaHei sans-serif;font-size:IGpx; fill:#0d47a1; }@keyframes edge- animation-frame{from{stroke-dashoffset:0; } }@keyframes dash{to{stroke- dashoffset:0; } }#mermaid-chart-1 edge-animation-slow{stroke- dasharray : 9,5!important_ stroke-dashoffset :goo;animation: dash Sos Iinear infinite;stroke-Iinecap : round; }#mermaid-chart-1 edge-animation-fast{stroke- dasharray : 9,5 !important stroke-dashoffset : goo;animation : dash 2Os Iinear infinite;stroke-linecap : round; }#mermaid-chart-I error - icon{fill:#fSfgff; }#mermaid-chart-I error- text fil1:#0a0600; stroke : #0a0600; }#mermaid-chart-1 edge-thickness- normal{stroke-width: Ipx; }#mermaid-chart-I edge-thickness-thick{stroke- width: 3. Spx; }#mermaid-chart-1 edge-pattern-solid{stroke- dasharray :0; }#mermaid-chart-I edge-thickness-invisible{stroke- Width:O;fill none; }#mermaid-chart-I edge-pattern-dashed{stroke- dasharray 3; }#mermaid-chart-I edge-pattern-dotted{stroke- dasharray 2; }#mermaid-chart-1 marker{fill : #42a5f5;stroke: #42a5f5; }#mermaid- Chart-1 marker. cross{stroke : #42a5f5; }#mermaid-chart-1 SVg font-family: system- ui, "Segoe UI Roboto, "PingFang SC" "Microsoft YaHei sans-serif; font- size IGpX; }#mermaid-chart-1 P{margin:0; }#mermaid-chart-1 root{ --mermaid-font- family: system-ui, "Segoe UI" Roboto, "PingFang SC" _ "Microsoft YaHei Sans -
+
+
+===== IMAGE 112: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-01066e3e-2cb7-4150-b24e-20090b83fb4f.png =====
+5/5
+〈〉 〈path CIass= error-icon d="m411.313,123.313C6.25-6.25 6.25-16.375 8-22.62: 6.375-6.25-22.625,01-32,32-9.375,9.375-20.688-20.688C-12.484-12.5-32.766-12.5- 45.25,01-16,16C-1.261,1.261-2.304,2.648-3.31,4.051-21.739-8.561-45.324-13.426- 70.065-13.426-105.867,0-192,86.133-192,192586.133,192  192,192 192-86.133 192-1 92c0-24.741-4.864-48 327-13 426-70.065 1.402-1.007 2.79-2.049 4.051-3.31116-16 C12.5-12.492 12.5-32.758 0-45.251-20.688-20.688 9.375-9.375 32.001-31.999Zm-21 9.313,100.687C-52.938,0-96,43.063-96,96 0,8.836-7.164,16-16,165-16-7.164-16-16 C8-70 578 57 422-128 128-128 8.836,016,7.164 16,165-7.164,16-16,162">〈/path> 〈path class= error-icon d="m459.02,148.98C-6.25-6.25-16.375-6.25-22.625,Os-6 25,16.375 0,22.625116,16C3.125,3.125 7.219,4.688 11.313,4.688 4.094,0 8.188-1 563 11.313-4.688 6.25-6.25 6.25-16.375  0-22.6251-16.001-162">/path〉 〈path class= error-icon d="n340.395,75.605C3.125,3.125 7.219,4.688 11.313,4.6 88 4. 094,0 8.188-1.563 11.313-4.688 6.25-6.25 6.25-16.375 0-22.6251-16-16C-6.2 5-6.25-16.375-6.25-22.625,0s-6.25,16.375  ,22.625115.999,162">〈/path〉 〈path class= error-icon d="m480,64c8.844,0 16-7.164 16-16V-32c0-8.836-7.156-1 6-16-16-8.844,0-16,7.164-16,16V32c0,8.836  7.156,16 16,162">/path〉 〈path CIass= error-icon d="m496,96.586h-32C-8.844,0-16,7.164-16,16 0,8.836 7 156,16  16,16h32c8.844,0 16-7.164 16-16 0-8.836-7.156-16-16-162">/path〉 〈path cIass="error-icon d="n436.98,75.605C3.125 3.125 7.219,4.688 11.313,4.68 4.094,0 8.188-1.563 11.313-4.688132-32C6.25-6.25 6.25-16.375 0-22.6255-16.37 5-6.25-22.625,01-32,32C-6.251,6.25-6.251,16.375-0.001,22.6252">〈/path> 〈text classs"erpor-text Xs"1440 V= 250 font_sizes"l5ODx stvles text-ancho
+
+
+===== IMAGE 113: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-763a061f-7018-4db1-a41f-ce901f937b26.png =====
+应用层 (Applications )
+计算机视觉 分类/检测/分割 视频理解
+自然语言处理 理解/生成/对话 代码生成
+多模态/生成式
+CLIP /DALL-E/Stable Diffusion /GPT-4V
+架构层 (Architectures )
+CNN家族 ResNet /Dense EfficientNet
+Transformer ViT /Swin BERT /GPT
+混合/新兴架构 ConvNeXt MaxViT , Mamba, RetNet, RWKV
+训练技术层 (Training Techniques)
+优化算法 AdamW /LAMB 学习率调度 Warmup / Cosine
+正则化技术 Dropout /Label | Smoothing/Cut Mix/Stochastic
+训练稳定性
+Gradient Clipping Mixed Precision, Gradient Checkpointing
+基础组件层 (Building Blocks)
+归一化 BN/LN /RMSNorm (RMSNorm用于 LLM稳定)
+激活函数 ReLU /GELU / Swish/Mish (GELU用于 Transformer )
+连接机制 Residual Dense , SE/ECA注意力, Skip Connections
+计算基础设施层 (Infrastructure ]
+
+
+===== IMAGE 114: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7f4c97ea-edce-4bb9-bf93-26cd5ac3a3ab.png =====
+|鼬{劂匆 髑[舒 右外点冰Toeloop (T) 点冰跳 外》 右内结环Salchow (S) 刃跳 内》 右外结环Loop (Lo) 刃跳 外刃 : 右内点冰Flp (F) 点冰跳 内》 勾手Lutz (L2) 点冰跳 外刃 阿克塞尔Axel (A) 刃跳 外刃
+向右
+向右
+向右
+向右
+向右
+向前
+
+
+===== IMAGE 115: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b150a0fd-4682-4721-b962-6f9b5d3f12c4.png =====
+左右脚 滑行方向 LFI 简写 LBI LFO  '  器三 RBO
+[
+
+
+===== IMAGE 116: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2940e99b-247e-4162-af62-e418d62be5cc.png =====
+转三 (3 turn ) 括弧 (bracket) 内勾 (rocker) 外勾 (counter)
+结环 (loop) 捻转 (twizzle )
+乔克塔 (choctaw)
+莫霍克 (mohawk)
+
+
+===== IMAGE 117: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a1a8809e-5d76-4378-a604-b66cd7df96f3.png =====
+进入刃/滑出刃 相反 相反 相同 相同
+转体方向与刃进入方向 相同 榧反 相同 相反
+转三 括弧 内勾 外勾
+
+
+===== IMAGE 118: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5ec1ac05-405d-41e4-be3a-3e898cdc82e4.png =====
+声音的两个重要指标
+声音的频率
+声音的振幅
+定 义
+每秒钟声波振动的次数
+声音的音量,或者说响度。功率。能量
+听力范围
+20赫兹 20,000赫兹
+20徽帕 200,000,000微帕
+频率低,听起来比较低沉。飘渺 频率高,听起来比较高亢。激越
+振幅低;代表声音小 振幅高 代表声音大
+人的感受
+
+
+===== IMAGE 119: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2717086f-c75d-4047-8f8e-edb3757bb395.png =====
+4000赫兹 3600赫兹 3200赫兹
+第十诰波 笫九谱波 第八谐波
+2800赫兹
+第七谐波
+2400赫兹
+hACUq
+笫六谐波
+2000赫兹
+笫五诣波
+(泛音)
+1600赫兹
+第四诰波
+1200赫兹
+笫二谐波
+800林苁
+400赫兹
+谐波
+(基音/
+400赫兹的乐音
+400赫兹复合波
+
+
+===== IMAGE 120: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-78c8e999-1f26-4f5f-b545-4d03b1e39c35.png =====
+@dIssonance( f1, 12, 11, 12) X=O. 24 51=0,0207 52=18.96 5 61=3.51 62=5.75 fmin-min (f1,f2) fmax=max (f1,f2) S=X/ (sl*fmints2 ) 10 |p=s* ( fmax-fmin ) min ( 11, 12) * (exp (-bl*p )-eXp ( -b2*p) ) dissonance compiled successfully
+@mySound_ds (X ) f_ref=440 f=[1,2,3,4,51 a=[1,0.4,0.3,0,2,0.1] sumz0 for In 1..5 Tor 1 In 1.5 sumtzdissonance ( f_refxf(1) , X*f (j),a(1),a(1) end 10 end 5Um
+mySound ds compiled successfully。
+plot (mySound_ds (X) , X= [0,1000] ,y= [-0.1,0.5] )
+1O0
+200
+300
+400
+500
+SU0
+TO0
+800
+900
+Trace
+OOm
+
+
+===== IMAGE 121: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a556e1b2-91a2-42ab-8721-8a4cbc1e2337.png =====
+#孑系统
+2026 年 OpenAl Anthropic Thoughtworks 三家几乎同时发文;
+不约而同指向同一个方向:  围绕模型的工程 系统才是关键。
+综合他们的实践。 一个完整的 Harness 包含 五个子系统。
+指令  TN| T
+合话生命周J UTuI THE HARNESS
+状态 C T
+骑讧
+公众5 庠苎FJSI
+
+
+===== IMAGE 122: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-677cdbf8-2195-4ad4-abe4-0359a362f131.png =====
+井 @ InStructions (指今系统)
+告诉 Agent 做什么
+不是写一个巨大的 prompt 塞迸去。
+好的指令系统是渐进式披露 一Agent 按需 读取。不-一次性加载所有信息。
+核  心  文  件  是 AGENTSmd 或 CLAUDEmd) 它是 Agent 的操作手册, 定义工作流程。规范和约束。
+
+
+===== IMAGE 123: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9ffc61f1-d493-4d95-9b70-221a3aeb8ca8.png =====
+HGENTS.I『B
+工怍沆- feature_Iist. Json 挽到下一个符兑咸的 feature fg这 Teatule 十迂 实现后迂行}试萁4 刮让讪过I担士C鸬#小歼#度
+雀P . p用 Typescrpt 5TII[ }性不招寸 ZOO JUU N沪方讨应的蜚让艾仟
+公众号 解药不甜SM
+关键原则:  别把所有信息塞进一个文件。项 目文档。 API 规范 设计稿务开放,让 Agent 按需导航。
+@ StateC状 态系统)
+记住做到哪了
+Agent 最大的痛点之一:  跨会话失忆。
+上一轮做了一半。新开一个会话, Agent 不
+
+
+===== IMAGE 124: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d7cd48f0-78ea-4ea0-85c5-4ddab7c2aee2.png =====
+知道从哪接着干。
+状态系统解决这个问题 -一用一个 JSON 文件跟踪每个 feature 的状态。
+Anthropic 建议用 JSON 而不是纯文本。
+原因很实际: JSON 格式更不容易被模型"无 意中"改错。
+纯文本的进度记录; Agent 经常在更新时把 格式搞乱。
+# @ verification (验证系统)
+Agent 不能自己说"我做完了"
+
+
+===== IMAGE 125: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-81bb0054-9836-43cd-a4fb-e8d1e5687419.png =====
+这是最关键的子系统。
+Anthropic 在实践中发现一个问题:
+让 Agent 自己评估产出质量, 它几乎总是对 自己的代码充满自信。
+说"我检查过了,没问题", 结果一跑就崩。
+解决方案: 把 Generator 和 Evaluator 分 开。
+Generator TNII
+Evaluator +T
+Cowmit
+T7
+公众号 解药下甜S川
+落地到工程上, 就是用自动化测试替代 Agent 的自我评价:
+单元测试跑通 > 逻辑正确
+
+
+===== IMAGE 126: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-50b194ca-4a8c-459d-877d-a100ff9d975e.png =====
+Lint + Type Check > 代码规范
+EZE 测试 >功能可用
+没通过测试的"完成", 不算完成。
+@ SCopec作用域)
+一次只做一件事
+Agent 有个毛病:  你让它做一个功能, 它经 常"顺手"改了三个地方。还把另两个 feature 做了一半。
+作用域约束就是划红线: 一次只做一个 feature, 做完再拿下一个。
+更狠的约束是: 不尤许 Agent 修改 feature
+
+
+===== IMAGE 127: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b596cbc5-b363-4ea7-8152-3a978e0debe1.png =====
+否则它可能把没做完的任务标记为"己完 成"。或者把任务从列表里删掉。来"隐藏"未 完成的工作。
+一句话:  像带实习生一样管 Agent 给明 确的任务边界。别让它自由发挥。
+# @ SesSion Lifecycle (会话周期)
+每次会话都有标准流程
+每个 Agent 会话走固定流程:
+初始化 >工作 >验证 >提交 >交接
+初始化脚本 initsh 在每个会话开始时运行,
+list。
+
+
+===== IMAGE 128: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d3eaee11-3f33-4a51-b58c-81c766a0e4bb.png =====
+确保环境是好的。
+会话结束时。 Agent 要留一份交接笔记 (写 到 progress.md) 告诉下一个会话:
+做了什么
+做到哪了
+下一步该干什么
+# 04 动手:4  个文件搭建 最少Harness
+理论讲完。动手千。
+在你的项目根目录创建这4个文件。就能明
+
+
+===== IMAGE 129: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-470254da-b26f-4fe0-bf03-a794432a3fcc.png =====
+显感受到 Agent 产出稳定性的变化:
+你哟项目 ACENTS。d Init.sh 73T LLst.Json 0rqaressI
+TVeIC 莳痄于册 环{初鲨化倒本 功彪清申与状态追| 芸话许庭与娈援1记
+S公众号 解药不甜SN
+一个提醒:  引入这些文件意味着你多了4个 需要维护的配置。但和 Agent 产出稳定性的 大幅提升相比。这点维护成本的性价比极 高。
+你花 10 分钟写好规则,能省下无数次帮 Agent 返工的时间。
+下面给出每个文件的可直接复制的模板。
+File-I:AGENTS.md
+
+
+===== IMAGE 130: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-085a4179-3995-4b65-82b8-f9fb61128352.png =====
+Qpent 擤怍手-
+R心规则 厨;天35巧 feature_list,json 中的-个 pending 任务 开芒阿朱适门  11-.sh 蛮认环墙正苇 袁戍后凶舜透讨所有尕试才熊揠奂 挺娈卮型疔 TetUTCI1 son OToref , I
+技术观乖 Typescript Is-rict podel 剩^;  .个功雕少犰有对应跚试 *!柏式 f715rctartar 雨短脂盹
+#止11 ANJRNR LetUTt 不婴睽改 Iealure AIitnTI #T
+的己元匠#芯
+公众号 解药不甜51
+模板要点:
+核心规则:  每次只处理一个 pending 任 务
+技术规范: TypeScript strict mode = 每 个功能必须有对应测试
+禁止事项:  不同时处理多个 feature, 跳过测试直接提交
+File-z:init.Sh
+
+
+===== IMAGE 131: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-637cefd9-8b7a-485d-b848-54cf8fa3bcce.png =====
+17AINUBI
+利 化开爱环堍
+支装依檗 DackaRe , SOn T0STal 1
+怜簟环懊 Wmr 5[T2 'Npn: $(NpM
+沅行狈有票试 M讦现有<码 TCILTULL
+echo "5元#试"
+公众号 解药不甜S1
+4t
+模板要点:
+自动安装依赖
+检查环境版本
+运行现有测试确认当前代码是好的
+File-3:feature_liSt .jSon
+
+
+===== IMAGE 132: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-8c03325d-9291-499e-91ad-f3ef976857a6.png =====
+'project  '你的项目名" VaCelat O4 - 0 AoaTre
+nid : Tane
+'动惦捐逮 TT 081411 ULUr L[ SL 5100531 Teet 贝体猃抚逡 几什片 [侨弁
+公众号 解药不甜S1
+模板要点:
+每个 feature 有唯一 id  状态  优先级
+包含具体的验收标准
+JSON 格式。防止 Agent 误改
+File-4:progresS.md
+
+
+===== IMAGE 133: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-8c7ff821-efac-428c-8923-dcbbd5c567f6.png =====
+琢目#垂
+当丽卺 已咸: Teat  迸行中; 亓正〈  2026-05-07
+芸话记
+Seyon 2026-04-07 4万瓦 [元] +aLH 「五] TotUFI 开姥 AIO  [a」动_岳-圊Ju s_锚山珏堪1
+公从号 解药不甜5
+模板要点:
+当前整体状态一目了然
+每个会话的完成情况和下一步计划
+注意事项传递给下一个会话
+把这 4个文件放进项目, 下次用 Claude Code 或 Codex 开工时。先让 Agent 读一遍 AGENTSmd。
+你会发现它不再乱跑。不再忘事 不再自说 自话了
+
+
+===== IMAGE 134: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-2ed20e5c-4261-4a29-a878-a5277fe93c6c.png =====
+JavaGuide Harness Engineering 公众号: Javaguide。 解决  执行问题 网站: 长链路任务中持续做对。不跑偏 出锘了能拉回来
+文件系统 沙箱 约束执行 熵管理 反馈回路
+Context Engineering 解决  信息  问题 确保模型在合适时机亨到正确且必要的事实信息
+上下文管理 RAG 记忆注入 Token 优化
+Prompt Engineering 解决表达 问题 怎么让模型听懂你想要什么
+系统提示词 Few-Sht 思维链引导
+简单任务
+外部知识任务
+长链路商业场景
+提示词最重要 把话说清楚就行
+上下文很关键 把正确的信息隈进去
+Harness 决定成败 持续正确 纠倌
+Prompt Engineering C Context Engineering Harness Engineering
+模型决定上限; Harness 决定底线
+
+
+===== IMAGE 135: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d284ca86-78ce-4d3a-a690-160278d81d76.png =====
+agenl角色和目标定义
+上下文c理
+信氤栽翦和选择
+结构化组织
+发消总
+犟作浏览器
+给什么工具
+讽Aap
+写代码。执行代码
+工具系统
+如何使用工只
+什么时候用什么工只。确保不用工只
+捉炼
+结果如何返回
+筛选
+理目标
+2.判断信息 {失败返回1 )
+定义
+执行绢排
+3。生成出
+检查绚出 (失败返回3)
+当前任务状态
+状态与2忆
+中间会话结果
+长期记忆和倡好
+输出验收
+环境验证
+评估与观则
+自动测试
+日志和指杯
+错]因
+harness
+约束
+约柬与恢。
+校验
+
+
+===== IMAGE 136: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-43b232e3-6310-4d10-9ab7-1e6ff70f9831.png =====
+c
+执行编排
+生出
+检查翰出 (失败返回3)
+当前任务状态
+状恋与记忆
+中间会话结果
+长期记忆和偏好
+骊出验收
+环境俭证
+评估与观则
+自动则试
+日志和指标
+错讽]因
+harness
+约束
+约束与憷,
+Planhel
+理辉忐求拆分计划
+Generalor
+抿据计划夹现代码
+分角色
+代码捡Y
+按浏览器
+Evalualol
+傈QA ~岸去兵实刈试
+操作界面
+接日志系统
+环境隔离 (任务互不干扰)
+实践
+输出结果
+拆分任务
+任务拆解成a0e0能理解的小任务
+设计环境 (harness思维)
+补充掮力
+确 agent 失效
+迎立反馈
+验收结果
+工程师职责
+系统架恂
+慎块分层
+定义系统规则 (赋能人类工积师的经验)
+修:议
+权吟
+
+
+===== IMAGE 137: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-d3ea3f5f-12ea-406e-a59a-e2f732286c00.png =====
+置顶
+(更新中)秋月春风个入向番剧严选榜单 Posted at 2024-01-30 析影视 番剧 2016.12入宅以来看过的番剧合集。简单分级, 同级别内粗略排序。
+(更新中) 秋月春风个人向音乐剧严选榜单 Posted at 2024-01-28 析影视 音乐剧 高中入坑以来看过的音乐剧合集。简单分级。同级别内粗略排序。
+
+
+===== IMAGE 138: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3e0e4cd5-db96-4307-b48f-e08d65e70469.png =====
+置顶
+1
+(更新中)秋月春风个入向番剧严选榜单 Posted at 2024-01-30 析影视 番剧 2016.12入宅以来看过的番剧合集。简单分级,同级别内粗略排序。
+(更新中)秋月春风个人向音乐剧严选榜单 Posted at 2024-01-28 析影视 音乐剧 高中入坑以来看过的音乐剧合集;简单分级,同级别内粗略排序。
+
+
+===== IMAGE 139: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-18f5781d-c64f-409e-80b1-581136c26f7f.png =====
+苯人一周肝完顶会论 文的血泪经验 (本硕 博通用 )
+ACM MM 26截稿前一周,我刚跑完实验,模型效 果还行,但论立二企室没宣 那7夭我每夭只睡5小 时,咖啡当水喝,最后压哨投出。复盘孓二丕_如 果丕是田孓丕面这套立法__根本宣丕寇。
+分享给所有正在赶dd1或即将赶dd1的你- 本硬堙 通甩_只噩要二仓鱼脑和二颗想适丕枣堕心
+写在前面: -周写完论文的核 心心法
+先完成,再完善。初稿写得再烂都没关系,有东西 改比没东西强。你追求完善的每一分钟,都在吃掉 睡觉的时间。
+
+
+===== IMAGE 140: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5b5ab182-903a-43ed-8bdd-798c577137f5.png =====
+每夭只盯着当天的任务,别去想 "还有6天要写这 么多' 把大目标拆成小块 = 每完成一块就给自己 一个正反馈 比如吃个零食。刷5分钟手机 )
+Day1: 搭骨架。不碰细节 (约4小时 )
+目标:  把论文的 "空壳子》 建起来,后面只负 责填肉。
+具体操作:
+1 新建一个LaTeXIWord 文档,先把所有一级标 题列出来:
+2 Abstract
+3 Introduction
+4 Related Work
+5. Method 分成3-4个子节 : Problem Formulation; Model Architecture; Training Details )
+
+
+===== IMAGE 141: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-acf23e17-9715-4c99-94e4-27cb082c4587.png =====
+6. Experiments 数  据 集 Baseline Implementation Details Main Results: Ablation Studies )
+7 Conclusion
+8 在每个标题下面,用中文写下你要在这个部分 讲什么 2-3个 bullet points ) 比如 Method 下写:
+9. 输入是什么,怎么预处理
+10.核心模块A的设计 (图1公式)
+11.损失函数长什么样
+12.把跑出来的实验结果图 . 表格先插到 Experiments对应位置。占个位。
+经验之谈: 骨架搭好了,你会发现 "写论 文"  娈成了 "填空' 心理压力小一大半。骨 架用中文写都没关系,后面再翻译。
+避坑:_丕要在0ay1就珏始雕殛措h= 看到咖包适 丕眼想改?_忍住。改二企词龅耻迥够俭鱼三愆置 架了。
+
+
+===== IMAGE 142: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-6f701f4c-036f-430a-8094-d4c6437aff4a.png =====
+Day 2-3: 先写Method和 Experiments 每天6-8小 时 )
+为什么先写这两块:  这是你熟悉的部分,实验 刚跑完,数据。模型。代码都在脑子里。写起 来快,能帮你建立 "small wins
+Method写作要点:
+画图优先: -张清晰的模型架构图胜过500 字。用PPTNisiolDraw .io画,别追求美观, 先保证逻辑对c
+公式不要堆砌:  每个公式下面写1-2句 "人 话"  解释这个公式在做什么。
+写作顺序:  先写Problem Formulation ( 输 入输出定义 )>再写模型各个模块 >写训练细 节 (损失函数。优化器 超参数 )
+Experiments 写作要点:
+数据集:  写清楚名称. 规模。训练/验证/测试划 分 是否用了数据增强
+
+
+===== IMAGE 143: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0f74a89e-c16d-4656-9fa4-78c17a3d738f.png =====
+够了。
+写作步骤:
+1. 把这10篇论文按 "主题' 分成2-3个小组。比 如:
+2. 传统方法组 ( SIFT HOG.)
+3。深  度 学 习方法  组 CNN-based Transformer-based.)
+4。你  的  特  定  任  务  组 (比如 video understanding )
+5. 每组写一个段落:  先概括这类方法的核心思 想 再点出1-2篇代表性工作 = 最后说 "但是 它们都有什么问题 -这个问题正好是你的 方法能解决的。
+6. 最后一段总结前人不足 +引出你的工作。
+模板句式 (可以直接套用 )
+开  篇 : "Recently; there has been growinginterestin 介绍前人工作: "[Author] proposed which achieved
+
+
+===== IMAGE 144: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-60158a7b-5e53-40a4-8ab3-b9fb4706e1bc.png =====
+Baseline 列2-4个对比方法 ,每个 baseline 写1句话介绍 比如 《ResNet- 50" ) 然后写你们的比它好在哪里。
+实现细节:  框架 PyTorchlTF ) GPU型 号  batch size  学习率。 epoch数。审稿人 会看这里!
+主结果表:  放一个表格 , 行是不同的方法,列 是评估指标,把你们的结果加粗。
+消融实验:  至少做2-3个,证明每个模块都有 用。
+避坑:_丕要在这个阶段去重跑实验 结果旦经定 孓_哪怛直企baseline结果丕太好看_生写上 去_卮面恿逸。
+Day 4: Related Work (约5小时。大家怕的部分 )
+为什么怕:  觉得自己没读够论文。不知道怎么 组织,怕漏了重要工作。
+真相:  你不需要读100篇 找出10-15篇相关的, 足
+
+
+===== IMAGE 145: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-c65508c9-4ce4-4afa-91e1-312c96d92605.png =====
+指出不足: However; these methods sUffer from
+引出自己: "To address this gap, We propose
+避坑:  不要写成 "A做了什么 B做了什么, C 做了什么= 的流水账。要按主题1方法流派来组织; 最后一定要指出不足。
+Day 5: Introduction ( 约 6小肘。难但关键 )
+Introduction的任务:  在1页内讲一个完整的 故事,让审稿人觉得 '这个问题重要,这个方 法有新意。实验结果靠谱
+五段式结构 (顶会标配 ) :
+1 大背景 (1段 ) 任务是什么,为什么重要 (举 1-2个应用场景 )
+2 问题与挑战 (1段 ) 现有方法有什么问题? 用 However 转折。
+
+
+===== IMAGE 146: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-4ca50b17-feca-4c54-b2bc-d86bf8d7a8a8.png =====
+Day 6: Abstract和 Conclusion 约3小时 )
+Abstract: 全文的浓缩,200-250字。
+结构固定:
+背景 (1句 ) 任务重要。
+问题 (1句) :  现有方法有X问题。
+方法 (2-3句) :我们提出了什么,核心思 想。
+结果 (1-2句 ) 在X个数据集上达到XX指 标,比SOTA好多少.
+意义 (1句) : 这项工作有助于.。
+少技_互
+Abstract 最_匠_恿_昱 。把 Introguction里D每段筻二包适迸起苤_糙简二 丕 就是Ab5t@+初稿。
+Conclusion: 不要复制Abstract。 写:
+我们做了什么 (1句 )
+
+
+===== IMAGE 147: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a3491896-87f5-489e-b01b-21b78dfc50ec.png =====
+我们发现了什么 (1-2句,比如 消融实验表 明XX模块贡献大" )
+末来工作 (1-2句,比如 "未来可以探索XX方 向" )
+避坑:_丕要在Conclusion里出?蚯龅结果或 引围。苤来工作丕要昼得太县体,否则鱼稿人会迥 俭 "为仕幺没做
+Day 7:  格式 +暴力自查 + 润色 (约4小时)
+格式检查清单:
+所有图表编号正确 , 引用对应 Figure 1, Table 2.  )
+参考文献格式统一 (用LaTeX 的bibtex 或 Zotero-键生成 )
+没有拼写错误 用Grammarly或Word自带的 拼写检查 )
+页数符合要求 别超页 )
+暴力自查:
+
+
+===== IMAGE 148: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-197bd329-bb34-4a92-a43b-a3d5dd89aff2.png =====
+3. 前人工作的不足 (1段 ) 具体指出2-3个局限 性。
+4 我们的方法 (1段 ) 我们提出了什么,核心 idea是什么,为什么能解决上述问题
+5. 贡献 (1段 ) 用bullet points列出3-4条贡 献 (比如:  提出新模块。在X个数据集上达到 SOTA, 开源代码 )
+实用技巧:
+先写贡献列表:  把实验部分的结果提炼成3-4 个bullet points , 这就是你的贡献。然后倒着 写前面几段。
+第一句话要抓人:  不要写 In this paper; we study.. 写 "Video understanding is fundamental problem in computer Vision; yet。 这种有冲击力的开头。
+引用要精: Introduction里只引相关的5-8 篇详细引用留到Related Work。
+避坑:  不要在Introduction里写太多方法细 节。告诉审稿人 我们做了什么' 具体怎么做留 到Method。
+
+
+===== IMAGE 149: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-99c0162c-85f2-4c43-99dc-d29f66ec4f44.png =====
+通读全文; 问自己三个问题:
+1. 审稿人读完Introduction , 知道我们要解决什 么问题吗?
+2 实验部分有没有一个表格是 "为了凑数"  的? 删掉不自信的结果。
+3. 有没有 "this is good' 语化表达?  删掉。
+we think" 这种口
+英文不是母语,写出来的句子可能不地道 我会把 一段写好的英文 比如 Abstract 丢进 DiffMind , 让GPT  Claude  Gemini三 个模型 分别润色 三个版本并排显示, 对比哪个用词更专 业。哪个句式更流畅。比如Claude可能把 uVery good" 改成 "significant" Gemini 把 《We do experiment" 改 成 《We conduct experiments' 我选出地道的版本,理解为什 么这么改,然后自己重新写一遍 不要直接复制粘 贴;要学到别人的表达方式。
+最后一步:  把论文转换成PDF, 从头到尾读一遍 (出声读更好 ) 发现不通顺的地方再改。然 后.提交 ! 不要再看第二遍了 , ddl不等人。
+
+
+===== IMAGE 150: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-f6334e86-0e85-4e29-ad28-e867ad99f358.png =====
+本站原创内容采用 CCBYNC-ND 4.0 许 可,禁止转载。
+
+
+===== IMAGE 151: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-73da914b-0641-4983-84ab-9c32cc7b305e.png =====
+Outline
+数组与哈希表
+二;链表
+三;字符串
+四  动态规划
+五;二叉树
+二 回溯算法
+三;贪心算法
+四  图论
+五。堆与优先队列
+栈与队列
+七  字符串处理
+八  位运算
+九 其他重要题目
+
+
+===== IMAGE 152: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3829ecc4-ecc6-439c-8927-8348d38b1fdf.png =====
+从一次请求开始
+假设你现在打开一个网站,或者在终端里执行一条 命令。 大致会经过这几个步骤:
+1
+应用发起请求
+2 如果目标是域名,先查 DNS , 拿到目标 IP
+3 应用决定协议和端口
+4 操作系统查路由表,决定目标 IP 走哪张接口
+5. 如果目标不在本地网段,流量先交给默认网关
+6. 如果命中了 TUN 接口 流量先进入虚拟接口
+7. 如果程序要建隧道。原始 IP 包会再封装一次
+8 如果应用使用代理,请求会先发给代理
+9. 流量离开本机后,还会经过 NAT , 防火墙。安 全组。企业网关
+10.到达目标服务以后,很多应用还会继续做 TLS 校验
+
+
+===== IMAGE 153: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-24ff163f-d982-45f3-bc27-9d76003b08cd.png =====
+抚 ,宅SSFt
+U
+(o
+57
+q回
+T0
++C卅5U0 UUhTTTDITLI
+LtIIM
+LUINITUIS =!
+FIIS Mlv
+IR
+MIM+
+T49
+Rcl
+T IN
+TTT
+~曩
+LT
+虫4
+很多人遇到网络问题时,只会说 "连不上' 但 "连不上"  背后,可能是完全不同的环节出了问 题。
+应用: socket  端口
+网络请求的起点是某个应用, 常见的有:
+
+
+===== IMAGE 154: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-6aae2dff-1bf7-4423-ab90-b929b822884a.png =====
+浏览器
+CUrl
+git
+pip
+SSH 客户端
+VS Code Remote
+Python 程序里的某个库
+应用会通过 socket 和操作系统交互 IP 只回 答 "去哪台机器' 端口回答 去那台机器上的哪 个服务
+比如:
+1.1.1.1:53常见于 DNS
+8.8.8.8:443常见于 HTTPS
+10.2.11.117:22常见于 SSH
+所以一个完整目标,通常写成:
+协议+目标 IP + 目标端口
+科研里很多 '服务器能不能连上"  的问题最后都
+
+
+===== IMAGE 155: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0f260ff6-e4f8-463f-9f41-2da1034e158b.png =====
+落在端口上 ping 通只能说明机器大概率在线, 22。8888。6006能不能访问,是另一回事。
+DNS
+如果你输入的是 example.com 这种域名,系统 会先查 DNS , 把它翻译成 IP。DNS 只管 "这个 域名对应哪个 IP" 后面的路径。代理  VPN 都 不在它的范围里=
+常见情况有:
+内网域名只有企业 DNS 能解析
+校园网和家宽下,解析结果不一样
+代理已经接管流量, DNS 还在本地解析,于是 出现 DNS 泄漏
+所以 网站打不开"  这句话太粗了 更有用的问法 是:
+域名有没有被正确解析
+解析出来的 IP 对不对
+这个 IP 是公网目标,还是企业内网目标
+
+
+===== IMAGE 156: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-905b2dd3-a4c6-4852-8625-c64234c91662.png =====
+|。默认网关。路由
+电脑连上网络后,通常会拿到一个本地 IP; 开了 VPN 或零信任客户端,还会多出一层虚拟 IP。 系 统会先判断:
+目标 IP 和我是不是在同一个本地网段。
+如果在同-一个网段,数据通常可以直接发过去。 如果不在,就要交给默认网关。
+默认网关是兜底的下一跳2 系统没有命中更具体的 路由时。先把包交给它,剩下的交给路由器继续转 发。路由表负责决定:
+去某个目标 IP 时,应该走哪张接口
+必要时 ,应该交给哪个下一跳
+流量不总是走默认网关c 只要路由表里有更具体的 规则,系统就会优先走那条规则。
+比如:
+default -> en0
+10.2.11.117/32 -> utung
+
+
+===== IMAGE 157: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9b6c3649-ab3e-46f0-9982-1cc1d96c609b.png =====
+这时你访问10.2.11.117,不会走 eno, 会直接走 utung 因为 /32比 default 更具体。
+这也是一台机器能同时挂多个网络工具的原因。真 正决定流量归属的,是路由规则。
+ARP。 NDP
+这一步很底层,但很重要c 路由表告诉系统下一跳 是谁,网卡真正发数据时。还要知道下一跳的二层 标识。IPv4 里常见的是 ARP , IPvG 里常见的是 NDP。 它们解决的问题是:
+默认网关的 MAC 是什么
+本地网段里某台机器的二层标识是什么
+如果这一步出问题,常见现象是:
+DNS 看起来正常
+路由也没问题
+目标就在本地网段
+结果还是发不出去
+
+
+===== IMAGE 158: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a3d624cd-50bc-40ed-9d67-25d0fdcc2e57.png =====
+网络问题有时候会卡在比 DNS 和路由更靠后的位 置。
+NAT。 防火墙。安全组
+流量离开电脑以后,还会遇到 NAT. 防火墙。安 全组。 NAT 是网络地址转换,本地私有 IP 离开路 由器时,常会被改写成公网出口 IP, 所以远端网站 看到的,往往是你家庭网络或学校网络的出口 IP。 防火墙和安全组则决定流量能不能继续往前走。
+它可能出现在:
+你的本机 家用路由器
+学校出口
+公司网关
+云服务器安全组
+有路由,只说明路径在表里 能不能访问 ,还要看 中间有没有被拦。
+科研服务器外网访问里, 这类问题尤其常见。
+
+
+===== IMAGE 159: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-b82ecff4-0e41-44f4-8bef-17712ec655ed.png =====
+你在服务器上启动了一个服务 ,只说明它在本机能 跑。想让外网访问到它。通常还要继续检查:
+服务有没有监听正确端口
+本机防火墙有没有放行
+云平台安全组有没有放行 上级网络有没有公网入口
+需不需要端口映射
+很  多 人第 一次 配  远  程 JupyterLab TensorBoard. Gradio . API 服务,都会停在 这里。
+TUN 接日
+TUN 接口是一个虚拟接口 操作系统会把它当成 一张网络接口,背后连接的是某个程序。它的意义 在于:
+物理接口负责真正把包发出去
+TUN 接口负责让程序在系统层面接管 IP 包
+很多现代网络工具都靠它工作:
+
+
+===== IMAGE 160: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-102eb873-6874-46fd-ba07-3830a53e4461.png =====
+Cisco Secure Client
+零信任客户端
+WireGuard
+Tailscale
+Clash 的 TUN 模式
+普通代理模式下, 应用主动把请求交给代理。 到了 TUN 模式,请求是否经过某个程序,己经变成系 统网络层的问题了
+这一段放一张层次图更直观:
+
+
+===== IMAGE 161: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e30fb9b9-c9f1-4968-87e2-7507a8d5dc93.png =====
+皿#
+DN5
+Clash TUN 棋式
+踣庄表
+命中 Cisco 路由
+命 TrustAgent k由
+TIIR
+Utung Trustgen
+CIsco VPN
+普迪公网且末 中特定规刈
+Clash 音通代理楔式
+Cisco 瓞迸封装
+Trustugent 陲遒封裘
+en0
+默认网关
+公网 企业网关
+曰标服务
+隧道
+隧道做的事情很直接:
+把原始 IP 包再包一层
+
+
+===== IMAGE 162: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-34aa6d57-24ee-4da6-8e11-0852881585fc.png =====
+浏览器代理
+HTTP 代理
+SOCKS 代理
+Clash 普通代理模式
+如果应用使用代理,链路会变成:  应用先连代理, 代理再连目标,最后把结果转回来。
+代理和 VPN 容易被混在一起 代理主要改变的是 应用怎么出去,它未必会改系统路由,也未必会接 管整机流量。
+所以很多人会遇到这种情况:
+浏览器能正常走代理
+命令行工具却像完全没配置过
+这通常说明,应用有没有主动把请求交给代理。差 别很大。
+VPN
+VPN 常常会和代理放在一起说。它往往会把这些 机制组合起来:
+
+
+===== IMAGE 163: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-775ae2b8-dc68-495d-89d0-4e0a170dc969.png =====
+让它穿过另一个网络到达远端
+在远端再拆开
+可以把它理解成一条逻辑运输管道。
+常见流程通常是=
+1. 路由命中 TUN 接口
+2 程序从 TUN 接口读到原始 IP 包
+3. 程序把原始 IP 包封装进隧道
+4 封装后的外层包再通过物理接口发出去
+所以 TUN 接口和隧道常常一起出现,但它们不是 同一件事。
+TUN 接口是入0
+隧道是运输方式
+代理
+代理的核心思路很直接:  应用先访问一一个中间人; 再由这个中间人代它访问目标。
+常见场景包括:
+
+
+===== IMAGE 164: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-cfd55d37-52b7-47c5-8918-5a270bbcb2b6.png =====
+新的虚拟 IP
+TUN 接口
+隧道
+路由修改
+DNS 修改
+最终效果是 ,你的设备在逻辑上接入了另一张网 络。科研者访问实验室内网_ 公司内网 校园内网 资源时,经常依赖这种能力。
+企业零信任客户端也会用到同样的积木:
+TUN 接口
+隧道
+路由
+DNS
+差别更多体现在策略层 传统 VPN 给你更大的远 端网络访问面,零信任会把授权范围收得更小。
+TLS
+很多人以为连上目标 |P, 事情就结束了 很多应用
+
+
+===== IMAGE 165: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-aa045444-11c4-456b-8ab1-522844084622.png =====
+层连接还会继续做 TLS。TLS 负责的是:
+加密应用数据
+校验证书
+确认你连接到的是预期服务
+这个层次和 VPN 不冲突。 VPN 保护的是网络通 道; TLS 保护的是应用会话。
+所以你完全可能同时拥有:
+一条被 VPN 保护的路径
+一个继续被 TLS 保护的 HTTPS 连接
+放回科研场景里
+如果把这条链路放回科研工作里。很多事会清楚很 多
+1.上网探索
+你查论文 下代码 - 拉模型 访问 Hugging Face  GitHub. 文档站点时。真正影响体验的, 常常是:
+
+
+===== IMAGE 166: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5633d8bb-e338-4981-8c26-152676683e57.png =====
+Cisco VPN 和 TrustAgent 常见的插法是接 管 TUN 接口。再建立隧道
+最后谁接管哪部分流量,核心还是 DNS, 路由 表和接口匹配顺序
+所以碰到 '我明明都开了, 为什么还是不通 这类 问题时,光看图标通常没什么帮助。
+最后
+我现在看网络基础,心态比以前实际很多。
+你只要经常拉代码 装依赖_ 访问服务器 跑远程 实验,迟早会遇到网络问题。
+理解这套链路以后,最大的变化通常是:  你知道应 该从哪一层下手。
+你会先看 DNS 再看路由,再看默认网关和接 口;再看代理  TUN VPN 谁在接管,然后再看 NAT _ 防火墙 安全组 ,最后看目标服务和 TLS。
+到这一步 很多原本模糊的报错会开始有形状。 排查不再是试运气。
+
+
+===== IMAGE 167: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-9cf133ae-c2a4-4d27-acc8-2d68b4d6b7c4.png =====
+DNS 解析对不对
+请求有没有被代理接管
+Clash 是普通代理模式还是 TUN 模式
+路由有没有把流量送到预期出0
+2.访问实验室服务器
+你从宿舍或家里连实验室服务器时,真正要看的通 常是:
+目标服务监听了哪个端口
+外网入口有没有打开
+防火墙和安全组有没有放行
+是否必须通过 VPN 或零信任通道进入
+3.同时开多个网络工具
+你同时开 Clash Cisco VPN TrustAgent 时。最好脑子里有一张清晰的图:
+Clash 普通代理模式更靠近应用层
+Clash TUN 模式会下沉到系统网络层
+
+
+===== IMAGE 168: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-3e801383-9dd3-47dc-a68d-e4be1925ba20.png =====
+章句日新:'学习篇 『Veritas vos liberabit。
+ZJU学习体验 &CS核心课程自学: 上浙大 泛计算机类技术 &科研学习: 学CS/SE 学AIDS   泛商科知识学习: 学商科 留学申请 &英语学习笔记: 学英语 小语种与语言学探索: 学语言 (日/德/法|拉丁) 纯业余泛社科1博物学自学与随想: 思万物 (哲学1心理1历史1地理1社会1自然/工程.)
+
+
+===== IMAGE 169: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-545f8fc5-6921-4deb-a561-9a7ad3ad5bf6.png =====
+流程图摘录
+
+
+===== IMAGE 170: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a49846df-8bbf-4b87-8a65-4374080a5cbf.png =====
+应 |
+DNS
+协议与`
+路由表
+TTTN 书
+本地代理端
+Clish TTIN
+TrustAgent
+Cisco MI
+Clash 代理1
+代理转发或
+隧诮圭
+
+
+===== IMAGE 171: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-48c3ecd9-61bb-4b5a-bf00-83c7e4b8463e.png =====
+科研场景 放回科研场景里, 把链路套到实际工作里, 很多现象会清楚很多
+上网探索:  查论文, 下代码。拉模型。访问 Hugeing Face GitHub 文档站。 真正影响体验的 常常是
+DNS 解析对不对
+请求有没有被代理接管
+Clash 是普通代理模式还是 TUN 模式
+路由有没有把流量送到预期出口
+访问实验室服务器:  从宿舍或家里连实验室服务器时 真正要看的通常是:
+目标服务监听了哪个端口
+外网入口有没有打开
+防火墙和安全组有没有放行
+是否必须通过 VPN 或零信任通道进入 同时开多个网络工具:  同时开 Clash, Cisco VPN TmstAgent 时, 最好脑子里有一张清晰的图:
+Clash 普通代理模式更靠近应用层 Clash IUN 模式会下沉到系统网络层
+Cisco VPN 和 TrustAgent 常见的插法是接管 TUN 接口, 再建立隧道 最后谁接管哪部分流量, 核还是 DNS, 路由表和接口匹配顺序
+所以碰到 明明都开了,为什么还是不通"这类问题时,光看图标通常没什么帮助。
+
+
+===== IMAGE 172: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a7edcad1-def0-477f-b936-a7df7f0f9a92.png =====
+排查顺序 理解这套链路以后,最大的娈化通常是:  知道应该从哪一层下手。
+排查顺序通常是:
+1.先看 DNS
+2.再看路由
+3.再看默认网关和接口
+4.再看代理 TUN VPN 谁在接管
+5.再看 NAT, 防火墙 安全组
+6.最后看目标服务和 ILS
+到这一步,很多原本模糊的报错会开始有形状。排查不再是试运气。
+
+
+===== IMAGE 173: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0b74f656-571b-4929-ab25-35c2f4e1e1cb.png =====
+DNS
+把域名翻译 成目标 T
+协议与 端口 例如 TC卫 443
+路由表
+决定目标 卫走 哪块接口
+"IUIN 接口
+Cisco TPN 大范围 TPN 策略
+Clash TUN 模式 系统流量先交 给 Clash
+1端口 'lash DCKs
+TrustAgent
+零信任策略与小范 围企业访问
+:理逻
+隧道 封装
+代理转发 或直连
+
+
+===== IMAGE 174: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-c766572e-8471-451c-a0c5-8b88189946a3.png =====
+几个月下来;她的文档里攒了几十条这样的记录; 她发现这些 "安全词"  并不是随机的口头禅; 而是 有规律可循的。它们往往集中在几个特定的场景; 表达不同意见的肘候。委婉拒绝的肘候 不想当场 做决定的时候。想让对方停下来的肘候。每个场景 都有自己常用的 -套词汇。母语者用这些词的时候 根本不需要思考;就像呼吸一样自然。但对于非母 语者来说。如果只按字面意思理解。就会一苴在沟 通过程中慢半拍。
+有-天; 她特别兴奋地给我看了她整理的一个小总 结。她把那些最常出现的安全词按 "真实意图"分 成了几类。
+表达 "我不回意但不想现在争"的有: 'That's interesting: /Isee JOur point, but... / That's one way to look at 让. / I'm not sure I follow the logic _ Can you Walk me through your assumptions?
+裘达 "这个事先放一放; 不要在会议上继续了"  的 有: Let's take it offline。 Let's park it for IOT。 Lets circle back on this. / We can discuss this separately。 Let's not getinto
+
+
+===== IMAGE 175: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-dd1def73-a4ba-4b1b-a9ca-5e7869ee33a5.png =====
+the details here。
+表达 "我有一个很大的问题但不想听起来太尖 锐" 的有: Ihave a small concern. / Just a quick thought。 This might be a minor point; but. .. /I'm curious about one thing: | Help me understand something:
+她说;她以前听到 "Ihave a small concern 以为真的只是一个小问题。后来发现。能让对方在 会议上专门说出来的concern, 从来都不small。 对方之所以说 Small'' , 是在用最不具攻击性的方 式; 把一个可能推翻整个方案的问题摆到桌面匕。
+她以前听到 "Let's circle back on this" 以为对 方真的会把这事记下来下次再讨论。后来发现这句 话在大多数情况下就是 "这件事到此为止 ' 的同义 词。真正会被circle back的, 只有那些有人在会 后持续推动的事。
+她以前以为 "Can you walk me through your assumptions 是一句请教; 对方真的想了解她的 推导过程。后来发现这句话经常出现在对方巳经发 现了逻辑漏洞 但不想直接说 "你这里有问题"  的 时候。让对方walk through一遍, 漏洞就会自己
+
+
+===== IMAGE 176: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-7f95ee38-a953-42a3-bd4a-4675a96040e5.png =====
+在过程中暴露出来。
+她把 "解码" 变成了一套方法
+更让我佩服的是。她没有停留在收集层面, 她把自 己整理的每一条记录;都拆解成了三个层级的应对 策略。
+笫一个层级是识别, 她总结了一个快速判断法:  当 对方使用了一个比正常表达 "更礼貌 更间接。更 模糊''  的说法肘; 就要启动解码模式。比如对方明 明可以直接说 "Idisagree' 但他说了 "That's 311 interesting perspective"  明明可以直接 说 'stop' 但他说了 "let's take it offline '= 礼 貌程度和实际否定程度往往是成正比的。越礼貌; 否定可能越强。
+策二个层级是确认,她没有选择去猜对方的意思; 而是设计了几种优雅的确认方式。比如当对方 说 "That's interesting' 的时候。她不再苴接 说"谢谢",而是会追问一句: "I'd love to hear your thoughts on What might work better。 或者 "Is there a particular angle Jou
+
+
+===== IMAGE 177: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-088eb6a8-72c8-427a-926e-2623cc395043.png =====
+think Ishould revisit?' 既不点破对方在委婉否 定;又给了对方一个安全的出口来表达萁实意见。
+第三个层级是对接。在需要正面回应的肘候; 她会 用一种既接住对方的萁实意图 又不让场面尴尬的 方式来表达。比如她学会了在需要推动一个被搁置 的话题肘,不再说 "你匕次说let's take it offline 但我们还没聊" , 而是说: " KIOW We parked this last time. I've done some more analysis since then-do you have a few minutes this week to align before the next group discussion?" 把 "你答应过我的"  变成 "我做了 更多功课。现在更有底气跟你聊了"
+她说,这三个层级做下来;她最大的感受是, 以前 开会她只听到了一层对话;现在她能听到两层。表 面那一层 是所有人都能听到的句子。底下那一 层。是那些句子真正在表达的意图。而听懂第二 层 才是真正进入了外企沟通的权力对话。
+后来; 她成了跨部门 沟通里最被信任的人
+一年之后。部门里所有人都能感觉到她的变化。她
+
+
+===== IMAGE 178: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-29a11af0-3172-4e7f-b7ca-8570cf4c0dd1.png =====
+不再在会议后追着人问 "他刚才那句话到底是什么 意思", 也不再因为一句 "let's take i offline' 而辗转反侧一个周末。
+她的沟通方式也发生了微妙的变化;她说话的肘 候;那些外国同事的表情变了。以前是那种面 对 "不太确定对方是否真的听懂了"  肘的礼貌微 笑。后来变成了一种 "跟这个人说话不用打安全 词" 的自在。
+有一次;一个重要项目出现了严重分歧, 两边的负 责人在会议上巳经快要吵起来了, 气氛极其紧张; 她在中间做了一个简短的协调发言。她没有评判任 何-方的对错。而是用自己的语言,把双方在各 自 "安全词"  背后真正的顾虑;分别翻译成了对方 能理解的信息。
+她对4方说: Ithink What they're really concerned about is the timeline risk. When they SaV 'interesting; Ibelieve they're flagging that the current plan might be too aggressive.
+她对B方说: " hear Jour concern. And I think When they say 'let's Park 让; they're not
+
+
+===== IMAGE 179: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-0e5e9ed3-8a86-491f-8f78-00b9fb3665da.png =====
+shutting it down-they just want to make sure we have all the data before making a call.
+双方都安静了几秒, 然后4方的负责人说: 《Yes; that's exactly my point B方的负责人也点了点 头。
+会议结束后,总监把她叫到一边; 说了一句 话: "You have a gift = for understanding what people really mean. Dont lose that。
+她后来跟我说;她听到那句话的时候; 想起了一年 前的自己, 那个把 'interesting' 当成夸奖。追 着 "let's take i offline" 发了一周会议邀请的自 己。她说: "Olivia姐;我以前以为外企沟通拼的是 谁的英语更流利。后来才发现; 拼的是谁更能听懂 那些没说出来的部分。而听懂这些; 不需要你有多 高的词汇量; 只需要你把它们当成一个系统去研 究。
+她总结了一套 "外企 暗语解码法"
+后来;她把她那 -整套方法整理成了一份简洁的框
+
+
+===== IMAGE 180: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5ece39ee-baf8-4aa3-8bd0-b8d0057dce7e.png =====
+架; 在部门内做了分享。那份框架的核心理念只有 一句话:  外企的沟通有两层; 表层是礼貌。底层是 意图。听懂底层; 才算入局。
+她的方法分三步:
+笫一步是 "建立暗语词库' 把你在会议中反复听 到。但字面意思和实际效果不一致的表达全部记录 下来。不是记单词,是记凹个要素:  谁说的。什么 场合  字面意思。实际效果。当你的词库积累到二 十条以上时,你会开始发现规律。某些词总是在某 些特定的权力场景中出现。
+第二步是 "场景预判" 在每次跨文化会议之前, 提前预测对方在哪些节点可能会使用安全词。比如 当对方不同意你的方案但不想当场说破肘, 他大概 率会用哪些表达?  当对方不想在会上继续讨论某个 话题时。他的退出句式有哪些?  提前预判能让你在 听到这些词的瞬间做出正确反应; 而不是像她当初 一样; 以为是夸奖;结果一路跑偏。
+第三步是 "优雅确认" , 听到安全词之后;不要 猜要确认。但确认的方式要体面。不是 你刚才 说interesting; 你是不是不同意? 而是 "I' love to hear more-any particular aspect
+
+
+===== IMAGE 181: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-44d52942-23bb-476c-bc1f-9c21effdcd40.png =====
+Jou think could be improved?" 给对方一个安 全的出日来表达真实的顾虑; 对方会觉得你既听懂 了表面意思;也接住了深层意思。
+她说;这套方法听起来简单,但萁正改变的是心 态。当你不再把每一个听不懂的瞬间都归结为 "我 英语不够好 时。你就不再内耗了c 你会开始用一 种研究者的眼光去观察每一次跨文化沟通,这一句 他没说出日的话是什么,那个词背后的顾虑指向哪 里。而当你真正开始听到第二层对话时; 你在任何 跨国会议上都会有一种别人没有的从容。
+致那个还茌 "安全 词"〉里迷茫的你
+我知道你的困惑。你明明每个单词都听懂了, 但总 觉得哪里不对劲。你跟外国同事开会的时候。经常 有一种 "我以为我听懂了, 但事后发现好像没完全 懂"  的感觉。你因为一句 "let's take 让 offline' 追了对方两周,后来才发现对方只是不想 在会上继续聊。你以为 "Ihave a small Concern 只是一个小问题。结果那个小问题推翻 了你整个方案。
+
+
+===== IMAGE 182: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-fa90609e-fe7e-4504-bedd-2fed4ec0eca7.png =====
+建筑之始, 产生于实际需要 - 受制于自然物 理。非着意创制形式 更无所谓派别。 其结构 之系统, 及形式之派别  乃其材料环境所形 成。古代原始建筑。如埃及 巴比伦 伊琴 美洲及中国诸系 莫不各自在其环境中产生, 先而胚胎 粗具规模。继而长成。转增繁缛。 其活动乃赓续的依其时其地之气候。物产材料 之供给;  随其国其俗 思想制度 政治经济之 趋向;  更同其时代之艺文。技巧 知识发明之 进退, 而不自觉。 建筑之规模 形体 工程 艺术之嬗递演变。乃其民族特殊文化兴衰潮汐 之映影; 一国一族之建筑适反鉴其物质精神 _ 继往开来之面貌。 今日之治古史者, 常赖其建 筑之遗迹或记载以测其文化 其故因此。盖建 筑活动与民族文化之动向实相牵连。互为因果
+
+
+===== IMAGE 183: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-bbfae35f-ba48-45ed-8870-c57b8d3fb505.png =====
+建筑显著特征之所以形成; 有两因素:  有属于 实物结构技术上之取法及发展者;  有缘于环境 思想之趋向者。 对此种种特征, 治建筑史者必 先事把握, 加以理解, 始不致淆乱一系建筑自 身优劣之准绳。不惑于他时他族建筑与我之异 同。 治中国建筑史者对此着意。对中国建筑物 始能有正确之观点。不作偏激之毁誉。
+今略举中国建筑之主要特征:
+属于结构取法及发展方面之特征, 有 以下可注意者四点:
+
+
+===== IMAGE 184: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-22acf516-3fe5-43f2-8703-1f496eaf6fa3.png =====
+() 以不科刀士娑杓忉。 儿~陛建巩物筲囚 其材料而产生其结构法 更因此结构而产生其 形式上之特征。世界他系建筑, 多渐采用石料 以替代其原始之木构,故仅于石面浮雕木质构 材之形。以为装饰。其主要造法则依石料垒砌 之法, 产生其形制。中国始终保持木材为主要 建筑材料。故其形式为木造结构之直接表现。 其在结构方面之努力 则尽木材应用之能事, 以臻实际之需要 而时完成其本身完美之形 体。匠师既重视传统经验 , 又忠于材料之应 用。故中国木构因历代之演娈。乃形成遵古之 艺术。唐宋少数遗物在结构上造诣之精 实积 干余年之工程经验 所产生之最高美术风格 也。
+(二)  历用构架制之结构原则。既以木材为 主, 此结构原则乃为 "梁柱式建筑"  之 "构架 制" 以立柱四根, 上施梁枋, 牵制成为一 "间" (前后横木为枋,左右为梁) 梁可数 层重叠称 '梁架" 每层缩短如梯级, 逐级增 高称 "举折" 左右两梁端, 每级上承长樽, 直至最上为脊搏 故可有五搏 七樗至十一樽 一华 3「加^p~- e开M5汩 宓尤
+
+
+===== IMAGE 185: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-e2dd60b2-de4d-4f69-a616-c8fb15702497.png =====
+(三) 以斗拱为结构之关键。并为度量单位。 在木构架之横梁及立柱间过渡处, 施横材方木 相互垒叠 前后伸出作 "斗拱" 与屋顶结构 有密切关系。其功用在以伸出之棋承受上部结 构之荷载。转纳于下部之立柱上,故为大建筑 物所必用。后世斗棋之制日趋标准化, 全部建 筑物之权衡比例遂以横棋之 "材"  为度量单 位。犹罗马建筑之柱式(Order)以柱径为度量 单位。治建筑学者必习焉。一系统之建筑自有 其-定之法式。如语言之有文法与辞汇; 中国 建筑则以柱额。斗棋。梁。樽 瓦。檐为其 "辞汇" 施用柱额。斗棋。梁。樽等之法式 为其 "文法" 虽砖石之建筑物,如汉阙。佛 塔等。率多叠砌雕凿。仿木架斗棋形制。斗棋 之组织与例大小, 历代不同,每可藉其结构 演变之序。以鉴定建筑物之年代。故对于斗棋 之认识,实为研究中国建筑者所必具之基础知 识。
+(四)  外部轮廓之特异。外部特征明显 迥异 于他系建筑。乃造成其自身风格之特素。中国 建筑之外轮廓予人以优美之印象, 且富于吸引 力。今分别言之如下:
+1.翼展之屋顶部分。屋顶为实际必需之一部, 其在中国建筑中 , 至迟自殷代始 已极受注 意。历代匠师不惮烦难 集中构造之努力于 此。依梁架层叠及 '举折"  之法;以及角梁 翼角。椽及飞椽  脊吻等之应用 遂形成屋顶 坞而 脊端 乃 为 转鱼冬釉曲绊 豸和什
+
+
+===== IMAGE 186: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-a231dd35-111e-4a01-996d-c01dea2a12b4.png =====
+2.崇厚阶基之衬托。中国建筑特征之一为阶基 之重要 与崇峻屋瓦互为呼应。周。秦 。西汉 时尤甚。高台之风与游猎骑射并盛 其后日渐 衰弛, 至近世台基。阶陛遂渐趋扁平。仅成文 弱之衬托,非若当年之台榭; 居高临下,作雄 视山河之势。但宋辽以后之 台随檐出"  及 "须弥座"  等仍为建筑外形显著之轮廓。
+3.前面玲珑木质之屋身。 屋顶与台基间乃立面 主要之中部,无论中国建筑物之外表若何魁 伟, 此段正面之表现仍为并立之木质楹柱与玲 珑之窗户相间而成,鲜用墙壁。 左右两面如为 山墙。则又少有开窗辟门者。厚墙开辟窗洞之 法,除箭楼。仓廒等特殊建筑外, 不常见于殿 堂 与垒石之建筑状貌大异。
+
+
+===== IMAGE 187: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-87b54969-2ee2-4e57-b842-6c69421c8c13.png =====
+4.院落之组织。凡主要殿堂必有其附属建筑 物 联络周绕。如配厢: 夹室 廊庑。周屋 山门。前殿 围墙。角楼之属。成为庭院之组 织 始完成中国建筑物之全貌。除佛塔以外。 单座之建筑物鲜有呈露其四周全部轮廓。使人 得以远望其形状者。单座殿屋立面之印象, 乃 在短距离之庭院中呈现其一部。此与欧洲建筑 所予人印象。独立于空旷之周围中者大异。中 国建筑物之完整印象, 必须并与其院落合观 之。 国画中之宫殿楼阁, 常为登高俯视鸟瞰之 图 其故殆亦为此耶。
+5.彩色之施用。彩色之施用于内外构材之表 面 为中国建筑传统之法。虽远在春秋之世 藻饰彩画已甚发达, 其有逾矩者,诸侯。大夫 且引以为戒 唐 宋以来, 样式等级已有规 定。 至于明清之梁栋彩绘,鲜焕者尚夥。其装 饰之原则有严格之规定  分划结构,保留素 面。以冷色青绿与纯丹作反衬之用。其结果为 异常成功之艺术,非滥用彩色, 徒作无度之涂 饰者可比也。在建筑之外部。彩画装饰之处 均约束于檐影下之斗棋。横额及柱头部分,犹 欧洲石造建筑之雕刻部分约束于墙额(Frieze) 及柱顶(Capital) , 而保留素面于其他主要墙壁 及柱身上然。盖木构之髹漆为实际必需, 木材 表面之纯丹纯黑犹石料之本色;  与之相衬之青 绿点金。彩绘花纹, 则犹石构之雕饰部分。而 屋顶之琉璃瓦 亦依保留素面之原则。庄严殿 空 尥阳千纯名 >田 珩由用肄+-9;为久
+
+
+===== IMAGE 188: c__Users_lenovo_yzy_AppData_Roaming_Cursor_User_workspaceStorage_296771b8ae55ded8a4c468d91d98309e_images_image-5da3b48a-e897-4856-a2e7-afb426f2d4a4.png =====
