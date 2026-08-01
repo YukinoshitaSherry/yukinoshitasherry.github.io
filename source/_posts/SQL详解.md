@@ -66,31 +66,202 @@ takes(ID, course_id, sec_id, semester, year, grade)
 ```sql
 CREATE TABLE student (
     sid         INT,
-    name        VARCHAR(50) NOT NULL,
+    name        VARCHAR(50) NOT NULL,   -- 不允许空姓名
     age         INT,
     gender      VARCHAR(10),
     department  VARCHAR(50),
-    PRIMARY KEY (sid),
-    CHECK (age IS NULL OR age >= 0)
+    PRIMARY KEY (sid),                  -- 主键：唯一标识一名学生
+    CHECK (age IS NULL OR age >= 0)     -- 表级检查：年龄非负或未知
 );
 
 CREATE TABLE club (
-    cid         INT PRIMARY KEY,
+    cid         INT PRIMARY KEY,        -- 列级写法，与 PRIMARY KEY (cid) 等价
     name        VARCHAR(50) NOT NULL,
     supervisor  VARCHAR(50)
 );
 
+-- 选课/入社关系表：多对多用“中间表 + 联合主键 + 外键”
 CREATE TABLE member (
     sid   INT,
     cid   INT,
     date  DATE,
-    PRIMARY KEY (sid, cid),
+    PRIMARY KEY (sid, cid),             -- 联合主键：同一人同一社只记一次
     FOREIGN KEY (sid) REFERENCES student(sid)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
+        ON DELETE CASCADE               -- 学生删了，其入社记录跟着删
+        ON UPDATE CASCADE,              -- 学号改了，外键同步改
     FOREIGN KEY (cid) REFERENCES club(cid)
 );
 ```
+
+### 键与约束
+
+建表不只是“有哪些列”，更要声明**谁唯一标识一行、表与表如何引用、哪些值非法**。下面按 SQL 里最常写的约束说明；理论侧（超键/候选键/闭包）见 [数据库系统笔记](/数据库系统/)。
+
+#### 主键 PRIMARY KEY
+
+（Primary Key）
+
+- **是什么**：从表的候选键里选出的一个，用来**唯一标识**每一行。
+- **规则**：唯一 + 非空（不能是 `NULL`）；一张表通常只有一个主键（可以是单列或联合多列）。
+- **为什么需要**：更新/删除要精确定位一行（`WHERE sid = 1`）；JOIN 时有稳定连接列；很多引擎会据此建索引。
+- **用在哪**：几乎每张实体表（学生、订单、商品）；中间表常用联合主键。
+
+```sql
+-- 单列主键（两种等价写法）
+CREATE TABLE department (
+    dept_name VARCHAR(20) PRIMARY KEY,
+    building  VARCHAR(20),
+    budget    NUMERIC(12,2)
+);
+
+-- 联合主键：多对多关系“边”上，两端一起才唯一
+-- PRIMARY KEY (sid, cid) 见上 member 表
+```
+
+> [!NOTE]+ 主键 vs `UNIQUE`
+>
+> - 主键：唯一且非空，表级“官方身份证”，一般只有一个。
+> - `UNIQUE`：唯一，但**允许 NULL**（多数引擎对 NULL 的唯一性处理有差异）；一张表可有多个唯一约束（如邮箱、手机号）。
+> - 业务上“也能唯一标识、但不是主键”的列 → 用 `UNIQUE`（候选键落库的常见写法）。
+
+#### 外键 FOREIGN KEY
+
+（Foreign Key）
+
+- **是什么**：本表某列（或列组）的值必须在**另一张表**的主键（或唯一键）中出现，或为 `NULL`（允许“暂不关联”时）。
+- **为什么需要**：保证参照完整性——不能出现“选课记录指向不存在的学生”。
+- **用在哪**：订单→用户、成员→学生/社团、`teaches.ID`→`instructor.ID`、`instructor.dept_name`→`department.dept_name`。
+
+```sql
+CREATE TABLE instructor (
+    ID         CHAR(5),
+    name       VARCHAR(20) NOT NULL,
+    dept_name  VARCHAR(20),
+    salary     NUMERIC(8,2),
+    PRIMARY KEY (ID),
+    FOREIGN KEY (dept_name) REFERENCES department(dept_name)
+);
+
+-- 插入失败例：department 里没有 'Astrology' 时，下面会报错
+-- INSERT INTO instructor VALUES ('99999', 'Alice', 'Astrology', 90000);
+```
+
+父表（被引用）改删时，子表（带外键）怎么办——用参照动作：
+
+| 动作 | 含义 | 典型场景 |
+| :--- | :--- | :--- |
+| `NO ACTION` / `RESTRICT` | 有子行引用则禁止删/改父行 | 默认、最安全 |
+| `ON DELETE CASCADE` | 删父行时级联删子行 | 删用户顺带删其购物车 |
+| `ON UPDATE CASCADE` | 改父键时子表外键跟着改 | 学号变更（少见） |
+| `SET NULL` | 父行没了，子行外键置空 | 岗位撤销，员工“暂无部门” |
+| `SET DEFAULT` | 置为默认值 | 产品相关 |
+
+```sql
+FOREIGN KEY (sid) REFERENCES student(sid)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+```
+
+##### CASCADE 级联（详解）
+
+**Cascade** 原意是“瀑布式连带”：对**父表（被引用表）**做删除或更新时，数据库按外键定义**自动同步处理子表（引用表）**，不必手写第二条 `DELETE`/`UPDATE`。
+
+为什么需要：没有级联时，父行若仍被子行引用，删除常被直接拒绝；若先手工删子再删父，应用层容易漏步骤，留下“指向已不存在主键”的脏数据或半截清理。
+
+| 写法 | 父表操作 | 子表自动发生什么 |
+| :--- | :--- | :--- |
+| `ON DELETE CASCADE` | `DELETE` 掉被引用的主键行 | 所有引用该键的子行一并删除 |
+| `ON UPDATE CASCADE` | `UPDATE` 改了被引用的主键值 | 子表外键列改成新值 |
+
+```sql
+-- 假设 member.sid 已声明 ON DELETE CASCADE / ON UPDATE CASCADE
+
+-- 删学生 1 之前：member 里可能有 (1,10)、(1,20)
+DELETE FROM student WHERE sid = 1;
+-- 之后：上述 member 行自动消失；无需再 DELETE FROM member WHERE sid = 1;
+
+-- 学号 1 改成 1001（少见，但语法上支持）
+UPDATE student SET sid = 1001 WHERE sid = 1;
+-- 之后：原引用 sid=1 的 member 行自动变成 sid=1001
+```
+
+对比（同一场景，**没有** CASCADE，默认 `NO ACTION`/`RESTRICT`）：
+
+```sql
+-- member 里还有 sid=1 时：
+DELETE FROM student WHERE sid = 1;   -- 失败：有子行引用
+-- 只能先：
+DELETE FROM member WHERE sid = 1;
+DELETE FROM student WHERE sid = 1;
+```
+
+> [!EXAMPLE]+ 何时用 / 何时慎用
+>
+> **适合 CASCADE**
+>
+> - 子行是父行的附属数据：用户→购物车、订单→订单明细、学生→入社记录。
+> - 业务语义就是“父没了，子也没意义”。
+>
+> **慎用 CASCADE**
+>
+> - 子行有独立业务价值（如历史订单、审计流水）：误删父表会**连锁删光**子表，不可轻易恢复。
+> - 多层外键链：`A ← B ← C` 都 CASCADE 时，删 A 可能拖垮一大片，需想清楚范围。
+> - 更稳妥时改用 `ON DELETE SET NULL`（保留子行、断开关联）或禁止删除（`RESTRICT`），由应用显式归档。
+
+> [!WARNING]+ 别和另外两种 “CASCADE” 搞混
+>
+> | 出现位置 | 含义 |
+> | :--- | :--- |
+> | 外键 `ON DELETE/UPDATE CASCADE` | 改删父键时**级联改删子表数据**（上文） |
+> | `REVOKE ... CASCADE` | 收回权限时，**连带收回**由此转授出去的权限 |
+> | 事务里的“级联回滚” | 并发控制概念：一事务中止导致读过其脏写的事务也回滚（见主笔记），**不是**外键语法 |
+>
+> 口语里说“加个 cascade”，在建表语境下几乎总是指外键的 `ON DELETE CASCADE`。
+
+> [!WARNING]+ 外键方向
+>
+> 外键建在**引用方（多的一端 / 关系表）**。  
+> `member.sid` → `student.sid`，不是反过来在 `student` 上写“有哪些社团”。
+> 级联也写在子表外键定义上：是“子表声明：父没了我就跟着没”。
+
+#### 其他常用约束
+
+| 约束 | 作用 | 为什么需要 / 用在哪 |
+| :--- | :--- | :--- |
+| `NOT NULL` | 该列禁止空 | 姓名、主键列；必填业务字段 |
+| `UNIQUE` | 取值不重复（主键以外） | 登录名、身份证号、邮箱 |
+| `CHECK (条件)` | 行级/表级取值校验 | 年龄≥0、成绩 in ('A'..'F')、起止日期有序 |
+| `DEFAULT 值` | 插入未给列时用默认 | 注册年份、状态='pending' |
+
+```sql
+CREATE TABLE takes (
+    ID         CHAR(5),
+    course_id  VARCHAR(8),
+    sec_id     VARCHAR(8),
+    semester   VARCHAR(6),
+    year       NUMERIC(4,0),
+    grade      VARCHAR(2) DEFAULT NULL,   -- 未出成绩可为空
+    PRIMARY KEY (ID, course_id, sec_id, semester, year),
+    FOREIGN KEY (ID) REFERENCES student(ID),
+    FOREIGN KEY (course_id) REFERENCES course(course_id),
+    CHECK (grade IS NULL OR grade IN ('A','B','C','D','F'))
+);
+```
+
+#### 三类完整性（对应关系）
+
+| 完整性 | SQL 里主要靠 |
+| :--- | :--- |
+| 实体完整性 | `PRIMARY KEY`（非空且唯一） |
+| 参照完整性 | `FOREIGN KEY` + 参照动作 |
+| 用户定义完整性 | `NOT NULL` / `UNIQUE` / `CHECK` / 触发器 / 断言 |
+
+> [!EXAMPLE]+ 用本文模式串起来
+>
+> - `student.sid`、`club.cid`：各自主键。
+> - `member(sid,cid)`：联合主键防重复入社；两个外键分别挂学生与社团。
+> - 删学生且 `ON DELETE CASCADE`：其 `member` 行自动清掉，避免“幽灵选课”。
+> - 删社团若**没有**级联且仍有成员：删除被拒绝 → 先清 `member` 或改策略。
 
 常见类型（几乎所有类型允许 `NULL`，除非声明 `NOT NULL`）：
 
@@ -820,6 +991,8 @@ SELECT * FROM cs_student WHERE age > 20;
 ## 完整性与触发器
 
 完整性：不让坏数据进库。触发器：数据变更时自动跑一段逻辑。为什么需要：学分合计校验、涨薪超过 50% 记审计日志、删订单前清明细——放在应用层容易漏。
+
+主键 / 外键 / `UNIQUE` / `CHECK` 等**声明式约束**见上文 DDL「键与约束」；本节补断言与触发器（过程式或库级补充手段）。
 
 ### 断言（多数 MySQL 不支持）
 
