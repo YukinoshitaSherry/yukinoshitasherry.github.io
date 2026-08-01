@@ -2190,7 +2190,7 @@ FROM monthly_revenue;
 
 ## ZJU习题
 
-### Quiz2 五题（完整可交卷版）
+### Quiz2 五题
 
 模式：`student(sid,name,age,gender,department)`，`club(cid,name,supervisor)`，`member(sid,cid,date)`。
 
