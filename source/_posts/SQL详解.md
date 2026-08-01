@@ -576,6 +576,9 @@ WHERE student.sid = member.sid      -- 学生↔成员
 
 先固定两张小表（数字少才好看清）。连接条件一律：`student.sid = member.sid`。
 
+<div style="display: flex; gap: 1.5rem; margin: 10px 0; flex-wrap: wrap; align-items: flex-start;">
+<div style="flex: 1; min-width: 200px;">
+
 **表 `student`（左表）**
 
 | sid | name |
@@ -583,6 +586,9 @@ WHERE student.sid = member.sid      -- 学生↔成员
 | 1 | 小明 |
 | 2 | 小红 |
 | 3 | 小刚 |
+
+</div>
+<div style="flex: 1; min-width: 200px;">
 
 **表 `member`（右表，谁进了哪个社）**
 
@@ -592,6 +598,9 @@ WHERE student.sid = member.sid      -- 学生↔成员
 | 1 | 篮球社 |
 | 2 | 舞蹈社 |
 | 4 | 棋社 |
+
+</div>
+</div>
 
 读表：小明进了两个社；小红进了舞蹈社；小刚**没进任何社**；`member` 里还有 sid=4（棋社），但 `student` 里**没有**这个人（脏数据或学生已删）。
 
@@ -762,25 +771,111 @@ JOIN emp b ON a.manager_id = b.id;
 
 把两个查询结果当集合做并/交/差。为什么需要：两个条件筛出的名单要合并或对比，又不想写很绕的 OR/EXISTS。
 
+模式需相容：列数相同、类型相容（都选 `name` 才能竖着接在一起）。
+
+
+还是用一张小 `student`：
+
+| name | department | gender |
+| :--- | :--- | :--- |
+| 小明 | CS | Male |
+| 小红 | CS | Female |
+| 小美 | Math | Female |
+| 小刚 | EE | Male |
+
+两个子查询各自会得到：
+
+**查询 A：CS 系** → 小明、小红  
+
+**查询 B：女生** → 小红、小美  
+
+注意：**小红两边都有**。差别就出在“叠在一起时要不要去掉这份重复”。
+
+### UNION
+（合并后去重）
+
 ```sql
--- UNION：并集并去重 —— “CS 系 或 女生”的姓名（人只出现一次）
-SELECT name FROM student WHERE department = 'CS'
+SELECT name FROM student WHERE department = 'CS'   -- A：小明、小红
 UNION
+SELECT name FROM student WHERE gender = 'Female'; -- B：小红、小美
+```
+
+结果（小红只留一次）：
+
+| name |
+| :--- |
+| 小明 |
+| 小红 |
+| 小美 |
+
+含义：名字出现在「CS 或 女生」里即可，人只报一次。引擎通常要**排序/哈希去重**，所以更慢一点。
+
+### UNION ALL
+（合并后不去重）
+
+```sql
+SELECT name FROM student WHERE department = 'CS'
+UNION ALL
 SELECT name FROM student WHERE gender = 'Female';
+```
 
--- UNION ALL：并集保留重复 —— 更快；要计数/流水合并时常用
--- SELECT ... UNION ALL SELECT ...
+结果（小红出现两次）：
 
--- INTERSECT：两边都出现（交）
--- EXCEPT / MINUS：在前不在后（差）
+| name |
+| :--- |
+| 小明 |
+| 小红 |
+| 小红 |
+| 小美 |
+
+含义：把两段结果**直接竖着接起来**，不管有没有重复行。
+
+> [!EXAMPLE]+ 一张图记住
+>
+> | | 小明（仅 A） | 小红（A 和 B 都有） | 小美（仅 B） | 小刚（都不沾） |
+> | :--- | :--- | :--- | :--- | :--- |
+> | `UNION` | 1 次 | **1 次** | 1 次 | 无 |
+> | `UNION ALL` | 1 次 | **2 次** | 1 次 | 无 |
+
+什么时候用 UNION ALL
+
+| 场景 | 为什么用 ALL |
+| :--- | :--- |
+| 两段结果**本来就不会重复**（如 2023 流水 ∪ 2024 流水，按年切开） | 去重纯浪费，ALL 更快 |
+| **就要保留重复**（两份名单叠在一起做后续 `COUNT`，重复代表“命中两次条件”） | `UNION` 会把信息弄丢 |
+| 递归 CTE 里 `UNION ALL` 往下扩一层 | 标准写法，通常不在这里去重 |
+
+```sql
+-- 例：把两年订单流水拼成一张长表（订单号跨年不重复 → 用 ALL）
+SELECT order_id, amount FROM orders_2023
+UNION ALL
+SELECT order_id, amount FROM orders_2024;
+
+-- 若误用 UNION：引擎仍会全局去重，白干活，还可能更慢
+```
+
+和 OR 的关系：
+
+「CS 或女生」用 `WHERE department='CS' OR gender='Female'` 在**同一张表**上也能写，且每人一行。  
+`UNION` / `UNION ALL` 更适合：**两段查询结构不同**（不同表、不同列计算），再竖着合并。
+
+```sql
+-- 同表时 OR 往往更直接（结果无重复小红）
+SELECT name FROM student
+WHERE department = 'CS' OR gender = 'Female';
+```
+
+### INTERSECT / EXCEPT（顺带）
+
+```sql
+-- INTERSECT：两边都出现 → 只有小红（既是 CS 又是女生）
+-- EXCEPT / MINUS：在 A 不在 B → 小明（CS 但不是女生）
 -- MySQL 旧版本可能没有，可用 EXISTS / NOT EXISTS 模拟
 ```
 
-模式需相容：列数相同、类型相容。
-
-> [!NOTE]+ `UNION` vs `UNION ALL`
+> [!NOTE]+ 面试一句
 >
-> `UNION` 要排序/去重，贵；确定无重复或需要重复时用 `UNION ALL`。面试常问性能差异。
+> `UNION` = 并上再去重；`UNION ALL` = 只拼接、不去重、通常更快。需要重复或确定无重复时用 `ALL`。
 
 <br>
 
@@ -790,7 +885,10 @@ SELECT name FROM student WHERE gender = 'Female';
 
 ```sql
 -- GROUP BY department：每个系一组
--- COUNT / AVG：组内统计；AS 起别名方便读
+-- COUNT(*)：数的是“行数”；* 在这里不表示“所有列的值”，而是“整行占一个名额”
+--   即使某列是 NULL，这一行仍然计入（和 COUNT(列名) 不同）
+--   本例配合 GROUP BY department：数的是「每个系里有多少名学生（多少行）」
+-- AVG(age)：对 age 列求平均（NULL 年龄不参与平均）
 SELECT department, COUNT(*) AS cnt, AVG(age) AS avg_age
 FROM student
 GROUP BY department
@@ -799,11 +897,30 @@ GROUP BY department
 HAVING COUNT(*) >= 3;
 ```
 
+> [!INFO]+ `COUNT(*)` 里的 `*` 是什么
+>
+> - `SELECT *` 的 `*` = 所有**列**。
+> - `COUNT(*)` 的 `*` = 按**行**计数的写法（历史语法），**不是**把每一列加起来。
+> - 读法：数满足条件/落入该组的行有多少条。
+>
+> | 写法 | 数什么 | 遇到 NULL |
+> | :--- | :--- | :--- |
+> | `COUNT(*)` | 行数 | 行仍算 1（整行在就计数） |
+> | `COUNT(age)` | `age` 非空的个数 | 该列 NULL 的行**不计入** |
+> | `COUNT(DISTINCT department)` | 不重复取值个数 | NULL 一般忽略 |
+>
+> ```sql
+> -- 例：3 个学生，其中 1 人 age 未知
+> -- COUNT(*)        → 3
+> -- COUNT(age)      → 2
+> -- COUNT(1)        → 3（与 COUNT(*) 同义，有的人爱这么写）
+> ```
+
 规则：
 
 - `SELECT` 中未进入聚集的列，必须出现在 `GROUP BY` 中（严格模式）。
 - `WHERE` 在分组前过滤行；`HAVING` 在分组后过滤组。
-- `COUNT(*)` 计行；`COUNT(col)` 忽略该列 NULL；`SUM`/`AVG` 忽略 NULL；输入全空时 `SUM`/`AVG` 常为 NULL，`COUNT` 为 0。
+- `COUNT(*)` 计行；`COUNT(col)` 忽略该列 NULL；`SUM`/`AVG` 忽略 NULL；输入全空时 `SUM`/`AVG` 常为 NULL，`COUNT(*)` 为 0。
 
 ```sql
 -- 系均薪高于全校均薪的系
