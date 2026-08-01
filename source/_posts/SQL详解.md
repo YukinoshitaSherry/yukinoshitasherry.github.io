@@ -574,39 +574,159 @@ WHERE student.sid = member.sid      -- 学生↔成员
 
 ### INNER / LEFT / RIGHT / FULL
 
-```sql
--- INNER JOIN：两边都匹配才保留
--- 用在哪：只要“确实参加了社团”的学生名单
-SELECT s.name, c.name AS club_name
-FROM student s
-INNER JOIN member m ON s.sid = m.sid
-INNER JOIN club c ON m.cid = c.cid;
+先固定两张小表（数字少才好看清）。连接条件一律：`student.sid = member.sid`。
 
--- LEFT JOIN：左表全保留，右表对不上则填 NULL
--- 为什么需要：要看“没参加任何社团的学生”，或做完整花名册
-SELECT s.name, c.name AS club_name
+**表 `student`（左表）**
+
+| sid | name |
+| :---: | :--- |
+| 1 | 小明 |
+| 2 | 小红 |
+| 3 | 小刚 |
+
+**表 `member`（右表，谁进了哪个社）**
+
+| sid | club |
+| :---: | :--- |
+| 1 | 舞蹈社 |
+| 1 | 篮球社 |
+| 2 | 舞蹈社 |
+| 4 | 棋社 |
+
+读表：小明进了两个社；小红进了舞蹈社；小刚**没进任何社**；`member` 里还有 sid=4（棋社），但 `student` 里**没有**这个人（脏数据或学生已删）。
+
+#### INNER JOIN（只要两边对得上）
+
+```sql
+SELECT s.sid, s.name, m.club
+FROM student s
+INNER JOIN member m ON s.sid = m.sid;
+```
+
+结果只有“学生表里有、且确实入过社”的行：
+
+| sid | name | club |
+| :---: | :--- | :--- |
+| 1 | 小明 | 舞蹈社 |
+| 1 | 小明 | 篮球社 |
+| 2 | 小红 | 舞蹈社 |
+
+- 小刚没了（左有右无）
+- sid=4 棋社没了（右有左无）
+- 小明出现两行：一人多社，INNER 会**复制左行**
+
+> [!INFO]+ 何时用 INNER
+>
+> 只要“有效关联”，不要光杆司令。例如：下过单的用户、选过课的学生。
+
+#### LEFT JOIN（左表全留，右对不上就 NULL）
+
+```sql
+SELECT s.sid, s.name, m.club
+FROM student s
+LEFT JOIN member m ON s.sid = m.sid;
+```
+
+| sid | name | club |
+| :---: | :--- | :--- |
+| 1 | 小明 | 舞蹈社 |
+| 1 | 小明 | 篮球社 |
+| 2 | 小红 | 舞蹈社 |
+| 3 | 小刚 | NULL |
+
+- 小刚还在，`club` 为 `NULL` → 表示“这个学生没有匹配的入社记录”
+- sid=4 棋社仍然不出现（右独有，LEFT 不管）
+
+找“从未入社的学生”：
+
+```sql
+SELECT s.sid, s.name
 FROM student s
 LEFT JOIN member m ON s.sid = m.sid
-LEFT JOIN club c ON m.cid = c.cid;
--- 找从未入社的学生：再加 WHERE m.sid IS NULL
+WHERE m.sid IS NULL;   -- 右表关键列是 NULL → 没配上
+```
 
--- RIGHT JOIN：右表全保留（少用，常改写成换左右的 LEFT）
-SELECT * FROM student s
+结果：只有小刚。
+
+> [!INFO]+ 何时用 LEFT
+>
+> 花名册要完整，右边信息可有可无。例如：全部员工 + 可选的部门名；全部学生 + 可选的社团。
+
+#### RIGHT JOIN（右表全留，左对不上就 NULL）
+
+```sql
+SELECT s.sid, s.name, m.sid AS member_sid, m.club
+FROM student s
 RIGHT JOIN member m ON s.sid = m.sid;
+```
 
--- FULL OUTER JOIN：两侧未匹配都保留（MySQL 常需用 UNION 模拟）
-SELECT * FROM student s
+| sid | name | member_sid | club |
+| :---: | :--- | :---: | :--- |
+| 1 | 小明 | 1 | 舞蹈社 |
+| 1 | 小明 | 1 | 篮球社 |
+| 2 | 小红 | 2 | 舞蹈社 |
+| NULL | NULL | 4 | 棋社 |
+
+- 棋社那行留下了，学生侧是 `NULL` → “入社记录在，学生表对不上”
+- 小刚没了（左独有，RIGHT 不管）
+
+`A RIGHT JOIN B` 等价于 `B LEFT JOIN A`（换左右即可），所以生产里少写 RIGHT，统一用 LEFT 更不易晕。
+
+> [!INFO]+ 何时用 RIGHT
+>
+> 理论上要“以右表为主”。实务更常把主表放到左边，改写成 LEFT。
+
+#### FULL OUTER JOIN（两边的独苗都留）
+
+```sql
+SELECT s.sid, s.name, m.sid AS member_sid, m.club
+FROM student s
 FULL OUTER JOIN member m ON s.sid = m.sid;
 ```
 
-> [!EXAMPLE]+ 四种 JOIN 何时选
+| sid | name | member_sid | club |
+| :---: | :--- | :---: | :--- |
+| 1 | 小明 | 1 | 舞蹈社 |
+| 1 | 小明 | 1 | 篮球社 |
+| 2 | 小红 | 2 | 舞蹈社 |
+| 3 | 小刚 | NULL | NULL |
+| NULL | NULL | 4 | 棋社 |
+
+= INNER 的匹配行 ∪ 仅左有（小刚）∪ 仅右有（棋社）。
+
+MySQL 长期没有 `FULL OUTER JOIN`，可用 UNION 模拟：
+
+```sql
+SELECT s.sid, s.name, m.club
+FROM student s
+LEFT JOIN member m ON s.sid = m.sid
+UNION
+SELECT s.sid, s.name, m.club
+FROM student s
+RIGHT JOIN member m ON s.sid = m.sid;
+```
+
+> [!INFO]+ 何时用 FULL
 >
-> | 类型 | 保留谁 | 典型问题 |
-> | :--- | :--- | :--- |
-> | INNER | 匹配上的 | 订单明细（必须有商品） |
-> | LEFT | 左表全部 | 用户列表 + 可选的最近登录 |
-> | RIGHT | 右表全部 | 少用 |
-> | FULL | 两侧全部 | 对账：两边都有、仅左有、仅右有 |
+> 对账、比对两份名单：看两边都有、只有左、只有右。例如：系统用户表 vs 考勤打卡表。
+
+#### 一眼对照
+
+同一份数据，四种结果差在“独苗要不要”：
+
+| | 小明/小红（两边都有） | 小刚（仅左） | 棋社 sid=4（仅右） |
+| :--- | :--- | :--- | :--- |
+| INNER | 有 | 丢 | 丢 |
+| LEFT | 有 | 有，右列 NULL | 丢 |
+| RIGHT | 有 | 丢 | 有，左列 NULL |
+| FULL | 有 | 有，右列 NULL | 有，左列 NULL |
+
+> [!EXAMPLE]+ 记法
+>
+> - INNER = 交集（配得上才要）
+> - LEFT = 左表底册 + 能配上的右信息
+> - RIGHT = 右表底册 + 能配上的左信息
+> - FULL = 两边底册都要（对账）
 
 ### NATURAL / USING / ON
 
