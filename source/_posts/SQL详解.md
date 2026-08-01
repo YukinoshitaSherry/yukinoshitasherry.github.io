@@ -25,9 +25,9 @@ desc: 数据库 SQL 专项：DDL/DML、JOIN 全家、嵌套与相关子查询、
 
 有的教材把 `SELECT` 单独称为 DQL（Data Query Language，数据查询语言）；本文仍按习惯归在 DML 一侧讨论。
 
-### 定位
+### 内容
 
-本文是 [数据库系统笔记](/数据库系统/) 的 SQL 独立册：例子密度按作业 + 面试组织，覆盖复杂嵌套与“全部 / 仅有”类语义。理论侧（关系代数、优化、事务）见主笔记。
+本文是 [数据库系统笔记](/数据库系统/) 的 SQL 独立部分。理论侧（关系代数、优化、事务）见主笔记。
 
 参考：
 
@@ -35,7 +35,6 @@ desc: 数据库 SQL 专项：DDL/DML、JOIN 全家、嵌套与相关子查询、
 - [菜鸟教程 JOIN](https://www.runoob.com/sql/sql-join.html)
 - [牛客 SQL 篇](https://www.nowcoder.com/exam/oj?tab=SQL%E7%AF%87&topicId=199)
 
-### 示例模式
 
 全文默认使用下列模式：
 
