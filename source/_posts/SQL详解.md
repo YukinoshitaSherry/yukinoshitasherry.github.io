@@ -881,46 +881,158 @@ WHERE department = 'CS' OR gender = 'Female';
 
 ## 聚集与分组
 
-把多行收成“每个组一行”的统计。为什么需要：人均、总数、每个系多少人——业务报表核心。
+把多行收成「每个组一行」的统计（每系人数、均薪等）。
+
+### `GROUP BY` 在干什么
+
+**一句话**：按某列（或多列）的取值，把行**分堆**；每一堆用 `COUNT`/`AVG`/… 收成**一行**。
+
+**student（小数据）**
+
+| sid | name | department | age |
+| :---: | :--- | :--- | ---: |
+| 1 | 小明 | CS | 20 |
+| 2 | 小红 | CS | 22 |
+| 3 | 小刚 | EE | 19 |
+| 4 | 小美 | EE | 21 |
+| 5 | 小强 | Bio | 18 |
+
+没有 `GROUP BY` 时，整表是一堆 5 行。写上 `GROUP BY department` 后，引擎先在脑子里分成三堆：
+
+```text
+CS 堆：小明、小红          → 之后收成 1 行
+EE 堆：小刚、小美          → 之后收成 1 行
+Bio 堆：小强               → 之后收成 1 行
+```
 
 ```sql
--- GROUP BY department：每个系一组
--- COUNT(*)：数的是“行数”；* 在这里不表示“所有列的值”，而是“整行占一个名额”
---   即使某列是 NULL，这一行仍然计入（和 COUNT(列名) 不同）
---   本例配合 GROUP BY department：数的是「每个系里有多少名学生（多少行）」
--- AVG(age)：对 age 列求平均（NULL 年龄不参与平均）
 SELECT department, COUNT(*) AS cnt, AVG(age) AS avg_age
 FROM student
-GROUP BY department
--- HAVING：分组之后再过滤组（这里：至少 3 人的系）
--- 为什么不能写在 WHERE：WHERE 时组还没形成，COUNT 尚不存在
-HAVING COUNT(*) >= 3;
+GROUP BY department;
 ```
+
+| department | cnt | avg_age |
+| :--- | ---: | ---: |
+| CS | 2 | 21 |
+| EE | 2 | 20 |
+| Bio | 1 | 18 |
+
+- `department` 能出现在结果里，是因为它是**分组键**（每堆里这个值相同）。
+- `COUNT(*)` / `AVG(age)` 是对**这一堆里的行**算的。
+- 不能写 `SELECT name, COUNT(*) ... GROUP BY department`：一堆里有多个 `name`，引擎不知道该留哪一个（严格模式报错）。
 
 > [!INFO]+ `COUNT(*)` 里的 `*` 是什么
 >
 > - `SELECT *` 的 `*` = 所有**列**。
-> - `COUNT(*)` 的 `*` = 按**行**计数的写法（历史语法），**不是**把每一列加起来。
-> - 读法：数满足条件/落入该组的行有多少条。
->
-> | 写法 | 数什么 | 遇到 NULL |
-> | :--- | :--- | :--- |
-> | `COUNT(*)` | 行数 | 行仍算 1（整行在就计数） |
-> | `COUNT(age)` | `age` 非空的个数 | 该列 NULL 的行**不计入** |
-> | `COUNT(DISTINCT department)` | 不重复取值个数 | NULL 一般忽略 |
->
-> ```sql
-> -- 例：3 个学生，其中 1 人 age 未知
-> -- COUNT(*)        → 3
-> -- COUNT(age)      → 2
-> -- COUNT(1)        → 3（与 COUNT(*) 同义，有的人爱这么写）
-> ```
+> - `COUNT(*)` 的 `*` = 按**行**计数（历史写法），**不是**把各列加起来。
+> - `COUNT(age)` 只数 `age` 非空的行；`COUNT(*)` 行在就数，不管哪列是 NULL。
 
-规则：
+### 过滤行 vs 过滤组（同一张表走两遍）
+
+执行顺序要记住这一段：
+
+```text
+FROM 取出行
+  → WHERE     先扔掉一些「行」     （此时还没有组，也还没有 COUNT/AVG）
+  → GROUP BY  把剩下的行分堆
+  → 对每堆算 COUNT / AVG / …
+  → HAVING    再扔掉一些「组」     （此时才有 COUNT/AVG，按组的统计量筛选）
+  → SELECT 输出
+```
+
+| | `WHERE` | `HAVING` |
+| :--- | :--- | :--- |
+| 时机 | **分组之前** | **分组并算完聚集之后** |
+| 对象 | 每一**行**（小明这一行要不要） | 每一**组**（CS 这一组要不要） |
+| 能否用 `COUNT`/`AVG` | **不能**（组还没形成） | **能** |
+| 典型条件 | `age >= 20`、`department = 'CS'` | `COUNT(*) >= 2`、`AVG(age) > 20` |
+
+#### 只过滤行：`WHERE`
+
+题意：只统计 **age ≥ 20** 的学生，再按系数人数。
+
+```sql
+SELECT department, COUNT(*) AS cnt
+FROM student
+WHERE age >= 20          -- 先按「行」筛：小刚19、小强18 被扔掉
+GROUP BY department;
+```
+
+1. `WHERE` 后剩下：小明20、小红22、小美21（3 行）。
+2. 分堆：CS={小明,小红}，EE={小美}；Bio 空堆，不出现。
+3. 结果：
+
+| department | cnt |
+| :--- | ---: |
+| CS | 2 |
+| EE | 1 |
+
+注意：小刚虽是 EE，但被 `WHERE` 提前丢掉，**不会**进 EE 的 `COUNT`。
+
+#### 只过滤组：`HAVING`
+
+题意：先按系统计**全部**学生，再只要「至少 2 人」的系。
+
+```sql
+SELECT department, COUNT(*) AS cnt
+FROM student
+GROUP BY department
+HAVING COUNT(*) >= 2;    -- 按「组」筛：Bio 只有 1 人，整组扔掉
+```
+
+1. 不分 `WHERE`，5 行全进分组 → CS:2，EE:2，Bio:1。
+2. `HAVING` 看的是每组的 `COUNT(*)`，不是某一行的 age。
+3. 结果：
+
+| department | cnt |
+| :--- | ---: |
+| CS | 2 |
+| EE | 2 |
+
+Bio 组被丢掉时，**小强整个人都不输出**——因为输出单位已经是「组」而不是「行」。
+
+#### 两个一起用（对照）
+
+```sql
+-- ① 先丢掉年龄 < 20 的行
+-- ② 再按系分组计数
+-- ③ 只保留「筛完后仍至少 2 人」的系
+SELECT department, COUNT(*) AS cnt
+FROM student
+WHERE age >= 20
+GROUP BY department
+HAVING COUNT(*) >= 2;
+```
+
+| 步骤 | 还剩什么 |
+| :--- | :--- |
+| `WHERE age >= 20` | 小明、小红、小美 |
+| `GROUP BY` | CS:2，EE:1 |
+| `HAVING COUNT(*) >= 2` | 只留 **CS:2**（EE 只剩 1 人，组被丢） |
+
+若把 `HAVING COUNT(*) >= 2` 误写成 `WHERE COUNT(*) >= 2` → **报错**：`WHERE` 阶段没有组，没有 `COUNT`。
+
+> [!WARNING]+ 口诀
+>
+> - 条件里是**一行上的列**（age、salary、sid）→ 多半 `WHERE`。
+> - 条件里是**一组上的统计**（人数、均薪、总学分）→ 必须 `HAVING`（或先写成子查询/CTE 再在外层 `WHERE`）。
+
+规则补充：
 
 - `SELECT` 中未进入聚集的列，必须出现在 `GROUP BY` 中（严格模式）。
-- `WHERE` 在分组前过滤行；`HAVING` 在分组后过滤组。
 - `COUNT(*)` 计行；`COUNT(col)` 忽略该列 NULL；`SUM`/`AVG` 忽略 NULL；输入全空时 `SUM`/`AVG` 常为 NULL，`COUNT(*)` 为 0。
+
+#### 例：系均薪高于全校均薪
+
+**instructor（小数据）**
+
+| name | dept_name | salary |
+| :--- | :--- | ---: |
+| 张三 | CS | 90 |
+| 李四 | CS | 70 |
+| 王五 | EE | 80 |
+| 赵六 | EE | 100 |
+| 钱七 | Bio | 60 |
 
 ```sql
 -- 系均薪高于全校均薪的系
@@ -930,7 +1042,36 @@ GROUP BY dept_name
 HAVING AVG(salary) > (SELECT AVG(salary) FROM instructor);
 ```
 
-“每个系参加社团的学生百分比”：
+带入数值：
+
+1. 全校均薪（标量子查询，不分系）：$(90+70+80+100+60)/5 = 80$。
+2. 各组均薪：CS $(90+70)/2 = 80$；EE $(80+100)/2 = 90$；Bio $= 60$。
+3. `HAVING AVG(salary) > 80` → 只留 **EE**（90）。CS 等于 80 不进；Bio 低于不进。
+
+| dept_name | avg_salary |
+| :--- | ---: |
+| EE | 90 |
+
+#### 例：每个系参加社团的学生百分比
+
+**student**
+
+| sid | name | department |
+| :---: | :--- | :--- |
+| 1 | 小明 | CS |
+| 2 | 小红 | CS |
+| 3 | 小刚 | EE |
+| 4 | 小美 | EE |
+| 5 | 小强 | Bio |
+
+**member**（只列出 sid；一人可多社，故后面用 `DISTINCT`）
+
+| sid | cid |
+| :---: | :---: |
+| 1 | 10 |
+| 1 | 20 |
+| 2 | 10 |
+| 4 | 10 |
 
 ```sql
 -- WHERE 先留下“参加过社团”的学生，再按系计数
@@ -942,11 +1083,19 @@ WHERE sid IN (SELECT sid FROM member)
 GROUP BY department;
 ```
 
-> [!WARNING]+ `WHERE` 与 `HAVING`
->
-> - 过滤**行**：`WHERE age > 18`
-> - 过滤**组**：`HAVING COUNT(*) >= 3` 或 `HAVING AVG(salary) > 50000`
-> - `WHERE` 里写 `COUNT(*)` → 直接报错
+带入数值：
+
+1. `SELECT sid FROM member` → `{1, 2, 4}`（去重后；小明两社仍算一人）。
+2. `WHERE sid IN (...)` 后剩下：小明(CS)、小红(CS)、小美(EE)。小刚、小强未入社被丢掉。
+3. 分母：全校 `COUNT(*)` $= 5$。
+4. 按系：CS 有 2 人 → $2 \times 100.0 / 5 = 40$；EE 有 1 人 → $1 \times 100.0 / 5 = 20$；Bio 无人入社 → **无行**。
+
+| department | percentage |
+| :--- | ---: |
+| CS | 40 |
+| EE | 20 |
+
+若分母改成「本系人数」：CS 为 $2/2=100$，EE 为 $1/2=50$（题意不同，面试常追问这一点）。
 
 <br>
 
@@ -1034,65 +1183,190 @@ WHERE avg_salary > 50000;
 
 ## 全称量化
 
-自然语言“**所有** … 都 …”在 SQL 没有直写的 `FOR ALL`，常用双重 `NOT EXISTS`（不存在反例）。为什么需要：权限“必须学完所有先修”、社团“JL SUN 名下每个社都参加”——全称命题。
+自然语言「**所有**……都……」，SQL 没有 `FOR ALL`。标准改写：
 
-### 模式
+$$
+\text{对所有 } x,\ P(x)
+\quad\Longleftrightarrow\quad
+\text{不存在 } x,\ \text{使得 }\neg P(x)
+$$
 
-> 不存在一个（反例），使得（该反例未被满足）。
+口语：**全部成立** ⟺ **找不到反例**。SQL 用 `NOT EXISTS` 写“找不到”。
 
-### Quiz：JL SUN 监督的所有俱乐部的成员
+### 积木：EXISTS 的真假（先死记）
 
-找学生：对 JL SUN 的每个俱乐部，该生都是成员。
+```sql
+EXISTS (子查询)      -- 子查询能取出 ≥1 行 → 整个为 TRUE
+NOT EXISTS (子查询)  -- 子查询 0 行         → 整个为 TRUE
+```
+
+相关子查询：里层用到外层当前行（如 `student.sid`）。外层换一个人，里层就重跑一遍。
+
+### 例 1：参加了 JL SUN 的「所有」俱乐部
+
+#### 题目
+
+找出：JL SUN 管的每一个社，这个学生都进了。  
+（不是“至少进一个”，是“一个都不能少”。）
+
+#### 小数据
+
+**club**
+
+| cid | name | supervisor |
+| :---: | :--- | :--- |
+| 10 | 舞蹈社 | JL SUN |
+| 20 | 篮球社 | JL SUN |
+| 30 | 棋社 | 别人 |
+
+**member**
+
+| sid | cid | 含义 |
+| :---: | :---: | :--- |
+| 1 | 10 | 小明 → 舞蹈 |
+| 1 | 20 | 小明 → 篮球 |
+| 2 | 10 | 小红 → 舞蹈（没进篮球） |
+
+- JL SUN 的全集 = {10, 20}（棋社 30 不管）
+- 小明两个都有 → **要**
+- 小红缺 20 → **不要**
+
+#### 先写成人话三层（不要急着看 SQL）
+
+对**某一个学生 S**：
+
+```text
+第 0 层  正在考察学生 S
+
+第 1 层  问：存不存在「坏俱乐部」？
+         坏俱乐部 = （归 JL SUN 管）并且（S 没参加）
+         若一个坏的都没有 → S 合格，选出来
+
+第 2 层  怎么判断「S 没参加俱乐部 C」？
+         去 member 里找 (S, C)
+         找到了 → 参加了
+         找不到 → 没参加
+```
+
+对应到双重否定：
+
+```text
+S 合格
+  ⟺ 不存在坏俱乐部 C
+  ⟺ 不存在 C，使得：C 是 JL SUN 的  且  S 没参加 C
+  ⟺ 不存在 C，使得：C 是 JL SUN 的  且  member 里没有 (S,C)
+```
+
+#### SQL：每一层在干什么（对着缩进看）
 
 ```sql
 SELECT student.name
 FROM student
+-- ========== 第 0 层：循环每个学生 ==========
+-- 下面 WHERE 对「当前这个 student」为真才输出
 WHERE NOT EXISTS (
-    -- 外层 NOT EXISTS：不存在这样的“坏俱乐部”
+    -- ========== 第 1 层：找「坏俱乐部」==========
+    -- NOT EXISTS(...) 为真  ⟺  这个括号里 0 行  ⟺  没有坏俱乐部
     SELECT club.cid
     FROM club
-    WHERE club.supervisor = 'JL SUN'
+    WHERE club.supervisor = 'JL SUN'   -- 只从 JL SUN 的社里找坏的
       AND NOT EXISTS (
-          -- 内层：该生没有参加这个俱乐部 → 构成反例
-          SELECT member.sid
+          -- ========== 第 2 层：当前学生有没有进「当前这个 club」==========
+          -- 内层 EXISTS 语义：member 里有没有 (student.sid, club.cid)
+          -- NOT EXISTS 为真  ⟺  一行都没有  ⟺  「没参加」
+          -- 于是：JL SUN 的社 + 没参加 → 这一行 club 被第 1 层选中（坏俱乐部）
+          SELECT 1
           FROM member
-          WHERE member.sid = student.sid
-            AND member.cid = club.cid
+          WHERE member.sid = student.sid   -- 钉死第 0 层的学生
+            AND member.cid = club.cid      -- 钉死第 1 层的俱乐部
       )
 );
 ```
 
-直觉：不存在“JL SUN 的俱乐部，且该生未参加”。
+> [!WARNING]+ 最容易晕的一点
+>
+> 第 2 层的 `NOT EXISTS`：**不是**最终答案，只负责定义「没参加」。  
+> 真正决定「选不选这个学生」的，是第 1 层外面的那个 `NOT EXISTS`（有没有坏社）。
 
-### Quiz：只有女生的俱乐部
+#### 真假跳变表（建议抄一遍）
+
+固定学生 S、俱乐部 C：
+
+| member 里有 (S,C)？ | 第 2 层 `NOT EXISTS` | 含义 | C 会不会进第 1 层结果（在 JL SUN 前提下） |
+| :--- | :--- | :--- | :--- |
+| 有 | **假** | 参加了 | 不会（AND 短路掉） |
+| 没有 | **真** | 没参加 | **会**（这是坏俱乐部） |
+
+再往外：
+
+| 第 1 层能查出坏俱乐部吗 | 第 1 层外的 `NOT EXISTS` | 学生 S |
+| :--- | :--- | :--- |
+| 能（≥1 个坏社） | **假** | 丢掉 |
+| 不能（0 个坏社） | **真** | **留下** |
+
+#### 用小明走（应留下）
+
+1. 第 0 层：S = 小明 (sid=1)。
+2. 扫 JL SUN 的社。
+3. C=10：member 有 (1,10) → 第 2 层 `NOT EXISTS`=假 → 10 不是坏社。
+4. C=20：有 (1,20) → 同理不是坏社。
+5. 第 1 层结果空 → 外层 `NOT EXISTS`=真 → **输出小明**。
+
+#### 用小红走（应丢掉）
+
+1. S = 小红 (sid=2)。
+2. C=10：有 (2,10) → 不是坏社。
+3. C=20：没有 (2,20) → 第 2 层 `NOT EXISTS`=真 → **20 是坏社**，第 1 层查到一行。
+4. 外层 `NOT EXISTS`=假 → **不输出小红**。
+
+> [!EXAMPLE]+ 嵌套括号（人话版）
+>
+> ```text
+> 对每个学生 S：
+>   若不存在俱乐部 C，使得
+>        ( C.supervisor = 'JL SUN'
+>          且  不存在 member 行 (S 进了 C) )
+>   则选出 S
+> ```
+
+### 例 2：只有女生的俱乐部（单层，练手）
+
+只要一层：反例 =「社里有个非女生」。
 
 ```sql
 SELECT club.name
 FROM club
+-- 对每个俱乐部 C：
 WHERE NOT EXISTS (
-    -- 不存在“非女生成员” → 成员若存在则全是女生
-    SELECT member.sid
+    -- 反例成员：属于 C，且性别不是女
+    SELECT 1
     FROM member
     JOIN student ON member.sid = student.sid
     WHERE member.cid = club.cid
       AND student.gender <> 'Female'
 );
+-- 找不到反例 → 选出（注意：空社也「找不到反例」会被选出）
 ```
 
-空俱乐部是否算“只有女生”？按此写法会被选出；若需至少一人，再加 `EXISTS` 成员条件。
-
-### 除法：选了某集合全部课程
+不要空社时再加：
 
 ```sql
--- 关系代数除法：选了 Comp. Sci. 系每一门课的学生
+AND EXISTS (SELECT 1 FROM member WHERE member.cid = club.cid)
+```
+
+### 例 3：选了 Comp. Sci.「全部」课（与例 1 同构）
+
+把「JL SUN 的社」换成「CS 系的课」，结构一字不差：
+
+```sql
 SELECT DISTINCT s.ID
 FROM student s
-WHERE NOT EXISTS (
+WHERE NOT EXISTS (                      -- 第 1 层：不存在「漏选的 CS 课」
     SELECT course_id
     FROM course
-    WHERE dept_name = 'Comp. Sci.'
-      AND NOT EXISTS (
-          SELECT *
+    WHERE dept_name = 'Comp. Sci.'      -- 全集
+      AND NOT EXISTS (                  -- 第 2 层：该生没选这门 → 这门是坏课
+          SELECT 1
           FROM takes t
           WHERE t.ID = s.ID
             AND t.course_id = course.course_id
@@ -1100,10 +1374,10 @@ WHERE NOT EXISTS (
 );
 ```
 
-等价计数法（集合无重复选课前提）：
+验算可用计数（同一门不重复计时）：
 
 ```sql
--- 选中的 Comp. Sci. 课门数 = 该系课门数总数 → 门门都选了
+-- 选中的 CS 课门数 = CS 课总门数 → 全选了
 SELECT t.ID
 FROM takes t
 JOIN course c ON t.course_id = c.course_id
@@ -1114,188 +1388,443 @@ HAVING COUNT(DISTINCT t.course_id) = (
 );
 ```
 
+> [!NOTE]+ 认题
+>
+> | 题意 | 全集 | 反例 | 几层 NOT EXISTS |
+> | :--- | :--- | :--- | :--- |
+> | 所有 JL SUN 社都参加 | JL SUN 的 club | 某社没进 | 两层 |
+> | 只有女生 | 该社成员 | 有个非女生 | 一层 |
+> | 全部 CS 课都选了 | CS 的 course | 某门没选 | 两层 |
+>
+> 口诀：全称 → 找反例 → 外层 `NOT EXISTS`；反例若是「缺一条关联记录」→ 里层再 `NOT EXISTS`。
+
 <br>
 
 ## WITH 与 CTE
 
-CTE（Common Table Expression）给子查询起个临时名。为什么需要：复杂查询分层写、可读可复用；递归 CTE 还能走树/图。
+### CTE 是什么
+
+**CTE**（Common Table Expression，公用表表达式）= 给一段查询起临时名字，写在 `WITH` 里，后面像用表一样用。
+
+复杂逻辑若全塞进一层层括号，阅读成本高；拆成「先算出中间表 → 再查」更清楚。作用域**只在本条 SQL**，不是永久建表。
+
+### 读法：派生表 vs CTE（同一题两写法）
+
+目标不变：找出 Comp. Sci. 系里 `salary > 80000` 的教师姓名。
+
+**写法 A：派生表（括号嵌套，由内向外读）**
 
 ```sql
--- 先定义“CSE 教师”临时结果，后面像用表一样查
+SELECT name                          -- ← 第 2 层：最终要的列
+FROM (
+    -- ========== 第 1 层（里层）：先缩小范围 ==========
+    SELECT ID, name, salary
+    FROM instructor
+    WHERE dept_name = 'Comp. Sci.'
+) AS t                              -- 里层结果临时叫 t
+WHERE salary > 80000;               -- ← 第 2 层：再在 t 上过滤
+```
+
+执行顺序：① 算出括号里的表 t → ② 对 t 做外层 `WHERE`/`SELECT`。
+
+**写法 B：CTE（先定义后使用，从上往下读）**
+
+```sql
+-- ========== 第 1 步：给中间结果起名（还没最终输出）==========
 WITH cse_instructors AS (
     SELECT ID, name, salary
     FROM instructor
     WHERE dept_name = 'Comp. Sci.'
 )
-SELECT name FROM cse_instructors WHERE salary > 80000;
+-- ========== 第 2 步：像查真表一样查这个名字 ==========
+SELECT name
+FROM cse_instructors
+WHERE salary > 80000;
 ```
 
-递归 CTE（组织树、评论楼中楼、账单展开；方言需支持 `RECURSIVE`）：
+语义与写法 A **完全等价**；差别只在书写顺序：CTE 把「里层」提到语句最上面。
+
+> [!EXAMPLE]+ 小数据走一遍
+>
+> 假设 `instructor` 有：
+>
+> | name | dept_name | salary |
+> | :--- | :--- | ---: |
+> | 张三 | Comp. Sci. | 90000 |
+> | 李四 | Comp. Sci. | 70000 |
+> | 王五 | Biology | 95000 |
+>
+> 1. 第 1 步 CTE → 临时表只有张三、李四（王五被 dept 滤掉）。
+> 2. 第 2 步 `salary > 80000` → 只剩**张三**。
+
+### 多个 CTE：流水线，不是洋葱括号
+
+逗号分隔多个定义；**后面的可以引用前面的**，像传送带：
 
 ```sql
--- 锚点：从 id=1 的员工出发
--- 递归臂：不断找“manager 是上一层的人” → 全部下属
+-- 传送带第 1 站：CS 教师
+WITH cse AS (
+    SELECT ID, name, salary
+    FROM instructor
+    WHERE dept_name = 'Comp. Sci.'
+),
+-- 传送带第 2 站：吃第 1 站的输出，再筛高薪
+cse_high AS (
+    SELECT * FROM cse WHERE salary > 80000
+)
+-- 最终消费者：只读第 2 站
+SELECT name FROM cse_high;
+```
+
+| 步骤 | 名字 | 输入 | 输出（相对上例） |
+| :--- | :--- | :--- | :--- |
+| 1 | `cse` | `instructor` | 张三、李四 |
+| 2 | `cse_high` | `cse` | 张三 |
+| 3 | 主查询 | `cse_high` | 张三 |
+
+### CTE vs 视图 vs 子查询
+
+| | 存活多久 | 怎么读 |
+| :--- | :--- | :--- |
+| 子查询 / 派生表 | 仅本句 | 往往要由内向外抠括号 |
+| `WITH` CTE | 仅本句 | 从上往下，先定义后用 |
+| `VIEW` 视图 | 建完一直在库里 | 像真表，多语句可反复用 |
+
+### 递归 CTE：锚点 + 递归臂
+
+用于走**树/链表**：组织架构、评论回复、账单拆分。方言需支持 `WITH RECURSIVE`。
+
+固定两段，用 `UNION ALL` 拼接：
+
+```text
+临时表 = 锚点（起点，只跑一次）
+         ∪
+         递归臂（用「已进临时表的行」再扩下一批，反复跑）
+         ∪
+         …
+         直到某一轮 0 行新结果 → 停
+```
+
+#### 小组织树
+
+**emp**
+
+| id | name | manager_id |
+| :---: | :--- | :---: |
+| 1 | 老板 | NULL |
+| 2 | 经理A | 1 |
+| 3 | 经理B | 1 |
+| 4 | 员工甲 | 2 |
+| 5 | 员工乙 | 2 |
+
+树形：`老板 → 经理A → 员工甲/乙`，以及 `老板 → 经理B`。
+
+目标：列出 **id=1 老板的全部下属**（含间接）。
+
+```sql
 WITH RECURSIVE subordinates AS (
-    SELECT id, manager_id, name FROM emp WHERE id = 1
+
+    -- ========== 锚点（只跑一次）：把起点放进结果 ==========
+    SELECT id, manager_id, name, 0 AS lvl
+    FROM emp
+    WHERE id = 1
+
     UNION ALL
-    SELECT e.id, e.manager_id, e.name
+
+    -- ========== 递归臂（反复跑）==========
+    -- 含义：在 emp 里找「上级已经在 subordinates 里」的人
+    SELECT e.id, e.manager_id, e.name, s.lvl + 1
     FROM emp e
-    JOIN subordinates s ON e.manager_id = s.id
+    JOIN subordinates s          -- 引用「正在定义的同一个 CTE」已算出的部分
+      ON e.manager_id = s.id     -- 新人的老板 = 上一层已入选的人
 )
 SELECT * FROM subordinates;
 ```
 
-> [!INFO]+ CTE 用在哪
+#### 按轮次展开（对着 JOIN 条件看）
+
+| 轮次 | `s`（已有） | `e.manager_id = s.id` 对上谁 | 本轮新增 |
+| :--- | :--- | :--- | :--- |
+| 锚点 | — | — | (1, 老板, lvl0) |
+| 第 1 轮 | 只有老板 id=1 | 经理A、经理B 的 manager_id=1 | (2,A,1)、(3,B,1) |
+| 第 2 轮 | 含 1、2、3 | 甲/乙 的 manager_id=2 | (4,甲,2)、(5,乙,2) |
+| 第 3 轮 | 含全部 | 无人再挂在已有 id 下 | **空 → 停止** |
+
+最终 `SELECT *` 得到上述全部累计行（含老板本人；只要下属可加 `WHERE lvl > 0`）。
+
+> [!WARNING]+ 最容易晕的一点
 >
-> 多步报表（先过滤再聚合再排名）、递归组织架构、替代层层嵌套派生表。作用域只在本条语句。
+> 递归臂里的 `JOIN subordinates` **不是**去查另一张永久表，而是引用**本 CTE 到目前为止已算出的行**。  
+> 每一轮只拿「上一轮新进的行」去扩下一层（实现上可能优化，语义上按「越扩越大」理解即可）。
 
 <br>
 
 ## 窗口函数
 
-在“不合并行”的前提下做排名、累计、组内平均。为什么需要：既要看每个员工明细，又要旁注“本部门第几名 / 部门均薪”——`GROUP BY` 会把多行收成一行，窗口不会。
+### 和 GROUP BY 差在哪
+
+| | `GROUP BY` | 窗口 `OVER(...)` |
+| :--- | :--- | :--- |
+| 行数 | 多行收成**更少行** | **行数不变**，旁边多挂几列 |
+| 要什么 | 「每系均薪」一张汇总表 | 「每个教师仍一行 + 本系均薪/名次」 |
+
+同一批数据对比：
 
 ```sql
+-- GROUP BY：CS 三行 → 收成 1 行
+SELECT dept_name, AVG(salary) AS dept_avg
+FROM instructor
+GROUP BY dept_name;
+
+-- 窗口：CS 仍是 3 行，每行多一列 dept_avg（值相同）
 SELECT name, dept_name, salary,
-       -- 各部门内按薪降序排名（并列会占位，看 RANK/DENSE_RANK 区别）
-       RANK() OVER (PARTITION BY dept_name ORDER BY salary DESC) AS rk,
-       -- 每行旁挂“本部门平均薪”（行数不变）
-       AVG(salary) OVER (PARTITION BY dept_name) AS dept_avg,
-       -- 按薪排序的累计和（跑动合计；财务流水常用）
+       AVG(salary) OVER (PARTITION BY dept_name) AS dept_avg
+FROM instructor;
+```
+
+### 语法：从外往里拆
+
+```sql
+函数(...) OVER (
+    PARTITION BY 列    -- ① 先按谁切成互不干扰的「组」
+    ORDER BY 列        -- ② 组内怎么排（排名、累计需要）
+    窗口帧             -- ③ 累计从哪一行加到哪一行（可先忽略）
+)
+```
+
+读一条带窗口的 `SELECT` 时：先看 `FROM` 得到明细行 → 再对每一行，按 `OVER` 规则算出旁注列。
+
+### 小数据：分层算 RANK 与 AVG
+
+**instructor（片段）**
+
+| name | dept_name | salary |
+| :--- | :--- | ---: |
+| 张三 | CS | 90 |
+| 李四 | CS | 70 |
+| 王五 | CS | 90 |
+| 赵六 | EE | 80 |
+
+```sql
+SELECT
+    name,
+    dept_name,
+    salary,
+    -- ========== 旁注列 ①：组内排名 ==========
+    -- 对「当前行」：只看同 dept 的行，按 salary 降序排，给出名次
+    RANK() OVER (
+        PARTITION BY dept_name   -- 切开：CS 一组、EE 一组
+        ORDER BY salary DESC     -- 组内：薪高在前
+    ) AS rk,
+    -- ========== 旁注列 ②：组内平均 ==========
+    -- 对「当前行」：同 dept 所有 salary 求平均，抄到这一行（不删行）
+    AVG(salary) OVER (
+        PARTITION BY dept_name
+    ) AS dept_avg
+FROM instructor;
+```
+
+#### 只盯 CS 组（张三这一行怎么得到 rk、dept_avg）
+
+1. `PARTITION BY dept_name` → 当前窗口成员 = {张三90, 李四70, 王五90}。
+2. `ORDER BY salary DESC` → 次序：张三与王五并列最高，李四最低。
+3. `RANK()`：并列都给 1，下一个空号到 3 → 张三 rk=1，王五 rk=1，李四 rk=**3**。
+4. `AVG`：$(90+70+90)/3 \approx 83.3$，三行都抄同一值。
+
+逻辑结果：
+
+| name | dept | salary | rk | dept_avg |
+| :--- | :--- | ---: | ---: | ---: |
+| 张三 | CS | 90 | 1 | 83.3… |
+| 王五 | CS | 90 | 1 | 83.3… |
+| 李四 | CS | 70 | 3 | 83.3… |
+| 赵六 | EE | 80 | 1 | 80 |
+
+`DENSE_RANK` 不跳号（李四会是 2）。`ROW_NUMBER` 强制唯一序号（并列也拆开）。
+
+### 累计和：窗口帧在干什么
+
+```sql
+SELECT name, salary,
        SUM(salary) OVER (
            ORDER BY salary
+           -- 帧：从排序后的「第一行」一直加到「当前行」
            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
        ) AS running
 FROM instructor;
 ```
 
-常用：`ROW_NUMBER`（唯一序号）、`RANK` / `DENSE_RANK`（排名）、`NTILE`（分桶）、`LAG`/`LEAD`（上下行）、`SUM/AVG/... OVER`。
+假设按 salary 排序后为：李四70 → 赵六80 → 张三90 → 王五90，则 `running` 依次为 70、150、240、330（具体并列次序依实现/排序稳定性）。
 
-与 `GROUP BY` 区别：窗口不合并行，只附加分析列。
+### 嵌套一层：每组 Top-K
 
-> [!EXAMPLE]+ 窗口与分组
+窗口**不能**直接在同一层 `WHERE rk <= 1`（`WHERE` 早于窗口计算）。正确读法是「先开窗，再包一层」：
+
+```sql
+-- ========== 外层：只留 rk=1 ==========
+SELECT name, dept_name, salary, rk
+FROM (
+    -- ========== 内层：先给每行算 rk ==========
+    SELECT
+        name, dept_name, salary,
+        RANK() OVER (
+            PARTITION BY dept_name
+            ORDER BY salary DESC
+        ) AS rk
+    FROM instructor
+) AS t
+WHERE rk = 1;
+-- CS 并列第一会留下张三、王五两行；只要一人可用 ROW_NUMBER
+```
+
+常用：`ROW_NUMBER`、`RANK`/`DENSE_RANK`、`LAG`/`LEAD`（上一行/下一行）、`SUM/AVG/... OVER`。
+
+> [!EXAMPLE]+ 选型
 >
-> - 只要“每系均薪”一张汇总表 → `GROUP BY`
-> - 要“每个教师一行，外加本系均薪、本系名次” → 窗口
-> - Top-K per group、连续登录、同比环比 → 窗口几乎是标配
+> - 只要汇总表 → `GROUP BY`
+> - 明细 + 旁注 → 窗口
+> - 每组 Top-K → 内层窗口出 `rk`，外层再 `WHERE rk <= K`
 
 <br>
 
 ## NULL 与三值逻辑
 
-`NULL` 表示“未知/缺失”，不是 0、不是空串。为什么单独讲：一不小心 `= NULL`、`NOT IN (..., NULL)` 就会静默得到空结果，线上难查。
+`NULL` = 未知/缺失，**不是** 0，**不是** `''`。
 
-| 表达式 | 结果要点 |
-| :--- | :--- |
-| `1 = NULL` | UNKNOWN |
-| `NULL = NULL` | UNKNOWN（不是真） |
-| `age IN (1, NULL)` | 若 age≠1 则为 UNKNOWN 而非 FALSE |
-| `WHERE` 子句 | 仅 TRUE 通过（UNKNOWN 丢掉） |
-| 聚集 | 除 `COUNT(*)` 外多数忽略 NULL |
+比较运算遇到 `NULL` → 结果是 **UNKNOWN**（第三种逻辑值，不是 TRUE/FALSE）。  
+`WHERE` / `HAVING` **只保留结果为 TRUE 的行**；UNKNOWN 与 FALSE 一样被丢掉。
+
+| 表达式 | 结果 | 进不进 `WHERE` |
+| :--- | :--- | :--- |
+| `1 = NULL` | UNKNOWN | 不进 |
+| `NULL = NULL` | UNKNOWN | 不进 |
+| `age = age`（该行 age 为 NULL） | UNKNOWN | 不进 |
+| `age IS NULL` | TRUE | **进** |
+| `age IS NOT NULL` | 视情况 | 非空才进 |
 
 ```sql
--- age = age 对 NULL 为 UNKNOWN → NULL 年龄的行被丢掉
-SELECT * FROM student WHERE age = age;
+-- 错：= NULL 永远不是 TRUE，筛不出「空年龄」
+-- SELECT * FROM student WHERE age = NULL;
 
--- 正确找“年龄未知”
+-- 对：专门判断空 / 非空
 SELECT * FROM student WHERE age IS NULL;
+SELECT * FROM student WHERE age IS NOT NULL;
 
--- COALESCE：把 NULL 换成默认值（报表展示、避免算式被 NULL 污染）
+-- 展示时把空换成默认值（原表未改）
 SELECT name, COALESCE(age, 0) AS age_show FROM student;
 ```
+
+> [!EXAMPLE]+ 小数据
+>
+> | name | age |
+> | :--- | ---: |
+> | 小明 | 20 |
+> | 小红 | NULL |
+>
+> `WHERE age = 20` → 只有小明。  
+> `WHERE age <> 20` → **没有小红**（`NULL <> 20` 是 UNKNOWN）。  
+> 要「年龄不是 20（含未知）」需另写逻辑，例如 `age IS NULL OR age <> 20`。
+
+聚集：`COUNT(*)` 计行；`COUNT(age)` / `AVG(age)` **跳过** age 为 NULL 的行。
 
 <br>
 
 ## 视图
 
-把常用查询存成“虚拟表”。为什么需要：简化复杂 SQL、按角色裁剪可见列（安全）、逻辑模式变化时少改应用（逻辑数据独立性）。
+视图 = 把一段 `SELECT` **存进库里的名字**，之后当表名用。
+
+| | CTE | 视图 |
+| :--- | :--- | :--- |
+| 寿命 | 本条 SQL 结束即消失 | `CREATE` 后一直在 |
+| 典型用途 | 单条语句内分层 | 多语句复用、授权裁剪 |
 
 ```sql
--- 只暴露 CS 学生的部分列；应用侧当表查即可
+-- ========== 第 1 步：定义（执行一次，写入数据字典）==========
 CREATE VIEW cs_student AS
 SELECT sid, name, age
 FROM student
 WHERE department = 'CS';
 
+-- ========== 第 2 步：查询（引擎内部展开成下面的等价式）==========
 SELECT * FROM cs_student WHERE age > 20;
+
+-- 大致等价于：
+-- SELECT sid, name, age
+-- FROM student
+-- WHERE department = 'CS' AND age > 20;
 ```
 
-可更新视图通常要求：单基表、无聚集/`DISTINCT`、无计算列作为关键路径等（标准与产品限制多）。
+用途：少写重复过滤条件；只把视图的 `SELECT` 权限授给某角色（看不到其它列/行）；基表改名/拆分时少改应用 SQL。
 
 > [!NOTE]+ 视图不是备份
 >
-> 默认不存数据副本（物化视图除外）；基表变，视图结果变。授权时常 `GRANT SELECT ON 视图` 而不授基表。
+> 默认**不存**数据副本；基表变，再查视图结果就变。物化视图是另一话题。
 
 <br>
 
 ## 完整性与触发器
 
-完整性：不让坏数据进库。触发器：数据变更时自动跑一段逻辑。为什么需要：学分合计校验、涨薪超过 50% 记审计日志、删订单前清明细——放在应用层容易漏。
+声明式约束（主键、外键、`CHECK`）见 DDL「键与约束」。  
+**触发器** = 对表发生 `INSERT`/`UPDATE`/`DELETE` 时，由引擎**自动**执行的一段过程。
 
-主键 / 外键 / `UNIQUE` / `CHECK` 等**声明式约束**见上文 DDL「键与约束」；本节补断言与触发器（过程式或库级补充手段）。
+### 时机：一层层发生什么
 
-### 断言（多数 MySQL 不支持）
-
-```sql
--- 全库级约束：每个学生 total_cred 必须等于及格课程学分之和
-CREATE ASSERTION credits_constraint CHECK (
-    NOT EXISTS (
-        SELECT *
-        FROM student S
-        WHERE total_cred <> (
-            SELECT SUM(credits)
-            FROM takes NATURAL JOIN course
-            WHERE takes.ID = S.ID
-              AND grade IS NOT NULL
-              AND grade <> 'F'
-        )
-    )
-);
+```text
+客户端发出：UPDATE instructor SET salary = ... WHERE ...
+        │
+        ▼
+  ① BEFORE 触发器（若有）—— 尚可改 NEW，或拒绝本次修改
+        │
+        ▼
+  ② 真正写入基表
+        │
+        ▼
+  ③ AFTER 触发器（若有）—— 记审计日志、级联写其它表等
 ```
 
-实践中多用表级 `CHECK`、外键、或触发器/应用校验代替断言。
-
-### 触发器骨架
+### 示例：涨薪过大时做处理
 
 ```sql
--- AFTER UPDATE：薪资改完后触发
--- 当涨幅 > 50% 时做处理（记日志 / 拒绝 / 告警）——防误操作或合规审计
 CREATE TRIGGER bump_salary
-AFTER UPDATE OF salary ON instructor
-REFERENCING NEW ROW AS n OLD ROW AS o
-FOR EACH ROW
-WHEN (n.salary > o.salary * 1.5)
+AFTER UPDATE OF salary ON instructor  -- 只关心改了 salary 的 UPDATE
+REFERENCING OLD ROW AS o              -- o = 改之前的那一行
+            NEW ROW AS n              -- n = 改之后的那一行
+FOR EACH ROW                          -- 每更新一行，触发一次
+WHEN (n.salary > o.salary * 1.5)      -- 仅当涨幅超过 50% 才进入主体
 BEGIN
-    -- 方言相关过程体
+    -- 主体：写审计表 / SIGNAL 报错 等（具体语法随方言）
 END;
 ```
 
-`BEFORE`/`AFTER` × `INSERT`/`UPDATE`/`DELETE`；`OLD`/`NEW` 分别是改前/改后行。`BEFORE` 可改拟写入值；`AFTER` 适合级联写其他表。
+读法：先看 `AFTER UPDATE OF salary`（何时）→ 再看 `WHEN`（哪些行）→ 最后看 `BEGIN...END`（做什么）。
 
 <br>
 
 ## 权限
 
-（属 DCL：Data Control Language；`GRANT` / `REVOKE` 控制谁能碰哪些对象。）
-
-为什么需要：同一库里财务只能改薪资、教务只能读成绩——最小权限原则。
+（DCL）控制**谁**能对**哪个对象**做**什么操作**。
 
 ```sql
--- 角色：一批权限的打包，便于批量赋给同类用户
+-- ① 建角色（权限的篮子，还不是某个具体登录名）
 CREATE ROLE analyst;
-GRANT SELECT ON student TO analyst;     -- 角色可读 student
-GRANT analyst TO alice;                 -- alice 继承 analyst
 
--- 列级更新：bob 只能改 salary，且可转授（WITH GRANT OPTION）
+-- ② 往篮子里放特权：可读 student
+GRANT SELECT ON student TO analyst;
+
+-- ③ 把篮子挂到用户：alice 拥有 analyst 里的全部特权
+GRANT analyst TO alice;
+
+-- ④ 列级特权 + 转授：bob 可改 instructor.salary，且可再授给别人
 GRANT UPDATE (salary) ON instructor TO bob WITH GRANT OPTION;
 
--- 回收；CASCADE 会连带收回转授出去的权限
+-- ⑤ 收回：CASCADE 表示连带收回已转授出去的同权
 REVOKE SELECT ON student FROM alice CASCADE;
 ```
 
-特权直觉：读、插入、删除、更新；另有参照、触发器等产品扩展。
+层次可记：`特权 → 角色 → 用户`。原则：够用即可，避免长期 `WITH GRANT OPTION` 扩散。
 
 <br>
+
 
 ## SQL 注入
 
