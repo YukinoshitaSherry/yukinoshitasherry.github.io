@@ -1624,7 +1624,7 @@ SELECT
 FROM instructor;
 ```
 
-#### 只盯 CS 组（张三这一行怎么得到 rk、dept_avg）
+只盯 CS 组（张三这一行怎么得到 rk、dept_avg）：
 
 1. `PARTITION BY dept_name` → 当前窗口成员 = {张三90, 李四70, 王五90}。
 2. `ORDER BY salary DESC` → 次序：张三与王五并列最高，李四最低。
@@ -1640,7 +1640,66 @@ FROM instructor;
 | 李四 | CS | 70 | 3 | 83.3… |
 | 赵六 | EE | 80 | 1 | 80 |
 
-`DENSE_RANK` 不跳号（李四会是 2）。`ROW_NUMBER` 强制唯一序号（并列也拆开）。
+`RANK` / `DENSE_RANK` / `ROW_NUMBER` 不同在哪：
+
+并列时三种函数给出的「名次」不一样。只盯 CS 三行（薪 90、90、70），并排写：
+
+```sql
+SELECT
+    name, salary,
+    RANK()       OVER (ORDER BY salary DESC) AS r_rank,
+    DENSE_RANK() OVER (ORDER BY salary DESC) AS r_dense,
+    ROW_NUMBER() OVER (ORDER BY salary DESC) AS r_row
+FROM instructor
+WHERE dept_name = 'CS';
+```
+
+| name | salary | `RANK` | `DENSE_RANK` | `ROW_NUMBER` |
+| :--- | ---: | ---: | ---: | ---: |
+| 张三 | 90 | **1** | **1** | 1（或 2） |
+| 王五 | 90 | **1** | **1** | 2（或 1） |
+| 李四 | 70 | **3** | **2** | **3** |
+
+怎么记：
+
+| 函数 | 并列时 | 下一名 | 一句话 |
+| :--- | :--- | :--- | :--- |
+| `RANK` | 同名次 | **跳号**（占掉并列人数） | 奥运式：两人并列第 1 → 下一名是第 **3** |
+| `DENSE_RANK` | 同名次 | **不跳号** | 密级：两人并列第 1 → 下一名仍是第 **2** |
+| `ROW_NUMBER` | **强制拆开**（各不同号） | 连续 1,2,3… | 只排队编号；并列谁先谁后取决于排序稳定性/额外排序键 |
+
+`DENSE_RANK` 名字里的 dense =「名次挤在一起、中间不留空号」。
+
+为何第二高薪常用 `DENSE_RANK`：
+
+薪水：100, 100, 90, 80。
+
+| salary | `RANK` | `DENSE_RANK` |
+| ---: | ---: | ---: |
+| 100 | 1 | 1 |
+| 100 | 1 | 1 |
+| 90 | **3** | **2** |
+| 80 | 4 | 3 |
+
+- `WHERE rk = 2` 配 `RANK` → **没有**第 2 名（被跳掉了），90 是 3。
+- 配 `DENSE_RANK` → 90 的 `rk = 2`，正是「第二高的薪资档」。
+
+```sql
+-- 第二高的 distinct 薪资档（并列最高时仍能找到下一档）
+SELECT DISTINCT salary
+FROM (
+    SELECT salary,
+           DENSE_RANK() OVER (ORDER BY salary DESC) AS rk
+    FROM instructor
+) t
+WHERE rk = 2;
+```
+
+和 Top-K 怎么配合：
+
+- 「薪资前三**档**」（并列都算进同一档）→ `DENSE_RANK() ... WHERE rk <= 3`。
+- 「严格前三**人**」（只要 3 行）→ `ROW_NUMBER() ... WHERE rk <= 3`。
+- 「前三名，并列占名额且跳号」→ `RANK()`（两人并列第 1 时，`rk <= 3` 可能留下第 1、1、3 共三人，或更多人视数据而定）。
 
 ### 累计和：窗口帧在干什么
 
@@ -2089,12 +2148,14 @@ FROM seat
 ORDER BY id;
 ```
 
-### 分数排名（不并列跳号用 RANK，密级用 DENSE_RANK）
+### 分数排名（`RANK` 跳号 / `DENSE_RANK` 不跳号）
 
 ```sql
+-- 并列同分同名次，下一名不留空号（LeetCode 178 常用 DENSE_RANK）
 SELECT score,
        DENSE_RANK() OVER (ORDER BY score DESC) AS `rank`
 FROM scores;
+-- 若要奥运式跳号，把 DENSE_RANK 换成 RANK 即可（对照见上文「窗口函数」）
 ```
 
 ### 每月首次登录
