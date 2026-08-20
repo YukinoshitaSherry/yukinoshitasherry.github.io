@@ -6,7 +6,10 @@ categories:
 tags:
 - 课程体验
 desc: 2022.8.20 第一天来浙大报道，完整的四年后，我趁记忆还未消散写下这些，权且作为两年紫金港两年玉泉的回忆与收藏。
-hidden: true
+password: 322010
+message: 请输入密码【笔者大学本科学号前六位】+回车
+wrong_pass_message: 密码错误，请重试
+remember: false   # 添加这一行，禁用密码记忆功能
 ---
 
 
