@@ -62,10 +62,6 @@ friends:
     url: https://aboatwithflow.top
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/aboat.jpg
     desc: Aboat的小舟
-  - name: Memory Of Fish
-    url: https://memoryoffish.github.io
-    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/memory%20of%20fish.jpg
-    desc: 一只躺平的小丑鱼
   - name: 咸鱼暄
     url: https://xuan-insr.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/xyx.png
@@ -82,6 +78,10 @@ friends:
     url: https://ladygege2494.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/dccb78b35d47e1bcaa58b27d272b347b.jpg
     desc: 就是不拘一格！
+  - name: MetaPhysics
+    url: https://metaphysics-711.github.io/
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20260821201046002.png
+    desc: Cogito, ergo sum
   - name: DARSTIB
     url: https://darstib.github.io/myworld/
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/c49d7b6822c6c4ee925d38969a93ce44.jpg   
@@ -90,6 +90,10 @@ friends:
     url: https://cyrus28214.top
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/cyrus.png
     desc: Think twice,code once.
+  - name: Memory Of Fish
+    url: https://memoryoffish.github.io
+    avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/memory%20of%20fish.jpg
+    desc: 一只躺平的小丑鱼
   - name: Arrietty's Universe
     url: https://arriettych.github.io
     avatar: https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/Arrietty's%20Universe.jjpg.png
