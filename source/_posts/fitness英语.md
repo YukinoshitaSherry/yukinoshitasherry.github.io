@@ -8,6 +8,7 @@ tags:
 desc: Mat Pilates、Pilates Fusion、Barre Fusion、Cardio Dance 与健身房器械：词义、部位所指、机种部件与常见搭配。
 ---
 
+为了硕士阶段上点体育课恶补的。
 健身口令的骨架是动词、身体部位与体位名。本文按五种场景分列：垫上普拉提（Mat Pilates）、普拉提融合（Pilates Fusion）、把杆融合（Barre Fusion）、有氧舞蹈（Cardio Dance）、健身房器械（Gym）。前四块在约百词基础上略作扩展；器械一块按机种、部件、调节与标牌用语写细。释义对应身体所指与常见搭配，不收录课堂流程。
 
 <br>
