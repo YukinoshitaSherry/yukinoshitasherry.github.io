@@ -4,7 +4,7 @@ date: 2023-07-04
 categories:
 - 学CS/SE
 tags:
-- Python
+- 编程语言
 desc: 注意避免与C、C++混淆！
 ---
 
