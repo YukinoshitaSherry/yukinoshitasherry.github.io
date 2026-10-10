@@ -30,7 +30,7 @@ hidden: true
 <br>
 
 
-# 总览
+# 总览（Overview）
 
 - **表示与浅层模型**
   - 监督学习（supervised learning）记号、向量化（vectorization）与广播（broadcasting）；
@@ -139,7 +139,80 @@ $$
 - **概率与信息量**
   - sigmoid 输出解释为 Bernoulli 参数；
   - softmax 输出解释为类别分布；
-  - 交叉熵（cross-entropy）是真实分布与模型分布之间的编码长度差。
+  - 交叉熵（cross-entropy）是用模型分布 $Q$ 编码真实分布 $P$ 的样本时的期望码长。它等于熵（entropy）加 KL 散度（Kullback-Leibler divergence）；相对最优码长多付的部分才是 KL。
+
+> [!NOTE]+ KL 散度（Kullback-Leibler divergence）
+>
+> KL 散度衡量两个概率分布差多少（how different two distributions are）。它不是距离（not a true distance）：一般不对称（asymmetric），也不满足三角不等式。离散情形
+>
+> $$
+> D_{\mathrm{KL}}(P\|Q)=\sum_x P(x)\log\frac{P(x)}{Q(x)}=\mathbb{E}_{x\sim P}\left[\log\frac{P(x)}{Q(x)}\right].
+> $$
+>
+> 连续分布把求和换成对密度的积分。$\log$ 取自然对数时，单位是纳特（nat）；改成 $\log_2$ 则是比特（bit）。这个量是用 $Q$ 给来自 $P$ 的数据编码时，比用真实的 $P$ 多付的平均码长（expected extra cost）。
+>
+> 交叉熵拆开就是
+>
+> $$
+> H(P,Q)=-\sum_x P(x)\log Q(x)=H(P)+D_{\mathrm{KL}}(P\|Q).
+> $$
+>
+> $H(P)$ 与 $Q$ 无关，所以对 $Q$ 最小化交叉熵，就是最小化 $D_{\mathrm{KL}}(P\|Q)$。
+>
+> - $Q$ 与 $P$ 相同，KL 为 $0$。
+> - $Q$ 在 $P$ 很大的地方给了很小的概率，KL 变大；那里若 $Q=0$ 而 $P>0$，KL 为无穷。这是用 $Q$ 近似 $P$ 时丢掉的信息（information lost）。
+> - 不对称：$D_{\mathrm{KL}}(P\|Q)\neq D_{\mathrm{KL}}(Q\|P)$。$D_{\mathrm{KL}}(P\|Q)$ 惩罚 $Q$ 盖不住 $P$；$D_{\mathrm{KL}}(Q\|P)$ 惩罚 $Q$ 跑到 $P$ 几乎为零的区域。
+> - 恒非负（always non-negative）：$D_{\mathrm{KL}}(P\|Q)\ge 0$。$-\log$ 严格凸，Jensen 不等式给出 $\mathbb{E}_{P}[-\log(Q/P)]\ge -\log\mathbb{E}_{P}[Q/P]=0$。同一支撑上，等号仅当 $P=Q$。
+>
+> 深度学习里常见四类用法。
+>
+> 1. 知识蒸馏（knowledge distillation）。较小的学生模型（student）去拟合较大教师模型（teacher）的输出分布：
+>
+> $$
+> \mathcal{L}_{\mathrm{KD}}=D_{\mathrm{KL}}(P_{\mathrm{teacher}}\|P_{\mathrm{student}}).
+> $$
+>
+> 蒸馏常把 teacher 与 student 的 logits 都除以温度 $T>1$，让小概率类别携带的“暗知识”（dark knowledge）更明显。为保持梯度尺度，KL 项常乘 $T^{2}$。
+>
+> 2. 变分推断（variational inference），例如变分自编码器（variational autoencoder, VAE）。近似后验（approximate posterior）$q(z\mid x)$ 被拉向先验（prior）$p(z)$。最小化
+>
+> $$
+> \mathcal{L}=\mathbb{E}_{q(z\mid x)}[-\log p(x\mid z)]+\beta\, D_{\mathrm{KL}}(q(z\mid x)\|p(z)).
+> $$
+>
+> $\beta=1$ 时，这就是最大化 ELBO 的相反数。生成模型一章给出 ELBO 与高斯闭式。
+>
+> 3. 强化学习（reinforcement learning）。在 RLHF 与 KL 正则强化学习（KL-regularized RL）中，新策略（policy）$\pi$ 不要离开参考策略（reference policy）$\pi_{\mathrm{ref}}$ 太远：
+>
+> $$
+> \mathcal{L}=-\mathbb{E}_{x\sim\pi}[r(x)]+\beta\, D_{\mathrm{KL}}(\pi\|\pi_{\mathrm{ref}}).
+> $$
+>
+> 标准 PPO 的裁剪目标比较的是新策略与采样数据时的旧策略（old policy），不等同于固定 reference policy。RLHF 使用 PPO 时，两种分布可能同时存在。
+>
+> 4. 分布匹配（distribution matching）。采用最大似然训练的语言模型（language model）和生成模型（generative model）最小化 $D_{\mathrm{KL}}(P_{\mathrm{data}}\|P_{\mathrm{model}})$。$P_{\mathrm{data}}$ 取经验分布时，这与最大似然是同一件事；GAN 等不显式做最大似然的模型不能统一写成这一目标。
+
+> [!EXAMPLE]+ 离散 KL 计算（numerical KL calculation）
+>
+> 令 $P=(0.75,0.25)$，$Q=(0.5,0.5)$。使用自然对数：
+>
+> $$
+> D_{\mathrm{KL}}(P\|Q)
+> =0.75\log\frac{0.75}{0.5}
+> +0.25\log\frac{0.25}{0.5}
+> \approx 0.131\ \text{nat}.
+> $$
+>
+> 交换方向：
+>
+> $$
+> D_{\mathrm{KL}}(Q\|P)
+> =0.5\log\frac{0.5}{0.75}
+> +0.5\log\frac{0.5}{0.25}
+> \approx 0.144\ \text{nat}.
+> $$
+>
+> 两个结果不同，直接显示 KL 不对称。若 $P(x)>0$ 而 $Q(x)=0$，$P(x)\log(P(x)/Q(x))$ 发散，故 $D_{\mathrm{KL}}(P\|Q)=\infty$。
 
 ## 复杂度
 
@@ -156,38 +229,44 @@ $$
 ## 数值计算
 
 - 概率与指数在未归一化 logits 上计算，不是先 `exp` 再求和。
-- softmax 应减去每行最大值。
+- softmax 应沿类别轴减最大值。课程列样本约定 $Z\in\mathbb{R}^{K\times m}$ 时用 `axis=0`；框架常见 batch-first 张量 $(m,K)$ 时用 `axis=1`。
 - sigmoid 在大正负输入上应改写为稳定形式。
 - 比较 log-likelihood 前，说明是否按序列长度或像素数归一化。
 - 梯度检查：双精度；关闭 Dropout 与非确定性增强。
 - 混合精度（mixed precision）需要 loss scaling，否则小梯度会下溢为 0。
 
+混合精度训练（mixed-precision training）的动态损失缩放流程：
+
+1. 前向得到损失 $J$，先计算 $S J$，$S$ 是较大的 loss scale。
+2. 对 $S J$ 反向，浮点数能保留原本可能下溢的小梯度。
+3. 优化器更新前，把所有梯度除以 $S$，称为 unscale。
+4. 若梯度出现 `inf` 或 `nan`，跳过本次更新并减小 $S$；若长期稳定，可逐渐增大 $S$。
+
+缩放和反缩放相互抵消，不改变理论梯度，只改变低精度表示的数值范围。
+
 ## Python 实现基础
 
-- **角色**
-  - NumPy 用来验证算法：先在小数组上对齐 shape 与梯度，再交给 TensorFlow 或 PyTorch；
-  - 数值内核优先 broadcasting 与线性代数，避免在样本维或通道维上写 Python `for` loop；
-  - 向量化不改变渐近复杂度，只是把循环移到底层 BLAS。
-- **存贮约定**
-  - CS230 作业：$X$ 的 shape 是 $(n_x, m)$（特征 × 样本）；
-  - 机器学习社区更常见 $(m, n_x)$；
-  - PyTorch 默认 NCHW 或框架相关的 batch-first，迁移代码必须显式转置。
-- **索引**
-  - 整数索引消去一个维度；切片通常保留该维度；
-  - `A[0, :]` 的 shape 是 `(m,)`；`A[0:1, :]` 的 shape 是 `(1, m)`；
-  - 把前者与 `(n, m)` 矩阵相乘会触发意外广播。
-- **数值与随机**
-  - `/` 总是浮点除法；
-  - 随机性来自 `numpy.random` 或框架 generator；
-  - 复现实验必须固定 seed，并记录是否启用了非确定卷积算法。
-- **参数 vs 运行统计**
-  - BatchNorm 的 $\gamma,\beta$ 是参数；
-  - moving mean/variance 是评估期使用的估计。
-- **广播**
-  - 从尾维对齐；维长相等、其中一方为 1、或该维不存在时可以扩展；
-  - `(n, 1)` 与 `(n, m)` 相加：偏置复制到每一列；
-  - `(n,)` 与 `(n, m)` 相加会失败或得到错误语义，因为 `(n,)` 被当成最后一维长度为 $n$；
-  - 作业里所有偏置写成 `(n^{[l]}, 1)`，并用 `keepdims=True`。
+作业里一张设计矩阵按列放样本。两张已经展平的图，每张 3 个数：
+
+$$
+X=\begin{bmatrix} 0.2 & 0.0 \\ 0.8 & 1.0 \\ 0.4 & 0.5 \end{bmatrix}.
+$$
+
+shape 是 `(3, 2)`，即 `(n_x, m)`：行是特征，列是样本。`X[:, 0]` 取出第一列，shape 变成 `(3,)`，少了一维。`X[:, 0:1]` 仍是 `(3, 1)`。后面和权重做矩阵乘时要用第二种，第一种会在广播里被当成一行而不是一列。
+
+权重 `w` 的 shape 是 `(3, 1)`，偏置是标量 `b=0.1`。第一列的线性项是
+
+$$
+z=w_1\cdot 0.2+w_2\cdot 0.8+w_3\cdot 0.4+0.1.
+$$
+
+两列一起算：`w.T @ X + b`，结果 shape `(1, 2)`。用 `for i in range(m)` 逐列算，数字应一致，差在 $10^{-10}$ 以内。向量化没有少做乘法，循环进了底层线性代数库。先在这个 `3×2` 上对上数字，再换成猫图的 `(12288, m)`。
+
+偏置要写成 `(n, 1)` 才能加到 `(n, m)` 的每一列上。NumPy 从最后一维对齐：长度相同、或其中一边是 `1`、或这一维不存在，才会复制。`(n,)` 被看成最后一维长度是 $n$。它去对矩阵的列数 $m$。$n\neq m$ 直接报错；$n=m$ 时加到行上，不是加到每一列，梯度会错但不报错。`np.sum` 要带 `keepdims=True`，否则 `(n, m)` 收成 `(n,)`。
+
+`5/2` 在 Python 3 里是 `2.5`，不是 `2`。复现实验先 `np.random.seed`。卷积若开了非确定算法，同一个 seed 仍可能差最后几位，写进实验记录。BatchNorm 的 $\gamma,\beta$ 要梯度更新；滑动均值和方差只在评估时替换当批统计，不放进优化器。
+
+PyTorch 常见 batch 在第 0 维，图像是 `(m, C, H, W)`。作业代码是 `(n_x, m)`。搬过去之前显式转置，否则第 0 维会被当成特征。
 
 ```python
 def assert_col_major(X, name="X"):
@@ -205,20 +284,22 @@ def vectorized_vs_loop(X, w, b):
     return z_vec, float(np.max(np.abs(z_vec - z_loop)))
 ```
 
-- **计算图**
-  - 节点：$z=w^{\top}x+b$，$a=\sigma(z)$，$\mathcal{L}(a,y)$；
-  - 前向沿拓扑序求值并缓存 $x,z,a$；
-  - 反向从 $\mathrm{d}\mathcal{L}$ 出发，每个节点只用局部导数；
-  - 与自动微分的 reverse-mode 相同：标量损失、高维参数时，反向模式只需一次扫描。
-- **图像预处理**
-  - 作业样本常为 $64\times 64\times 3$；
-  - 展开顺序必须固定，例如 `x.reshape((n_x, 1), order="C")`；
-  - 否则同一张图会得到不同特征向量，训练与推理预处理不一致；
-  - 像素先除以 255 映射到 $[0,1]$，再视情况减训练集均值。
+计算图用上面第一列走一遍。取 $w=(1,-1,0.5)$，$b=0$，则
+
+$$
+z=1\cdot 0.2+(-1)\cdot 0.8+0.5\cdot 0.4=-0.4,\qquad
+a=\sigma(-0.4)\approx 0.401.
+$$
+
+节点顺序是 $z=w^{\top}x+b$，再 $a=\sigma(z)$，再标量损失 $\mathcal{L}(a,y)$。前向把 $x,z,a$ 存下来。反向从 $\mathrm{d}\mathcal{L}$ 开始，每个节点只乘自己的局部导数：$\partial a/\partial z=a(1-a)$，再乘这一列 $x$ 得到对 $w$ 的梯度。标量损失、高维参数时，这样从损失往回扫一次就够，自动微分的反向模式做的是同一件事。
+
+图像作业把 $64\times 64\times 3$ 按 C 序展成 $12288$：`x.reshape((n_x, 1), order="C")`。`order` 换掉，同一张图变成另一个向量，训练和推理对不上。像素先除以 $255$，落在 $[0,1]$。若再减均值，均值只用训练集估计，验证集和测试集减去同一个数。
+
+CS224n 笔记里还有白化：减均值之后乘 $\Lambda^{-1/2}U^{\top}$，把特征相关去掉。猫分类作业不做这一步。像素维 $12288$、样本往往更少，协方差不可逆，白化会把噪声方向放大。
 
 <br>
 
-# 记号
+# 记号（Notation）
 
 ## 概念记号
 
@@ -304,7 +385,7 @@ $$
 
 <br>
 
-# 逻辑回归
+# 逻辑回归（Logistic Regression）
 
 ## 概念：逻辑回归
 
@@ -488,7 +569,7 @@ def logistic_predict(X, w, b, threshold=0.5):
 
 <br>
 
-# 浅层网络
+# 浅层网络（Shallow Neural Network）
 
 ## 概念：浅层网络
 
@@ -519,16 +600,83 @@ $$
 - $W^{[2]}$：$(n_y, n^{[1]})$
 - $A^{[2]}$：$(n_y, m)$
 
-常用 $g^{[1]}$：
+常用 $g^{[1]}$ 的中英名称、公式、导数、用途与缺点如下。
 
-- **sigmoid**：输出有界，深层易饱和。
-- **tanh**：零中心，浅层隐层通常优于 sigmoid。
-- **ReLU**：$g(z)=\max(0,z)$，$g'(z)=\mathbf{1}_{z>0}$。计算便宜，负半轴梯度为 0，出现 dying ReLU。
-- **Leaky ReLU**：$g(z)=\max(\alpha z, z)$，$\alpha$ 如 $0.01$，减轻死亡神经元。
+> [!NOTE]+ 激活函数
+>
+> **sigmoid（logistic function，逻辑函数）**
+>
+> $$
+> g(z)=\frac{1}{1+e^{-z}},\qquad g'(z)=g(z)\big(1-g(z)\big).
+> $$
+>
+> 用途：值域 $(0,1)$，二分类输出直接当概率。缺点：$|z|$ 大时导数接近 $0$，多层连乘后梯度消失；输出不以 $0$ 为中心，下一层输入整体偏正。
+>
+> **tanh（hyperbolic tangent，双曲正切）**
+>
+> $$
+> g(z)=\tanh z=\frac{e^{z}-e^{-z}}{e^{z}+e^{-z}},\qquad g'(z)=1-\tanh^{2}z.
+> $$
+>
+> 用途：值域 $(-1,1)$ 且零中心，浅层隐层和 RNN 比 sigmoid 好训。缺点：$|z|$ 大时同样饱和，深层仍会消失。
+>
+> **ReLU（rectified linear unit，整流线性单元）**
+>
+> $$
+> g(z)=\max(0,z),\qquad g'(z)=\begin{cases} 0 & z<0 \\ 1 & z>0 \end{cases}.
+> $$
+>
+> 用途：正半轴导数恒为 $1$，不饱和，计算只是一次比较，所以是卷积隐层的默认。缺点：负半轴导数恒为 $0$，单元停在负区就不再更新，称为死亡 ReLU（dying ReLU）。$z=0$ 处导数不唯一，实现里通常把 $z\le 0$ 的导数写成 $0$。
+>
+> **Leaky ReLU（leaky rectified linear unit，渗漏整流线性）**
+>
+> $$
+> g(z)=\max(\alpha z, z),\qquad g'(z)=\begin{cases} \alpha & z<0 \\ 1 & z>0 \end{cases},\quad \alpha=0.01.
+> $$
+>
+> 用途：负半轴仍有梯度，避免永久死亡。缺点：$\alpha$ 很小，形状仍接近 ReLU，负信号几乎传不远。
+>
+> **ELU（exponential linear unit，指数线性单元）**
+>
+> $$
+> g(z)=\begin{cases} z & z>0 \\ a(e^{z}-1) & z\le 0 \end{cases},\qquad
+> g'(z)=\begin{cases} 1 & z>0 \\ g(z)+a & z\le 0 \end{cases}.
+> $$
+>
+> 常取 $a=1$。用途：负值平滑，激活均值更靠近 $0$，比固定小斜率更容易把单元拉回零附近。缺点：负半轴多一次指数，比 ReLU 贵。
+>
+> **GELU（Gaussian error linear unit，高斯误差线性单元）**
+>
+> $$
+> g(z)=z\,\Phi(z),\qquad g'(z)=\Phi(z)+z\,\phi(z).
+> $$
+>
+> $\Phi$ 是标准正态累积分布，$\phi$ 是其密度。用途：负半轴按概率缩小输入，不是硬截成 $0$，不会死亡；Transformer 与语言模型的隐层常用它。缺点：要比 ReLU 多算 $\Phi$。实现里常用 $z\,\sigma(1.702z)$ 近似。
+>
+> **hard tanh（hard hyperbolic tangent，硬双曲正切）**
+>
+> $$
+> g(z)=\begin{cases} -1 & z<-1 \\ z & -1\le z\le 1 \\ 1 & z>1 \end{cases},\qquad
+> g'(z)=\begin{cases} 1 & |z|<1 \\ 0 & |z|>1 \end{cases}.
+> $$
+>
+> 用途：CS224n 把它当作 tanh 的便宜替代，区间内就是恒等，没有指数。缺点：区间外饱和，导数为 $0$，和 tanh 一样会消失。
+>
+> **softsign（软符号）**
+>
+> $$
+> g(z)=\frac{z}{1+|z|},\qquad g'(z)=\frac{1}{(1+|z|)^{2}}.
+> $$
+>
+> 用途：值域 $(-1,1)$，零中心，导数恒正；尾部按多项式衰减，比 tanh 更晚贴到 $\pm 1$，比 tanh 少一次指数。缺点：仍会在远处变平，深层一样会饱和；比 hard tanh 多一次除法。
+>
+> 隐层默认 ReLU；要光滑负值时用 GELU 或 ELU。输出层按任务：二分类用 sigmoid，多分类用 softmax，不把 ReLU 放在概率输出上。
+
+<br>
 
 > [!INFO]+ ReLU
 >
-> - 是什么：整流线性，$g(z)=\max(0,z)$，正半轴导数为 1。
+> - 是什么：整流线性单元（rectified linear unit），$g(z)=\max(0,z)$，正半轴导数为 1。
 > - 来自：Nair & Hinton (2010)；AlexNet 之后成为卷积网络的默认隐层激活。
 > - 相对 sigmoid / tanh：深层不再把梯度乘进 $0.1$ 量级的饱和导数。
 > - 代价：负半轴永久为零（dying ReLU）；Leaky ReLU 用小斜率补这条通路。
@@ -554,9 +702,20 @@ $$
   - 等价于单层，决策边界仍是直线；
   - 异或四个点需要把空间折叠，至少要有弯曲的隐层响应。
 
-> [!EXAMPLE]+ 例1b 激活导数在实现中的取值
+> [!EXAMPLE]+ 例1b 反向里怎么写这些导数
 >
-> $z=2$ 时，$\sigma(2)\approx 0.88$，$\sigma'(2)\approx 0.105$。tanh$(2)\approx 0.96$，导数 $1-0.96^{2}\approx 0.07$。ReLU$(2)=2$，导数 $1$。深层中若每层都乘 $0.1$ 量级的饱和导数，十层后梯度衰减约 $10^{-10}$。这是隐层改用 ReLU、输出层才用 sigmoid/softmax 的原因。
+> 前向已经得到 $a=g(z)$。反向直接用下面的式子，不必再对某个具体的 $z$ 求一次数。
+>
+> - sigmoid：$g'(z)=a(1-a)$
+> - tanh：$g'(z)=1-a^{2}$
+> - ReLU：$z>0$ 时为 $1$，否则为 $0$
+> - Leaky ReLU：$z>0$ 时为 $1$，否则为 $\alpha$
+> - ELU：$z>0$ 时为 $1$，否则为 $g(z)+a$
+> - GELU：$g'(z)=\Phi(z)+z\,\phi(z)$
+> - hard tanh：$|z|<1$ 时为 $1$，否则为 $0$
+> - softsign：$g'(z)=1/(1+|z|)^{2}$
+>
+> sigmoid 与 tanh 在远离 $0$ 时导数接近 $0$，多层连乘后梯度消失。ReLU、Leaky ReLU、ELU 在正半轴导数为 $1$，所以隐层用它们，输出层才用 sigmoid 或 softmax。
 
 <br>
 
@@ -667,7 +826,7 @@ def two_layer_train(X, Y, params, lr=1.2, steps=10000):
 
 <br>
 
-# 深层网络
+# 深层网络（Deep Neural Network）
 
 ## 概念：深层网络
 
@@ -747,6 +906,7 @@ $y$ 为 one-hot 时 $\mathcal{L}=-\log a_{k^{\ast}}$。
 
 - 令 $\mathrm{d}A^{[L]}=\partial J/\partial A^{[L]}$。
 - sigmoid + BCE：直接设 $\mathrm{d}Z^{[L]}=A^{[L]}-Y$。
+- softmax + categorical cross-entropy：若 $Y\in\{0,1\}^{K\times m}$ 是 one-hot 标签，同样有 $\mathrm{d}Z^{[L]}=A^{[L]}-Y$。此时 $A^{[L]}$ 和 $Y$ 都是 $(K,m)$，每列和为 $1$。
 - 然后对 $l=L,\ldots,1$：
 
 $$
@@ -760,6 +920,18 @@ $$
 
 - 若损失已与输出激活配对，最后一层不必乘 $g^{[L]\prime}$。
 - 每层必须缓存 $A^{[l-1]}$，以及激活所需的 $Z^{[l]}$ 或掩码。
+
+> [!EXAMPLE]+ 多分类输出（multiclass output）
+>
+> 三分类时 $W^{[L]}$ 的 shape 是 $(3,n^{[L-1]})$，而不是 $(1,n^{[L-1]})$。前向和损失为
+>
+> $$
+> A^{[L]}=\operatorname{softmax}(Z^{[L]}),\qquad
+> J=-\frac{1}{m}\sum_{i=1}^{m}\sum_{k=1}^{3}
+> Y_{ki}\log A_{ki}^{[L]}.
+> $$
+>
+> 反向仍从 $\mathrm{d}Z^{[L]}=A^{[L]}-Y$ 开始。这个简化只适用于 softmax 与分类交叉熵的配对。若 $Y$ 只是类别号 $(m,)$，应先 one-hot，或使用框架提供的 sparse categorical cross-entropy，不能直接依赖 NumPy 广播相减。
 
 > [!INFO]+ 反向传播作为动态规划
 >
@@ -902,7 +1074,7 @@ def gradient_check(forward_loss, params, grads, eps=1e-7):
 
 <br>
 
-# 初始化
+# 初始化（Initialization）
 
 ## 概念：初始化
 
@@ -917,8 +1089,10 @@ def gradient_check(forward_loss, params, grads, eps=1e-7):
   - 下一章在能传到深层的梯度上加偏差-方差约束。
 
 - 全零 → 对称性：同一层神经元接收相同梯度，表达能力退化为每层一个神经元。
-- 方差过大：tanh/sigmoid 进入饱和区。
-- 方差过小：每层信号幅度收缩，深层输出接近常数。
+- 机制：同一层若每一行权重相等，前向预激活相等，输出相等；反向每一行梯度也相等，更新后仍然相等，整层只学到同一个特征。随机初始化打破这组相等。偏置仍可取 $0$。
+- 方差过小（标准差 $0.01$）：激活的标准差和梯度的标准差逐层一起变小，信号消失。
+- 按 Xavier 或 He 取值：两者跨层保持同一量级。
+- 方差过大（标准差 $1$）：ReLU 与线性层上，两者逐层变大，梯度爆炸。tanh / sigmoid 走另一条路，进入饱和，局部导数接近 $0$。
 
 - 对线性层 $z=\sum_{j=1}^{n_{\mathrm{in}}} w_j a_j$，若 $a_j$ 零均值、方差 $v_a$，$w_j$ 独立零均值方差 $v_w$，则
 
@@ -935,7 +1109,7 @@ W^{[l]}\sim\mathcal{N}\left(0,\frac{2}{n^{[l-1]}+n^{[l]}}\right)
 \quad\text{或均匀分布等价尺度}.
 $$
 
-- ReLU 把负半轴置零，大约折半方差。
+- 对零均值对称输入，ReLU 把负半轴置零，使二阶矩 $\mathbb{E}[a^{2}]$ 大约折半。这里不是严格把方差折半。
 - He 初始化取
 
 $$
@@ -945,9 +1119,11 @@ $$
 > [!INFO]+ Xavier 与 He
 >
 > - 是什么：按层宽设定 $W$ 的方差，使预激活保持 $O(1)$。
-> - Xavier / Glorot (2010)：同时约束前向与反向方差，适合 tanh / sigmoid。
-> - He et al. (2015)：ReLU 丢掉负半轴，方差约折半，故取 $2/n_{\mathrm{in}}$。
-> - 相对固定小方差（如 $0.01$）：深层不再逐层收缩或饱和。
+> - Xavier / Glorot (2010)：同时约束前向与反向方差，适合 tanh、sigmoid 与线性层。
+> - He / Kaiming（He et al., 2015）：ReLU 丢掉负半轴，激活二阶矩约折半，故取 $2/n_{\mathrm{in}}$。GELU 等近似 ReLU 的激活有时也把 He 类尺度作为经验起点，但最佳增益取决于具体激活与架构。
+> - 相对固定小方差（如 $0.01$）：在独立性等近似假设下，初始化时可使跨层信号保持同一量级。
+> - 考试陷阱（exam trap）：Xavier / He 只在初始化时（at initialization）控制方差。训练更新 $W$ 后，不保证每层方差永远不变。
+> - 对称性（symmetry）取决于同层神经元的权重是否相同，不取决于权重是否为正。把所有权重初始化为同一个非零常数，仍然不能打破对称；从 $\{-1,1\}$ 独立随机采样则可以打破对称。
 
 <br>
 
@@ -978,7 +1154,7 @@ def init_params(layer_dims, mode="he", seed=1):
 
 > [!EXAMPLE]+ 例5 过小与过大初始化
 >
-> 设十层 tanh 网络，$n^{[l]}=100$。若 $W_{ij}\sim\mathcal{N}(0,0.01^{2})$，每层方差约 $100\times 10^{-4}=0.01$，激活幅度逐层收缩，最后一层几乎是常数，梯度接近 0。若 $W_{ij}\sim\mathcal{N}(0,1)$，方差约 $100$，tanh 饱和，导数接近 0，同样学不动。He 对 ReLU 取 $\mathrm{Var}=2/n_{\mathrm{in}}=0.02$，标准差约 $0.14$，使 $\mathrm{Var}(z)$ 保持 $O(1)$。
+> 设十层 tanh 网络，$n^{[l]}=100$。若 $W_{ij}\sim\mathcal{N}(0,0.01^{2})$，每层方差约 $100\times 10^{-4}=0.01$，激活幅度逐层收缩，最后一层几乎是常数，梯度接近 0。若 $W_{ij}\sim\mathcal{N}(0,1)$，方差约 $100$，tanh 饱和，导数接近 0，同样学不动。同一套 $\mathcal{N}(0,1)$ 若接 ReLU，正半轴不截断，激活二阶矩大约每层乘 $n_{\mathrm{in}}/2$，激活与梯度一起变大。He 对 ReLU 取 $\mathrm{Var}=2/n_{\mathrm{in}}=0.02$，标准差约 $0.14$，使 $\mathrm{Var}(z)$ 保持 $O(1)$。
 >
 > 作业对比图通常显示：零初始化训练准确率停在随机水平；过大初始化损失曲线震荡；He 初始化损失平稳下降。这是 C2M1 编程作业的核心观察。
 
@@ -990,7 +1166,7 @@ def init_params(layer_dims, mode="he", seed=1):
 
 <br>
 
-# 正则化
+# 正则化（Regularization）
 
 ## 概念：正则化
 
@@ -1097,6 +1273,20 @@ def inverted_dropout_backward(dA, mask, keep_prob):
 - **Early stopping**：监控 dev 损失，回滚到最优检查点。它把有效训练步数当成超参数，与 $L_2$ 的作用有重叠。
 - **输入归一化**：每维减均值除标准差，条件数更好，水平方向的细长损失谷被拉圆。
 - **标签平滑**：把 one-hot 换成 $(1-\varepsilon)y+\varepsilon/K$，减轻过度自信。
+- **噪声注入（noise injection）**：训练时用 $\tilde{x}=x+\varepsilon$，$\varepsilon\sim\mathcal{N}(0,\sigma^{2}I)$，迫使模型在样本邻域保持稳定。输入噪声、Dropout 和随机增强都属于随机正则（stochastic regularization），但三者作用位置不同。
+
+> [!NOTE]+ 加噪为什么能正则（why noise regularizes）
+>
+> 对小噪声作二阶 Taylor 展开，线性项在零均值噪声下取期望后消失，留下与曲率有关的二阶项：
+>
+> $$
+> \mathbb{E}_{\varepsilon}[\mathcal{L}(x+\varepsilon)]
+> \approx \mathcal{L}(x)
+> +\frac{\sigma^{2}}{2}\operatorname{tr}
+> \big(\nabla_x^{2}\mathcal{L}(x)\big).
+> $$
+>
+> 因而训练不仅压低样本点损失，还惩罚输入附近过大的弯曲，使决策函数更平滑（smoother decision function）。噪声过大会改变标签语义，形成分布偏移而不是正则。
 
 - 训练时 Dropout 必须开启，推理必须关闭。
 - Keras/TF 用 `training=` 切换；推理仍除以 $p$ 且随机置零，会使 dev 准确率无故抖动。
@@ -1139,7 +1329,7 @@ def l2_grad_add(grads, params, lambda_, m):
 
 <br>
 
-# 优化
+# 优化（Optimization）
 
 ## 概念：优化
 
@@ -1163,6 +1353,15 @@ def l2_grad_add(grads, params, lambda_, m):
 > - $n_b$ 过小则 BN 统计不稳；过大则每 epoch 步数变少。
 
 <br>
+
+> [!NOTE]+ 大批量不是总更好（a large batch is not always better）
+>
+> batch 增大时，梯度估计方差（variance of the gradient estimate）下降，矩阵乘吞吐通常提高，但一个 epoch 内的参数更新次数减少。显存占用增加，而且低噪声轨迹有时收敛到泛化较差的尖锐区域（sharp minima）。
+>
+> - 小批量（small batch）：更新噪声大、每个 epoch 更新多，吞吐可能较低。
+> - 大批量（large batch）：梯度稳定、硬件利用率高，但需要更多显存，学习率通常也要重新调。
+> - 线性缩放规则（linear scaling rule）只是经验起点：batch 放大 $k$ 倍时把学习率放大约 $k$ 倍，并配学习率预热（learning-rate warmup）。它不是对所有优化器和任务都成立的定理。
+> - 比较实验时要同时说明 batch size、每个 epoch 的更新次数、总样本数与总优化步数，否则“收敛更快”没有统一含义。
 
 把 $m$ 个样本分成大小 $n_b$ 的批。一批一次更新：
 
@@ -1259,6 +1458,20 @@ $$
 - Adam 对初始学习率仍敏感。
 - 常用 $\alpha\in\{10^{-3},3\times10^{-4},10^{-4}\}$，再配合衰减。
 
+> [!NOTE]+ $L_2$ 与 AdamW
+>
+> 对普通 SGD，在损失中加入 $\lambda\|W\|^{2}/2$ 与每步按比例缩小 $W$ 基本等价。Adam 会按坐标缩放梯度，因此把 $\lambda W$ 混进梯度，不再等价于统一的权重衰减。
+>
+> AdamW 使用解耦权重衰减（decoupled weight decay）：
+>
+> $$
+> W\leftarrow
+> (1-\alpha\lambda)W
+> -\alpha\frac{\hat v}{\sqrt{\hat s}+\varepsilon}.
+> $$
+>
+> 这里衰减项不经过 Adam 的二阶矩缩放。英文题目中的 `L2 regularization with Adam` 与 `AdamW weight decay` 不能自动当作同一件事。
+
 > [!INFO]+ 偏差修正为何必要
 >
 > $s$ 的 $\beta_2=0.999$ 使早期 $s_t\approx(1-\beta_2)\sum_{k} \beta_2^{t-k} g_k^{2}$ 远小于稳态。若不除 $1-\beta_2^{t}$，分母过小，最初若干步更新会过大。$\beta_1$ 同样需要修正，但 $\beta_1=0.9$ 时偏差消失更快。实现中漏掉 $t$ 递增，等于永久处于 $t=1$ 的修正，学习率标度错误。
@@ -1329,7 +1542,7 @@ def mini_batches(X, Y, batch_size, rng):
 
 <br>
 
-# 超参数
+# 超参数（Hyperparameter Tuning）
 
 ## 概念：超参数
 
@@ -1394,7 +1607,7 @@ def tf_two_layer(n_x, n_h, n_y, lr=0.01):
 
 <br>
 
-# BatchNorm
+# 批归一化（Batch Normalization）
 
 ## 概念：BatchNorm
 
@@ -1404,6 +1617,9 @@ def tf_two_layer(n_x, n_h, n_y, lr=0.01):
 > - 来自：Ioffe & Szegedy (2015)。论文动机写内部协变量偏移；实践上主要是让损失面更好走。
 > - 相对只调初始化与 $\alpha$：可用更大学习率，对起始尺度不那么敏感。
 > - 推理必须改用 running mean / variance，不能沿用当批统计。
+> - 为什么还要 $\gamma,\beta$（why scale and shift）：纯标准化会把表示强制成零均值、单位方差；可学习缩放（learnable scale）与平移（learnable shift）恢复表示能力。
+> - 正则效果（regularizing effect）：batch 均值和方差是带噪估计，同一样本随 batch 伙伴不同会得到略不同的输出。这个噪声可产生轻微正则，但不能代替显式正则化。
+> - 考试陷阱（exam trap）：推理时不是跳过 BatchNorm，而是改用训练阶段累积的 running mean 与 running variance，再照常应用 $\gamma,\beta$。
 
 <br>
 
@@ -1502,7 +1718,7 @@ def batchnorm_backward(d_out, cache):
 
 <br>
 
-# 项目策略
+# 项目策略（ML Strategy）
 
 ## 概念：策略
 
@@ -1550,6 +1766,27 @@ def batchnorm_backward(d_out, cache):
 - 大数据下划分不必 70/30：例如 $10^{6}$ 样本可用 98/1/1。
 - 条件：dev/test 大到能分辨 $0.1\%$ 的指标差。
 - Dev 太小会使超参数选择变成对噪声拟合。
+
+> [!NOTE]+ 分类指标（classification metrics）
+>
+> 混淆矩阵（confusion matrix）包含真阳性（true positive, TP）、假阳性（false positive, FP）、真阴性（true negative, TN）与假阴性（false negative, FN）。
+>
+> $$
+> \begin{aligned}
+> \mathrm{precision} &= \frac{TP}{TP+FP},&
+> \mathrm{recall} &= \frac{TP}{TP+FN},\\
+> \mathrm{sensitivity} &= \mathrm{recall},&
+> \mathrm{specificity} &= \frac{TN}{TN+FP},\\
+> F_1 &= \frac{2\,\mathrm{precision}\,\mathrm{recall}}
+> {\mathrm{precision}+\mathrm{recall}}.&
+> \end{aligned}
+> $$
+>
+> Precision 回答“判为正的样本里有多少真是正类”；recall 回答“全部正类里找回了多少”。调高二分类阈值通常提高 precision、降低 recall，但具体结果取决于分数排序。
+>
+> ROC 曲线（receiver operating characteristic curve）画 true positive rate 对 false positive rate；AUROC 衡量随机抽一个正样本与负样本时，正样本得分更高的概率。正类极少时，precision-recall curve 与 PR AUC 通常比 ROC AUC 更能暴露假阳性。
+>
+> 多分类的 macro average 先逐类算再等权平均，强调少数类；micro average 先汇总所有类别的 TP、FP、FN 再计算，更受大类影响。
 
 ## 人类水平
 
@@ -1666,7 +1903,7 @@ Course 3 的两个书面案例是策略章的考试重点。
 
 <br>
 
-# 卷积
+# 卷积网络（Convolutional Neural Network）
 
 ## 概念：卷积
 
@@ -1854,7 +2091,7 @@ $$
 
 <br>
 
-# 深度卷积
+# 深度卷积（Deep CNN Architectures）
 
 ## 概念：深度卷积
 
@@ -1987,7 +2224,7 @@ MobileNet 把标准卷积分解为：
 
 <br>
 
-# 检测
+# 目标检测（Object Detection）
 
 ## 概念：检测
 
@@ -2054,6 +2291,21 @@ $$
 
 或后来版本中把类别与框解耦。框常用相对格子的中心偏移与宽高。训练损失包含：
 
+> [!NOTE]+ YOLO 框参数化（bounding-box parameterization）
+>
+> 设格子左上角坐标为 $(c_x,c_y)$，anchor 宽高为 $(p_w,p_h)$，网络输出原始数 $t_x,t_y,t_w,t_h$。常见解码为
+>
+> $$
+> b_x=\sigma(t_x)+c_x,\qquad
+> b_y=\sigma(t_y)+c_y,\qquad
+> b_w=p_w e^{t_w},\qquad
+> b_h=p_h e^{t_h}.
+> $$
+>
+> $\sigma$ 把中心限制在负责的格子附近，指数保证宽高为正。实现还会按网格或图像尺寸归一化。不同 YOLO 版本的具体参数化不同，考试若给了解码式，应按题目版本计算。
+>
+> 一阶段检测器（one-stage detector）如 YOLO 直接密集预测类别与框，速度快。两阶段检测器（two-stage detector）如 Faster R-CNN 先产生区域提案（region proposal），再分类与精修框，通常更慢但定位更细。
+
 - 有物体格子的坐标回归（平方或平滑 $L_1$）；
 - 置信度（有物体 / 无物体，后者权更小）；
 - 分类交叉熵。
@@ -2089,6 +2341,19 @@ def nms(boxes, scores, iou_thr=0.5, score_thr=0.6):
 
 - mAP：对每类按置信度排序，算 precision-recall 曲线下面积，再对类平均。
 - IoU 阈值集合（如 $0.5$ 到 $0.95$）决定定位严格程度。
+
+> [!NOTE]+ AP 与 mAP（average precision and mean average precision）
+>
+> 对某一类别，把全部预测框按 confidence score 从高到低排序。每加入一个预测，按它是否与未匹配真值达到指定 IoU 阈值更新 TP 或 FP，由此得到 precision-recall curve。平均精度（average precision, AP）是该曲线下的插值面积：
+>
+> $$
+> \mathrm{AP}=\int_{0}^{1}p_{\mathrm{interp}}(r)\,\mathrm{d}r,
+> \qquad
+> \mathrm{mAP}=\frac{1}{C}\sum_{c=1}^{C}\mathrm{AP}_c.
+> $$
+>
+> `AP@0.5` 表示 IoU 阈值固定为 $0.5$。COCO 的 `AP@[.5:.95]` 会在 $0.50,0.55,\ldots,0.95$ 上求平均，更严格。NMS 是推理后处理；AP/mAP 是评估指标，二者不能互换。
+
 - YOLO 训练：每个真值框只匹配一个格子（中心所在格）和一个 anchor（IoU 最大者）。
 - 无物体格子的置信度损失权重更小，否则背景淹没梯度。
 - 坐标：sigmoid 把中心约束在格内；指数把 anchor 宽高缩放到正数。
@@ -2141,7 +2406,7 @@ $$
 
 <br>
 
-# 人脸与风格
+# 人脸与风格（Face Recognition and Neural Style Transfer）
 
 ## 概念：人脸与风格
 
@@ -2200,6 +2465,17 @@ def triplet_loss(fA, fP, fN, alpha=0.2):
 - 验证（verification）：一对一，门禁刷脸。
 - 识别（recognition）：一对多，在库中找最近邻。
 - 二者共享嵌入，不共享决策。
+
+> [!NOTE]+ FAR、FRR 与 EER
+>
+> 假接受率（false accept rate, FAR）是不同人却被接受的比例；假拒绝率（false reject rate, FRR）是同一人却被拒绝的比例：
+>
+> $$
+> \mathrm{FAR}=\frac{\text{false accepts}}{\text{impostor attempts}},\qquad
+> \mathrm{FRR}=\frac{\text{false rejects}}{\text{genuine attempts}}.
+> $$
+>
+> 距离阈值 $\tau$ 变大时，系统更容易接受，FAR 通常上升而 FRR 下降。等错误率（equal error rate, EER）是两条错误率相等处的值，越低越好。安全门禁通常不直接选 EER 阈值，而是在 FAR 必须低于某上限的约束下再压 FRR。
 - 库新增人员不必重训 softmax 头，只需加入新嵌入；这是用度量学习而不是 $K$ 类分类器的工程原因。
 - 三元组构造：每个锚点的正例来自同一身份的另一张图。
 - 简单负例已满足间隔，损失为 0。
@@ -2297,7 +2573,7 @@ def total_style_loss(style_grams, gen_acts, weights):
 
 <br>
 
-# 循环网络
+# 循环网络（Recurrent Neural Network）
 
 ## 概念：循环
 
@@ -2344,6 +2620,16 @@ $$
 
 - 字符级语言模型：$\hat{y}^{<t>}$ 是词表上的 softmax。
 - 训练：每步交叉熵。
+- 困惑度（perplexity, PPL）是平均负对数似然的指数。若有效词元数为 $N$，
+
+$$
+\mathrm{PPL}
+=\exp\left(-\frac{1}{N}\sum_{t=1}^{N}
+\log p(x_t\mid x_{<t})\right).
+$$
+
+PPL 越低，模型给真实序列的平均概率越高。只有词元化、词表与计数方式相同时，两个 PPL 才可直接比较。
+
 - 生成：从 $\hat{y}^{<t>}$ 采样（或取 argmax）作为下一步输入。
 - 温度 $T$：logits 除以 $T$ 再 softmax。
 - $T>1$ 更均匀；$T\rightarrow0$ 接近贪心。
@@ -2377,7 +2663,18 @@ def rnn_forward(X, a0, params):
 - 从 $t=T$ 向 $t=1$ 回传 $\mathrm{d}a^{<t>}$。
 - 连乘 $\prod_{k} W_{aa}^{\top}\mathrm{diag}(1-(a^{<k>})^{2})$ 导致：
 
-- 谱半径 $>1$：爆炸，用梯度裁剪 $\mathrm{clip}(g, -\tau, \tau)$ 或全局范数裁剪；
+- 谱半径 $>1$：爆炸，用逐值裁剪（clip by value）或全局范数裁剪（global norm clipping）：
+
+$$
+g\leftarrow
+\begin{cases}
+g & \|g\|_2\le \tau,\\
+\dfrac{\tau}{\|g\|_2}g & \|g\|_2>\tau.
+\end{cases}
+$$
+
+逐值裁剪会分别截断每个坐标，改变梯度方向；全局范数裁剪只统一缩放，保留方向。
+
 - 谱半径 $<1$：消失，早期步对 $J$ 几乎无贡献，无法学长距离依赖。
 
 ```python
@@ -2527,7 +2824,7 @@ def lstm_cell_forward(xt, a_prev, c_prev, params):
 
 <br>
 
-# 词嵌入
+# 词嵌入（Word Embeddings）
 
 ## 概念：嵌入
 
@@ -2558,6 +2855,15 @@ def lstm_cell_forward(xt, a_prev, c_prev, params):
 - softmax 在大词表上昂贵，用负采样（negative sampling）近似。
 - CBOW：由上下文预测中心词。
 - GloVe：对共现对数做加权最小二乘，使 $w_i^{\top}w_j\approx\log X_{ij}$。
+
+GloVe（Global Vectors for Word Representation）的完整目标为
+
+$$
+J=\sum_{i,j}f(X_{ij})
+\left(w_i^{\top}\tilde{w}_j+b_i+\tilde{b}_j-\log X_{ij}\right)^2.
+$$
+
+$X_{ij}$ 是词 $j$ 出现在词 $i$ 上下文中的次数，$f(X_{ij})$ 降低极罕见与极高频共现对目标的支配。Skip-gram 直接做局部预测，GloVe 显式拟合全局共现统计。
 - 训练后常见类比：
 
 $$
@@ -2639,7 +2945,7 @@ def equalize(e1, e2, gender_dir):
 
 <br>
 
-# 注意力
+# 注意力（Attention）
 
 ## 概念：注意力
 
@@ -2746,7 +3052,8 @@ def bahdanau_attention(s_prev, H, Wa, va):
 
 - 触发词：注意力或 RNN 输出接到每帧二分类。
 - 正类极稀疏：需加权损失或下采样静音段。
-- CTC：允许输出与输入不对齐；用空白符与动态规划边缘化对齐。
+- 连接时序分类（Connectionist Temporal Classification, CTC）：允许输出与输入不对齐；用空白符与动态规划边缘化对齐。
+- CTC 路径先合并连续重复符号，再删除 blank。例如 `- c c - a - t` 折叠为 `cat`。目标概率是所有能折叠成该标签序列的路径概率之和，不是只选一条对齐。前向后向动态规划（forward-backward dynamic programming）避免枚举指数级路径。
 - CS230 课堂曾作为进阶讲座出现。
 
 - BLEU 的核心是修正 $n$-gram 精确率。
@@ -2859,6 +3166,23 @@ $$
 - Pre-LN 与 Post-LN 的稳定性不同；原论文为 Post-LN。
 - 解码器每层多一块：对编码器输出的交叉注意力，以及带因果掩码（causal mask）的自注意力。
 - 因果掩码使位置 $t$ 看不见 $t'>t$，训练可以并行，并与自回归推理一致。
+
+三类注意力的 $Q,K,V$ 来源不同：
+
+- 自注意力（self-attention）：$Q,K,V$ 来自同一序列。
+- 掩码自注意力（masked self-attention）：来源仍相同，但 causal mask 禁止看未来。
+- 交叉注意力（cross-attention）：$Q$ 来自解码器，$K,V$ 来自编码器输出。
+
+原始 Transformer 常取前馈隐藏宽度 $d_{\mathrm{ff}}=4d_{\mathrm{model}}$。忽略偏置时，一层 FFN 的参数量为
+
+$$
+d_{\mathrm{model}}d_{\mathrm{ff}}
++d_{\mathrm{ff}}d_{\mathrm{model}}
+=2d_{\mathrm{model}}d_{\mathrm{ff}}
+\approx 8d_{\mathrm{model}}^{2}.
+$$
+
+现代架构的倍率可以不是 $4$，考试应按题目给出的 $d_{\mathrm{ff}}$ 计算。Pre-LN 把 LayerNorm 放在子层之前，深层梯度通常更稳定；Post-LN 放在残差相加之后，是原论文结构。
 
 ## 位置编码
 
@@ -2977,7 +3301,7 @@ def transformer_block(x, Wq, Wk, Wv, Wo, W1, W2, gamma1, beta1, gamma2, beta2, m
 
 <br>
 
-# 对抗与生成
+# 对抗与生成（Adversarial and Generative Models）
 
 ## 概念：对抗
 
@@ -3064,7 +3388,7 @@ def fgsm(x, grad_x, eps):
 > $$
 >
 > - KL 非负，故 ELBO 是 $\log p(x)$ 的下界。
-> - 最大化 ELBO = 重构 − 正则。
+> - 最大化 ELBO = 重构 − 正则。写成要最小化的损失，就是 $\mathbb{E}_{q}[-\log p(x\mid z)]+\beta\,\mathrm{KL}(q(z\mid x)\|p(z))$，$\beta=1$ 时与 ELBO 只差一个符号。定义、不对称性与另外三种用法见前面的 KL 散度（Kullback-Leibler divergence）。
 > - $q=\mathcal{N}(\mu(x),\mathrm{diag}(\sigma^{2}(x)))$、$p(z)=\mathcal{N}(0,I)$ 时，KL 有闭式
 >
 > $$
@@ -3078,10 +3402,14 @@ def fgsm(x, grad_x, eps):
 
 ```python
 def vae_elbo(x, mu, logvar, decoder_logpx, kl_weight=1.0):
-    """mu, logvar: (m, d_z)；decoder_logpx 已对像素求和。"""
+    """返回要最大化的 ELBO；decoder_logpx 是 log p(x|z) 的像素和。"""
     recon = decoder_logpx.mean()
     kl = 0.5 * np.mean(np.sum(mu ** 2 + np.exp(logvar) - logvar - 1.0, axis=1))
     return recon - kl_weight * kl
+
+def vae_loss(x, mu, logvar, decoder_logpx, kl_weight=1.0):
+    """优化器最小化负 ELBO。"""
+    return -vae_elbo(x, mu, logvar, decoder_logpx, kl_weight)
 
 def reparameterize(mu, logvar, rng):
     eps = rng.normal(size=mu.shape)
@@ -3107,6 +3435,31 @@ def pgd_linf(x, loss_grad_fn, eps, alpha, steps):
 - 训练预测 $\varepsilon$ 或 $x_0$；采样从 $x_T\sim\mathcal{N}(0,I)$ 逐步去噪。
 - 课堂要求掌握噪声预测的直觉，以及似然可算但采样步多、GAN 采样快但不稳的对比。
 
+> [!NOTE]+ 生成评估（generative evaluation）
+>
+> Fréchet Inception Distance（FID）把真实图像与生成图像映射到 Inception 特征，分别拟合高斯，再比较均值与协方差：
+>
+> $$
+> \mathrm{FID}
+> =\|\mu_r-\mu_g\|_2^{2}
+> +\operatorname{tr}\left(
+> \Sigma_r+\Sigma_g
+> -2(\Sigma_r\Sigma_g)^{1/2}\right).
+> $$
+>
+> FID 越低越好，同时反映样本质量与多样性，但依赖特征提取器、样本数和预处理协议。
+>
+> Inception Score（IS）看单张图的类别分布是否尖锐，以及全体样本的边缘类别分布是否多样：
+>
+> $$
+> \mathrm{IS}
+> =\exp\left(
+> \mathbb{E}_{x}
+> D_{\mathrm{KL}}\big(p(y\mid x)\|p(y)\big)\right).
+> $$
+>
+> IS 越高越好，但不直接与真实数据比较，也会受 Inception 类别空间限制。两者都不能代替人工偏好与任务指标。
+
 > [!NOTE]+ 对照：对 $x$ 的两种梯度
 >
 > - FGSM：沿 $\nabla_x J$ 上升一小步，制造错分类。
@@ -3130,7 +3483,7 @@ def pgd_linf(x, loss_grad_fn, eps, alpha, steps):
 
 <br>
 
-# 强化学习
+# 强化学习（Reinforcement Learning）
 
 ## 概念：强化学习
 
@@ -3166,6 +3519,16 @@ $$
 - 最优 $Q^{\ast}$ 满足 $Q^{\ast}(s,a)=\mathbb{E}[r+\gamma\max_{a'}Q^{\ast}(s',a')]$。
 
 - Deep Q-Network：网络 $Q(s,a;\theta)$ 回归 TD 目标。
+- 时序差分目标（temporal-difference target）与 TD error 为
+
+$$
+y_t=r_t+\gamma(1-d_t)\max_{a'}Q(s_{t+1},a';\theta^{-}),
+\qquad
+\delta_t=y_t-Q(s_t,a_t;\theta).
+$$
+
+$d_t=1$ 表示终止，后续价值必须置零。DQN 最小化 $\delta_t^{2}$ 或 Huber loss。目标网络参数 $\theta^{-}$ 暂时固定，避免预测值与目标同时快速移动。
+
 - 目标网络（target network） $\theta^{-}$ 缓慢更新，稳定 bootstrapping。
 - 经验回放（experience replay）打散样本相关性。
 - 动作离散时可行；连续动作常用策略梯度（policy gradient）。
@@ -3233,6 +3596,7 @@ DQN 算法要点：
 - 因此可以在未知模型上学习（model-free）。
 - 优势 $\hat{A}_t=G_t-V(s_t)$ 或 GAE 进一步降方差。
 - PPO 的 clip 把 $\rho$ 限制在 $[1-\varepsilon,1+\varepsilon]$，防止一次更新毁掉策略。
+- 另一种限制是在目标里加 $\beta D_{\mathrm{KL}}(\pi_{\theta}\|\pi_{\mathrm{ref}})$，使新策略靠近参考策略（reference policy）。RLHF 与 KL 正则强化学习（KL-regularized RL）用的是这一项。
 - $\varepsilon$ 常取 $0.1$-$0.2$。
 - 探索：$\varepsilon$-greedy、熵奖励、噪声网络。
 - 奖励稀疏（只有终局 $+1$）时，先塑造稠密奖励或用课程学习。
@@ -3240,6 +3604,35 @@ DQN 算法要点：
 - 仿真到真实：像素 vs 状态向量、延迟、摩擦都会造成不匹配。
 - 先在状态可完整观测的玩具环境验证实现，再上像素输入。
 - 对应策略章：先保证能拟合训练。
+
+> [!NOTE]+ RLHF 流程（reinforcement learning from human feedback）
+>
+> 2025 Autumn Lecture 5 把语言模型训练分成以下阶段。
+>
+> 1. 下一词元预测（next-token prediction）：预训练语言模型（pretrained language model）最大化语料的对数似然。
+> 2. 监督微调（supervised fine-tuning, SFT）：使用人工示范（human-written demonstrations）学习有帮助的回答格式。
+> 3. 偏好数据（preference data）：对同一提示的多个回答做人类排序（human ranking）。
+> 4. 奖励模型（reward model, RM）：学习标量分数 $r_{\phi}(x,y)$，使偏好回答得分更高。常见成对偏好损失（pairwise preference loss）为
+>
+> $$
+> \mathcal{L}_{\mathrm{RM}}
+> =-\log\sigma\big(r_{\phi}(x,y_{\mathrm{chosen}})
+> -r_{\phi}(x,y_{\mathrm{rejected}})\big).
+> $$
+>
+> 5. 强化学习微调（reinforcement-learning fine-tuning）：策略生成回答，奖励模型打分；PPO 或相关策略方法提高奖励，同时用 KL penalty 限制策略离开参考模型。
+>
+> $$
+> \max_{\theta}
+> \mathbb{E}_{y\sim\pi_{\theta}(\cdot\mid x)}
+> \left[r_{\phi}(x,y)
+> -\beta\log\frac{\pi_{\theta}(y\mid x)}
+> {\pi_{\mathrm{ref}}(y\mid x)}\right].
+> $$
+>
+> PPO 的旧策略（old policy）$\pi_{\theta_{\mathrm{old}}}$ 用于构造裁剪概率比；RLHF 的参考策略（reference policy）$\pi_{\mathrm{ref}}$ 用于 KL 约束。二者角色不同，不能混成同一个分布。
+>
+> 奖励黑客（reward hacking）指策略利用奖励模型漏洞得到高分，却没有真正提高人类偏好。KL 太弱会漂移，太强则几乎不离开 SFT 模型。
 
 > [!NOTE]+ 对照：监督、对抗、RL
 >
@@ -3256,7 +3649,7 @@ DQN 算法要点：
 
 <br>
 
-# LLM 应用
+# LLM 应用（LLM Applications）
 
 ## 概念：应用层
 
@@ -3448,7 +3841,7 @@ def confusion_and_slices(y_true, y_pred, slice_ids):
 
 <br>
 
-# 作业
+# 作业（Assignments）
 
 ## 概念：作业
 
@@ -3473,6 +3866,64 @@ def confusion_and_slices(y_true, y_pred, slice_ids):
 | L8 | C5M1 | RNN step by step、Dinosaur Island、Jazz LSTM |
 | L9 | C5M2 / C5M3 | Word Vectors Debiasing、Emojify、NMT Attention、Trigger Word |
 | L10 | C5M4 | Transformers Architecture with Tensorflow |
+
+## 测验
+
+Coursera Quiz 与英文短答必须能口述以下结论。
+
+- **C1M1, Introduction to Deep Learning**
+  - Increasing data and model scale helps only when train and dev distributions are appropriate.
+  - Structured data often uses standard neural networks; images use CNNs; sequences use RNNs or Transformers.
+- **C1M2, Neural Network Basics**
+  - Vectorization replaces explicit loops over examples.
+  - With column-major examples, $X$ is $(n_x,m)$ and broadcasting adds $b$ along columns.
+  - Sigmoid with binary cross-entropy gives $\mathrm{d}Z=A-Y$.
+- **C1M3, Shallow Neural Networks**
+  - Hidden units must not start with identical weights because symmetry would be preserved.
+  - A linear hidden layer collapses with adjacent linear maps into one linear transformation.
+  - Tanh is zero-centered but still saturates; ReLU avoids positive-side saturation.
+- **C1M4, Deep Neural Networks**
+  - Cache $A^{[l-1]}$, $W^{[l]}$ and activation information during the forward pass.
+  - Backprop proceeds from layer $L$ to layer $1$ and uses pre-update weights.
+- **C2M1, Practical Aspects**
+  - High train error indicates avoidable bias or optimization failure; a large train-dev gap indicates variance.
+  - Xavier suits tanh-like activations; He suits ReLU.
+  - Inverted dropout divides by keep probability during training and is disabled at test time.
+  - Gradient checking requires deterministic execution, so Dropout is turned off.
+- **C2M2, Optimization**
+  - Mini-batch SGD trades gradient noise against hardware throughput.
+  - Momentum tracks the first moment; RMSprop tracks squared gradients; Adam combines both with bias correction.
+  - Learning-rate decay matters after progress reaches a plateau, not as a repair for incorrect gradients.
+- **C2M3, Hyperparameters and BatchNorm**
+  - Search learning rate on a logarithmic scale.
+  - BatchNorm uses batch statistics during training and running statistics during inference.
+  - $\gamma$ and $\beta$ are learnable; running mean and variance are not optimizer parameters.
+- **C3, ML Strategy**
+  - Use one optimizing metric and satisficing constraints.
+  - Dev and test sets should represent the deployment distribution and come from the same distribution.
+  - Manual error analysis estimates the maximum possible gain from fixing an error category.
+- **C4M1, CNN Foundations**
+  - Convolution uses parameter sharing and sparse connections.
+  - Output size is $\lfloor(n+2p-f)/s\rfloor+1$; pooling has no learned weights.
+- **C4M2, Deep CNNs**
+  - Residual connections provide a short gradient path.
+  - A $1\times1$ convolution mixes channels while preserving spatial size when stride is $1$.
+  - Transfer learning freezes more layers when target data are scarce and fine-tunes more when data are abundant.
+- **C4M3/C4M4, Detection and Applications**
+  - IoU measures overlap, NMS removes duplicate predictions, and mAP evaluates ranked detections.
+  - Verification is one-to-one; identification is one-to-many.
+  - U-Net concatenates encoder features into the decoder to recover localization detail.
+- **C5M1, Recurrent Models**
+  - RNN parameters are shared across time; BPTT sums their gradient contributions over time.
+  - GRU and LSTM gates provide paths that mitigate vanishing gradients.
+- **C5M2/C5M3, Embeddings and Attention**
+  - Similar embeddings have high cosine similarity; negative sampling avoids a full vocabulary softmax.
+  - Attention weights sum to $1$ over source positions for each decoder step.
+  - Beam search is approximate and is not guaranteed to find the globally most likely sequence.
+- **C5M4, Transformers**
+  - Scaled dot-product attention divides by $\sqrt{d_k}$ to control score variance.
+  - A causal mask prevents access to future tokens.
+  - Self-attention uses one sequence for $Q,K,V$; cross-attention takes $Q$ from the decoder and $K,V$ from the encoder.
 
 记号与课程一致：样本数是 $m$，特征矩阵 $X\in\mathbb{R}^{n_x\times m}$。标签 $y\in\{0,1\}$。迟交共 $10$ 天，单份最多 $3$ 天。
 
@@ -3562,7 +4013,7 @@ def L_model_forward(X, parameters):
 
 > [!INFO]+ 初始化、正则、梯度检查
 >
-> **初始化**。全零：隐层对称，每个单元学同一函数。过大高斯：ReLU 前的 $Z$ 进饱和，出现 `nan`。He 对 ReLU，Xavier 对 $\tanh$。
+> **初始化**。全零：隐层对称，每个单元学同一函数。过大高斯：ReLU 网络的激活与梯度可能爆炸并数值溢出；sigmoid / tanh 则进入饱和区。He 对 ReLU，Xavier 对 $\tanh$。
 >
 > **$L_2$**。代价加 $\frac{\lambda}{2m}\sum_\ell\|W^{[\ell]}\|_F^{2}$。梯度 $\mathrm{d}W$ 多一项 $\frac{\lambda}{m}W$。偏置不加。
 >
@@ -3725,7 +4176,7 @@ def rnn_forward(x, a0, parameters):
 
 <br>
 
-# 项目
+# 项目（Project）
 
 ## 概念：项目
 
@@ -3807,7 +4258,7 @@ def rnn_forward(x, a0, parameters):
 
 <br>
 
-# 复习
+# 复习（Review）
 
 - 课程把深度学习当成可微分模块的组合：仿射或卷积、逐点非线性、归一化、注意力、损失。
 - 把模块写对之后，项目成败由数据、指标与误差归因决定。
@@ -3830,6 +4281,69 @@ $$
 - 期末闭卷通常覆盖前半：前向反向、超参数、策略案例、卷积尺寸。
 - 编程作业覆盖实现细节。
 - 项目覆盖能否把上述方法用到自选数据上。
+
+## 英文
+
+英文题目首先看动作词（command verb），再看限制条件。
+
+- **compute / calculate**：算出数值，必须写中间尺寸或代入过程。
+- **derive**：从已知式逐步推导，不只写结论。
+- **show that**：证明题，写出等号或不等式成立的理由。
+- **prove**：给完整论证，例如用 Jensen inequality 证明 KL non-negativity。
+- **state**：直接写定义或结论，不需要展开长推导。
+- **explain why / justify**：给因果机制，不能只复述现象。
+- **compare and contrast**：同时写共同点与差异。
+- **give one reason / in one sentence**：只需一条准确理由，避免堆砌无关结论。
+- **circle all that apply**：多选题，可能不止一个正确答案。
+- **which statement is false**：找错误项，先圈出题目中的否定词。
+- **with respect to**：关于某变量求导，例如 gradient with respect to $W$。
+- **element-wise / entry-wise**：逐元素运算，不是矩阵乘法。
+- **in expectation**：对随机变量取期望，不表示每次采样都成立。
+- **at training time / at test time**：训练阶段 / 测试阶段，常用于 Dropout 与 BatchNorm。
+
+各章需要能从英文直接还原的核心词如下。
+
+- 数学与实现：计算图（computational graph）、链式法则（chain rule）、雅可比矩阵（Jacobian）、向量化（vectorization）、广播（broadcasting）、数值稳定性（numerical stability）、梯度检查（gradient checking）、有限差分（finite difference）。
+- 网络：前向传播（forward propagation）、反向传播（backpropagation）、预激活（pre-activation）、隐藏单元（hidden unit）、逐点非线性（pointwise nonlinearity）、通用逼近（universal approximation）、表示能力（representational capacity）。
+- 训练：参数（parameter）、超参数（hyperparameter）、损失函数（loss function）、目标函数（objective function）、经验风险（empirical risk）、优化器（optimizer）、收敛（convergence）、鞍点（saddle point）。
+- 梯度问题：消失梯度（vanishing gradient）、爆炸梯度（exploding gradient）、梯度裁剪（gradient clipping）、死亡 ReLU（dying ReLU）、饱和区（saturated regime）。
+- 初始化：随机初始化（random initialization）、对称性破缺（symmetry breaking）、扇入（fan-in）、扇出（fan-out）、Xavier / Glorot initialization、He / Kaiming initialization。
+- 正则：过拟合（overfitting）、欠拟合（underfitting）、权重衰减（weight decay）、反向 Dropout（inverted dropout）、保留概率（keep probability）、数据增强（data augmentation）、提前停止（early stopping）、标签平滑（label smoothing）。
+- 优化：批量梯度下降（batch gradient descent）、随机梯度下降（stochastic gradient descent, SGD）、小批量（mini-batch）、动量（momentum）、指数滑动平均（exponentially weighted moving average）、偏差修正（bias correction）、学习率衰减（learning-rate decay）、学习率预热（learning-rate warmup）。
+- 归一化：批归一化（batch normalization）、层归一化（layer normalization）、批统计（batch statistics）、运行均值（running mean）、运行方差（running variance）、可学习缩放和平移（learnable scale and shift）。
+- 诊断：可避免偏差（avoidable bias）、方差（variance）、贝叶斯误差（Bayes error）、人类水平表现（human-level performance）、误差分析（error analysis）、训练与开发集不匹配（train-dev mismatch）、分布漂移（distribution shift）。
+- 指标：混淆矩阵（confusion matrix）、精确率（precision）、召回率（recall）、灵敏度（sensitivity）、特异度（specificity）、假阳性率（false positive rate）、假阴性率（false negative rate）、ROC 曲线下面积（area under the ROC curve, AUROC）。
+- 卷积：感受野（receptive field）、参数共享（parameter sharing）、稀疏连接（sparsity of connections）、有效卷积（valid convolution）、同尺寸卷积（same convolution）、步幅（stride）、填充（padding）、池化（pooling）、通道（channel）、过滤器（filter / kernel）、深度可分离卷积（depthwise separable convolution）。
+- 视觉任务：边界框（bounding box）、交并比（intersection over union, IoU）、非极大值抑制（non-maximum suppression, NMS）、锚框（anchor box）、均值平均精度（mean average precision, mAP）、语义分割（semantic segmentation）、实例分割（instance segmentation）。
+- 序列：时间反向传播（backpropagation through time, BPTT）、隐藏状态（hidden state）、门控循环单元（gated recurrent unit, GRU）、长短期记忆（long short-term memory, LSTM）、双向循环网络（bidirectional RNN）、教师强制（teacher forcing）、暴露偏差（exposure bias）、束搜索（beam search）。
+- 语言与注意力：词嵌入（word embedding）、词表外词（out-of-vocabulary word, OOV）、余弦相似度（cosine similarity）、上下文向量（context vector）、查询（query）、键（key）、值（value）、缩放点积注意力（scaled dot-product attention）、因果掩码（causal mask）、位置编码（positional encoding）。
+- 生成与强化学习：对抗样本（adversarial example）、生成器（generator）、判别器（discriminator）、模式崩溃（mode collapse）、证据下界（evidence lower bound, ELBO）、重参数化技巧（reparameterization trick）、经验回放（experience replay）、目标网络（target network）、策略梯度（policy gradient）、优势函数（advantage function）、奖励模型（reward model）。
+
+> [!EXAMPLE]+ 公开试卷风格的英文问法
+>
+> **Why is scaling $\gamma$ and shifting $\beta$ applied after normalization?**
+>
+> 标准化本身会限制表示只能保持零均值和单位方差。Learnable scale and shift restore the representational capacity of the layer.
+>
+> **Is it always a good strategy to train with a large batch size? Why or why not?**
+>
+> No. A large batch gives a lower-variance gradient estimate and better hardware utilization, but uses more memory, performs fewer updates per epoch, and may require retuning the learning rate.
+>
+> **Which statement about Xavier initialization is false: “the variance remains unchanged throughout training”?**
+>
+> 该陈述错误。Xavier controls variance only at initialization; subsequent parameter updates can change it.
+>
+> **Why can a $1\times1$ convolution reduce channels without changing spatial dimensions?**
+>
+> At every spatial location, it applies a learned linear combination across input channels. With stride $1$ and zero padding, height and width stay unchanged, while the number of filters sets the output channels.
+>
+> **Why is KL divergence not a distance metric?**
+>
+> It is generally asymmetric and does not satisfy the triangle inequality, even though it is non-negative.
+>
+> **What happens if all hidden-layer weights are initialized to the same constant?**
+>
+> All neurons produce the same output, receive the same gradient, and remain identical after every update. Random initialization is needed for symmetry breaking.
 
 默写清单（与作业/期中对齐）：
 
@@ -3859,13 +4373,16 @@ $$
 <br>
 
 
-# 参考文献
+# 参考文献（References）
 
 ## 课程
 
 1. Stanford CS230. *Deep Learning* 课程主页与大纲。[https://cs230.stanford.edu/](https://cs230.stanford.edu/)；[Syllabus](https://cs230.stanford.edu/syllabus/)
 2. Stanford Bulletin. *CS230: Deep Learning*. [https://bulletin.stanford.edu/courses/2198851](https://bulletin.stanford.edu/courses/2198851)
 3. deeplearning.ai. *Deep Learning Specialization*（C1-C5，CS230 翻转课堂视频与作业来源）。
+4. Stanford CS230. *Winter 2021 Exam* 与 [solution](https://cs230.stanford.edu/files/cs230exam_win21_soln.pdf)：英文题干、初始化、BatchNorm、卷积与反向传播题型。
+5. Stanford CS230. *Winter 2020 Exam Solution*. [https://cs230.stanford.edu/files/cs230exam_win20_soln.pdf](https://cs230.stanford.edu/files/cs230exam_win20_soln.pdf)
+6. Stanford CS230. *Fall 2025 Lecture 5: Deep Reinforcement Learning and RLHF*. [lecture_5.pdf](https://cs230.stanford.edu/syllabus/fall_2025/5/lecture_5.pdf)
 
 ## 优化与正则
 
@@ -3905,7 +4422,7 @@ $$
 
 <br>
 
-# 工具
+# 工具（Tools）
 
 ## 数值与框架
 
