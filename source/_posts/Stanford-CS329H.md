@@ -6,7 +6,6 @@ categories:
 tags:
 - AI
 desc: Stanford CS329H 详细课程笔记：从选择数据、随机效用与 Bradley–Terry，到 RLHF、DPO、辅助博弈、对决赌博机与偏好聚合。
-hidden: true
 ---
 
 - **全名**

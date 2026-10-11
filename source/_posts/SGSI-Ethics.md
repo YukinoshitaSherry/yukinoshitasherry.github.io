@@ -6,7 +6,6 @@ categories:
 tags:
 - 课程体验
 desc: 2026 SGSI 四讲笔记。
-hidden: true
 ---
 
 # 课程

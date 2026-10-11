@@ -6,7 +6,6 @@ categories:
 tags:
 - AI
 desc: Stanford CS229 详细课程笔记：从线性回归、GLM 与 SVM，到泛化、EM、PCA、扩散模型、LLM 与强化学习。
-hidden: true
 ---
 
 - **主讲**

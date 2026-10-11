@@ -6,7 +6,6 @@ categories:
 tags:
 - 理财
 desc: Stanford CS 007 详细课程笔记：从行为偏差与薪酬股权，到储蓄、债务摊销、指数投资、目标规划与房产决策。
-hidden: true
 ---
 
 - **全名**

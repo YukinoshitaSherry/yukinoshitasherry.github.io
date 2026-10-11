@@ -6,7 +6,6 @@ categories:
 tags:
 - CompBio
 desc: Stanford CS274 详细课程笔记：从序列比对、HMM 与系统发育，到蛋白质结构、分子动力学、转录组、化学信息学和网络生物学。
-hidden: true
 ---
 
 Stanford CS274 的全名是 *Representations and Algorithms for Computational Molecular Biology*，与 BIOE 214、BMDS 214、GENE 214 交叉挂牌，由 Russ Altman 主讲。它是一门研究生计算分子生物学导论，先修课为 CS106B，课程包含较多 Python 编程。内容围绕生物对象的表示展开，依次讨论序列比对、概率模型、系统发育、结构计算、分子动力学、组学分析和网络生物学，同时考察算法复杂度、统计假设与生物学解释。

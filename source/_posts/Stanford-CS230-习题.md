@@ -6,7 +6,6 @@ categories:
 tags:
 - AI
 desc: Stanford CS230 公开期中与练习卷的中英对照题：选择、损失、优化、卷积、反向传播、GAN 与编程作业目标，附解析。
-hidden: true
 ---
 
 

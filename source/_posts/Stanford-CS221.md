@@ -6,7 +6,6 @@ categories:
 tags:
 - AI
 desc: Stanford CS221 详细课程笔记：从反射模型与搜索，到 MDP、博弈、因子图、贝叶斯网与逻辑。
-hidden: true
 ---
 
 - **全名**
