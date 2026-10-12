@@ -2524,22 +2524,385 @@ Rebuild a small classifier with TensorFlow 2 and automatic differentiation.
 
 C3 没有编程 notebook，公开归档只有两个案例测验。
 
-### C3M1 Bird Recognition in Peacetopia
+### C3M1 Bird Recognition in Peacetopia（和平托邦鸟类检测 · 全题）
 
-Design a metric and diagnose avoidable bias, variance, and data mismatch for a city bird detector.
+Coursera Deep Learning Specialization · Course 3 Week 1 案例测验。与主笔记「项目策略 · 评估指标 / 数据划分 / 人类水平」对应。
 
-为城市鸟类检测器选择指标，并区分偏差、方差与数据不匹配。
+**背景（中英）**
 
-- 把多个目标压成单一优化指标，把时延、内存等设成满足指标；
-- dev 与 test 必须来自相同目标分布；
-- 人类水平近似贝叶斯误差；
-- 训练误差减人类误差是可避免偏差；
-- dev 误差减训练误差是方差；
-- train-dev 与 dev 的差异揭示数据不匹配。
+In the City of Peacetopia, the population has a phobia of birds. A researcher must build an algorithm that detects birds flying over the city from security-camera sky images and alerts residents promptly.
 
-> [!EXAMPLE]+ 诊断顺序
+在和平托邦，市民普遍恐鸟。任务是用监控摄像头拍摄的天空图像做二分类：$y=0$ 无鸟，$y=1$ 有鸟；并在**新摄像头图像**上准确、快速、低内存地部署。
+
+数据：$N=10{,}000{,}000$ 张已标注天空图（来自安防摄像头）。市议会最初要求：高准确率、单张推理快、模型 $\le 10\,\mathrm{MB}$、单张分类 $\le 10\,\mathrm{s}$。
+
+<br>
+
+#### Q1 多个评估指标会拖慢迭代吗？
+
+True or False: You acknowledge that having multiple evaluation metrics may complicate the decision-making process and slow down iteration speed.
+
+对或错：拥有多个评估指标可能会使决策过程复杂，并拖慢迭代速度。
+
+- True
+- False
+
+> [!EXAMPLE]+ True
 >
-> 若人类 $1\%$、训练 $2\%$、train-dev $3\%$、dev $10\%$，则可避免偏差约 $1\%$，方差约 $1\%$，主要问题是分布不匹配约 $7\%$。此时盲目加正则会处理错对象。
+> 多个性能维度（准确率、延迟、内存）都重要，但**迭代时需要单一 optimizing metric**，否则每次实验无法快速判定“更好还是更坏”。时延、内存应设为 **satisficing metrics**（达标即可），在达标模型里再比准确率。
+>
+> - **True**：若团队同时优化三个数且无统一规则，决策与 A/B 对比会变慢。
+> - **False**：不选。多指标本身不是问题；**未压缩成「一个主指标 + 若干阈值」**才会拖慢迭代。
+
+<br>
+
+#### Q2 三目标并存时如何选模型？
+
+The city revises its criteria to: (1) detect birds as accurately as possible; (2) classify a new image in $\le 10\,\mathrm{s}$; (3) model size $\le 10\,\mathrm{MB}$. Given models with different accuracy, runtime, and memory, how to choose?
+
+市议会要求：尽可能准确；单张 $\le 10\,\mathrm{s}$；模型 $\le 10\,\mathrm{MB}$。如何在多个候选模型中选？
+
+- (A) Accuracy is the optimizing metric; pick the most accurate model regardless of constraints.
+- (B) Combine the three metrics into one scalar and pick the best.
+- (C) Pick the smallest runtime to leave headroom for accuracy later.
+- (D) Find models that meet runtime and memory thresholds; among them pick highest accuracy.
+
+> [!EXAMPLE]+ 选 (D)
+>
+> 准确率是 **optimizing metric**；$10\,\mathrm{s}$ 与 $10\,\mathrm{MB}$ 是 **satisficing metrics**。
+>
+> - (A) 不选：最准但超 10MB 或超 10s 的模型不能部署。
+> - (B) 不选：加权合成一个数权重任意、不可解释，且难与产品约束对齐。
+> - (C) 不选：只选最快会在**已满足约束的模型里**放弃更高准确率。
+> - (D) 选：先筛「延迟、内存都达标」，再在子集里最大化准确率。
+
+<br>
+
+#### Q3 为什么要区分 optimizing 与 satisficing？
+
+Which of the following best explains why it is important to identify optimizing and satisficing metrics in a project?
+
+以下哪一项最能解释：项目中为什么要区分优化指标与满足指标？
+
+- (A) Knowing the metrics provides input for efficient project planning.
+- (B) Identifying metric types sets thresholds for satisficing metrics—explicit evaluation criteria for constraints.
+- (C) Identifying the optimizing metric informs which models to try first.
+- (D) It is not important; all metrics must be met with equal priority.
+
+> [!EXAMPLE]+ 选 (B)
+>
+> - (A) 不选：规划有帮助，但不是「区分两类指标」的**核心**原因。
+> - (B) 选：满足指标必须写清**阈值**（如 $\le 10\,\mathrm{s}$、$\le 10\,\mathrm{MB}$），形成可执行的 pass/fail；优化指标在可行域内比较谁更好。
+> - (C) 不选：优化指标指导比较，但「先试哪个架构」还依赖资源与假设，不是本题最佳表述。
+> - (D) 不选：两类指标优先级不同；全部等权会拖慢决策（见 Q1）。
+
+<br>
+
+#### Q4 为何提议 train / dev / test = 95% / 2.5% / 2.5%？
+
+You propose 95% / 2.5% / 2.5% for train / dev / test. Which best justifies this given $N=10{,}000{,}000$?
+
+总数据 $10{,}000{,}000$ 张，下列哪条最能支持 95% / 2.5% / 2.5%？
+
+- (A) Emphasis on training gives the most accurate model and supports memory/efficiency.
+- (B) The most important goal is highest accuracy, achieved by maximizing training data only.
+- (C) With 10M samples, 2.5% is 250,000—enough for dev and test to evaluate bias and variance.
+- (D) A large training set allows faster iteration.
+
+> [!EXAMPLE]+ 选 (C)
+>
+> $2.5\%\times 10^7=2.5\times 10^5$：dev、test 各约 25 万张，在大数据制度下足以稳定估计泛化；$95\%$ 训练集让模型吃满数据。
+>
+> - (A) 不选：大 train 有助精度，但未说明 **dev/test 小比例仍够用**。
+> - (B) 不选：只强调 train 最大，忽略 dev/test 的统计目的。
+> - (C) 选：点明「绝对数量够评估 bias/variance」。
+> - (D) 不选：大 train 往往**减慢**单次训练；迭代快通常靠小实验集或子采样（见 Q15）。
+
+<br>
+
+#### Q5 额外 100 万张社交媒体天空图（分布与安防摄像头不同）怎么用？
+
+The Council offers 1,000,000 social-media sky images (different distribution from security cameras). Best use?
+
+市议会另提供 100 万张社交媒体天空图（分布与安防摄像头不同）。最佳用法？
+
+- (A) Add to dev to evaluate generalization on a broader set.
+- (B) Add to the training set.
+- (C) Split equally among train / dev / test.
+- (D) Do not use; it will change the distribution of any set it is added to.
+
+> [!EXAMPLE]+ 选 (B)
+>
+> **Train 与 dev 可以不同分布**；**dev 与 test 必须同分布**，且应对准**部署域（摄像头）**。
+>
+> - (A) 不选：dev 应代表上线摄像头；混入社交图会使 dev 指标不能指导部署。
+> - (B) 选：多样训练数据常提升鲁棒性，且不要求 train 与 dev 同分布。
+> - (C) 不选：会把非摄像头分布污染 dev/test。
+> - (D) 不选：改变 train 分布通常是**有意**增广，不是丢弃理由。
+
+<br>
+
+#### Q6 反对把 100 万张市民上传图并入 test 的理由（多选）
+
+A council member wants 1,000,000 citizen-uploaded images in the **test** set (original data from security cameras). Object because: (Choose all that apply.)
+
+有人要把 100 万张市民上传图加入 **test**（原数据为安防摄像头）。反对理由（多选）：
+
+- (A) This would make dev and test distributions different—you are not aiming where you want to hit.
+- (B) Citizen images do not have a consistent input–output relationship with camera labels.
+- (C) A bigger test set slows iteration because evaluation is expensive.
+- (D) The test set no longer reflects the security-camera distribution you care about.
+
+> [!EXAMPLE]+ 选 (A)(D)
+>
+> - (A) 选：在 dev 上调参、选模型，却用与 dev **不同分布**的 test 做最终评估，dev 上的改进不能预测上线表现。
+> - (B) 不选：任务仍是鸟/非鸟，**标签语义一致**；问题在于**输入分布**（市民图 vs 摄像头），不是 I/O 关系不存在。
+> - (C) 不选：大 test 增加评估成本，但不是「能否把市民图放进 test」的**原则性**反对理由。
+> - (D) 选：test 必须模拟**最关心的真实场景**（摄像头）；掺入市民图后 test 不再代表该场景。
+
+<br>
+
+#### Q7 Train 4.0% error，Dev 4.5% error—是否应加大网络降 train error？
+
+Training error 4.0%, dev error 4.5%. Suggestion: train a bigger network to reduce 4.0% training error. Agree?
+
+训练误差 4.0%，dev 4.5%。建议：加大网络以降低 4.0% 训练误差。是否同意？
+
+- (A) Yes; bias is higher than variance.
+- (B) Yes; 4.0% training error shows high bias.
+- (C) No; variance is higher than bias.
+- (D) No; insufficient information without human-level error.
+
+> [!EXAMPLE]+ 选 (D)
+>
+> 方差差距 $=4.5\%-4.0\%=0.5\%$ 可算；**可避免偏差** $=4.0\%-h$ 需要 $h$。
+>
+> | $h$ | 可避免偏差 | 方差差距 | 更优先 |
+> | :--- | :--- | :--- | :--- |
+> | $0.5\%$ | $3.5\%$ | $0.5\%$ | 降偏差（加大网络等） |
+> | $3.9\%$ | $0.1\%$ | $0.5\%$ | 降方差（数据、正则） |
+>
+> 同一组 train/dev，**结论随 $h$ 而变**（主笔记例 6a/6b）。
+>
+> - (A)(B) 不选：未给 $h$ 时不能断言 bias $>$ variance 或 “4% 一定 high bias”。
+> - (C) 不选：同样缺少 $h$，也不能断言 variance 更大。
+> - (D) 选：信息不足，无法判断。
+
+<br>
+
+#### Q8 鸟类任务中如何定义 human-level performance（估 Bayes 误差）？
+
+How should “human-level performance” be defined to estimate Bayes error for bird identification?
+
+如何用「人类水平表现」估计鸟类识别任务的 Bayes 误差？
+
+- (A) Performance of the average citizen.
+- (B) Best performance of a specialist (ornithologist) or a group of specialists.
+- (C) Performance of volunteer amateur ornithologists.
+- (D) Performance of the head of the City Council.
+
+> [!EXAMPLE]+ 选 (B)
+>
+> Bayes 误差 $E^*$ 是理论下限；$h$ 应取**人类在该任务上已达到的最好水平**，使 $E^*\le h$。
+>
+> - (A) 不选：普通市民错误率更高，$h$ 偏大 → **低估**可避免偏差。
+> - (B) 选：鸟类学家或专家组代表**峰值人类表现**，最接近 $E^*$。
+> - (C) 不选：业余志愿者通常弱于专家，$h$ 仍偏大。
+> - (D) 不选：与任务专业度无关。
+
+<br>
+
+#### Q9 准确率从差到好，三种量的典型排序？
+
+Which shows the optimal order of **accuracy** from **worst to best**?
+
+下列哪一项给出准确率从**最差到最好**的合理顺序？
+
+- (A) The learning algorithm’s performance $\to$ human-level performance $\to$ Bayes error.
+- (B) Human-level performance $\to$ the learning algorithm’s performance $\to$ Bayes error.
+- (C) Human-level performance $\to$ Bayes error $\to$ the learning algorithm’s performance.
+- (D) The learning algorithm’s performance $\to$ Bayes error $\to$ human-level performance.
+
+> [!EXAMPLE]+ 选 (A)（易错：勿选 (C)）
+>
+> 记 **error** 与 **accuracy** 反向：error 越低，accuracy 越高。
+>
+> - **Bayes error** $E^*$：理论最低 error ⇒ **最高 accuracy**（最好）。
+> - **Human-level** $h$：$E^*\le h$ ⇒ accuracy 通常**优于**未训好的算法，**次于**理想 Bayes。
+> - **Learning algorithm**：训练前或训练不足时 error 大、accuracy **最差**；训练极好时 accuracy **可略高于** $h$，但**不能稳定低于** $E^*$（不能长期优于 Bayes）。
+>
+> 因此 **accuracy 从差到好**：算法 $\to$ 人类水平 $\to$ Bayes（对应 error：算法 $\ge h \ge E^*$ 的常见阶段）。
+>
+> - (A) 选：与 Coursera 官方解析一致。
+> - (B) 不选：把人类放在最差，与 $E^*\le h$ 矛盾。
+> - (C) 不选：把 Bayes 放在中间、算法最好——**与「算法不能优于 Bayes」相反**（ChatGPT 对话里常见误选）。
+> - (D) 不选：Bayes 不是 accuracy 最差的一档。
+
+<br>
+
+#### Q10 $h=0.1\%$，Train 2.0%，Dev 2.1%—下一步？
+
+Human-level 0.1%, training error 2.0%, dev error 2.1%. Most effective next step?
+
+人类水平 0.1%，训练 2.0%，dev 2.1%。最有效的下一步？
+
+- (A) Evaluate the test set to determine variance.
+- (B) Decrease bias: increase model complexity (train error $\gg h$).
+- (C) Deploy to devices to check satisficing metrics.
+- (D) Keep tuning until training error matches human-level, focusing only on optimizing metric.
+
+> [!EXAMPLE]+ 选 (B)
+>
+> 可避免偏差 $=2.0\%-0.1\%=1.9\%$；方差差距 $=0.1\%$。**先处理更大的一项** → 加容量、训更久、改优化。
+>
+> - (A) 不选：test 不宜用于日常调参；方差已可从 train–dev 看出很小。
+> - (B) 选：train 远高于 $h$，典型 **high avoidable bias**。
+> - (C) 不选：尚未解决主误差问题；部署前应先按指标迭代。
+> - (D) 不选：忽略延迟/内存等 satisficing 约束；且 dev 已接近 train，不是当前瓶颈。
+
+<br>
+
+#### Q11 Test error 7.0%，Dev error 2.1%—怎么办？（多选）
+
+Test error 7.0% vs dev error 2.1%. What to do? (Choose all that apply.)
+
+测试 7.0%，dev 2.1%。怎么办？（多选）
+
+- (A) Try decreasing regularization for better generalization on dev.
+- (B) Increase the size of the dev set.
+- (C) Get a bigger test set to increase its accuracy.
+- (D) Try increasing regularization to reduce overfitting to the dev set.
+
+> [!EXAMPLE]+ 选 (B)(D)
+>
+> dev 与 test **应同分布**；差距 $7.0\%-2.1\%$ 巨大 ⇒ 在 dev 上选出的模型/超参**过拟合 dev**，或 dev 太小、估计偏乐观，或曾反复用 test 调参。
+>
+> - (A) 不选：减弱正则通常**加重**对 dev 的过拟合，不能缩小 dev–test 鸿沟。
+> - (B) 选：更大 dev ⇒ 更稳定的 dev 估计，减轻偶然「调准 dev」。
+> - (C) 不选：扩大 test **不提高** test「准确度」；且不解决 dev 上过拟合的根因。
+> - (D) 选：加强正则 ⇒ 减轻对 dev 集的过拟合。
+
+<br>
+
+#### Q12 $h=0.10\%$，Train 0.05%，Dev 0.05%—哪些成立？（多选）
+
+Human-level 0.10%, train 0.05%, dev 0.05%. What can you conclude? (Check all that apply.)
+
+人类 0.10%，train/dev 均为 0.05%。哪些结论成立？（多选）
+
+- (A) It is harder to measure avoidable bias; progress may be slower going forward.
+- (B) With only 0.05% gap to 0% error, remaining progress should be quick.
+- (C) Unlikely purely a statistical anomaly, but noise may still contribute.
+- (D) If the test-set error estimate is reliable, Bayes error $\le 0.05\%$.
+
+> [!EXAMPLE]+ 选 (A)(D)；不选 (B)；(C) 非 Coursera 标答
+>
+> - (A) 选：train/dev **已低于** $h$，相对 $h$ 的「可避免偏差」不好解释，**下一刀砍向 bias 还是 variance 不清晰**，迭代变慢。
+> - (B) 不选：0.05% error $\neq$ 离 Bayes 只差 0.05%；$E^*$ 可能已是 0.05% 或更低，**不能**推断「很快到 0%」。
+> - (C) 不选（本测验未计分）：超人类可能含噪声，但 Coursera 官方 **Nice work 未勾选** 此项；工程上可作备注，不作标准答案。
+> - (D) 选：若 test 足够大且与 dev 同分布，观测 error 0.05% ⇒ $E^*\le 0.05\%$（Bayes 是下界）。
+
+<br>
+
+#### Q13 准确率更高但 false negative（漏报鸟）更多—怎么办？
+
+Overall accuracy is higher, but the city prefers the competitor because you have more **false negatives** (missing birds). What should you do?
+
+整体准确率更高，但漏报（FN）更多，市议会更满意对手。该怎么办？
+
+- (A) Brainstorm with the team to refine the optimizing metric to include FN as development continues.
+- (B) Apply regularization to minimize the false negative rate.
+- (C) Ask the team to track both accuracy and FN during development without changing the metric.
+- (D) Pick false negative rate (or recall-focused metric) as the new optimizing metric and drive all further development by it.
+
+> [!EXAMPLE]+ 选 (D)
+>
+> 产品目标变为「少漏报」⇒ **optimizing metric 必须改**（如 recall、$F_\beta$、加权 cost），并**用新指标驱动全部后续实验**。
+>
+> - (A) 不选：「继续开发时再慢慢改指标」无法立刻对齐市议会偏好；应**明确切换**主指标。
+> - (B) 不选：正则不针对 FN/FP 不对称；改阈值或损失/指标才直接对准漏报。
+> - (C) 不选：同时看两列数但没有**单一决策规则**，迭代仍会卡在 accuracy 上。
+> - (D) 选：与 Coursera 一致——目标转移 ⇒ 更新 optimizing metric。
+
+<br>
+
+#### Q14 新鸟种迁入，仅 1000 张新类图，3 个月内要更好—先做？
+
+New bird species migrates in; only 1,000 labeled images; need a better system in 3 months. Do **first**?
+
+新鸟种出现，仅 1000 张标注；三个月内要更好系统。**第一步**做什么？
+
+- (A) Use available data to define a **new dev/test** for the new distribution; let that metric guide improvements.
+- (B) Add the 1,000 images to the dataset and reshuffle train/dev/test.
+- (C) Put the 1,000 images **only** in training.
+- (D) Try data augmentation / synthesis for the new bird type first.
+
+> [!EXAMPLE]+ 选 (A)；增强 (D) 是后续手段
+>
+> **分布已漂移**：旧 dev/test 不再衡量上线表现。必须先让 **dev/test 代表新分布**，再谈训练与增强。
+>
+> - (A) 选：先改评估靶心，再迭代模型（Coursera 强调「只加 train 无法直接改善在新物种上的 measured performance」）。
+> - (B) 不选：整体 reshuffle 仍可能让 dev/test **不代表**新部署分布。
+> - (C) 不选：只加 train、不改 dev ⇒ 无法**度量**对新鸟种的改进。
+> - (D) 不选作**第一步**：增强/合成有价值，但在**没有对新分布的 dev 指标**前，无法判断增强是否有效；应在 (A) 之后做。
+
+<br>
+
+#### Q15 猫检测：1 亿张图，全量训练约两周—同意哪些？（多选）
+
+Cat detector: 100,000,000 images; full training $\approx$ two weeks. Agree with which statements? (Check all.)
+
+猫检测 1 亿张图，全量训练约两周。同意哪些？（多选）
+
+- (A) A good Bird detector’s model and hyperparameters can be applied to Cat with no iteration.
+- (B) Faster computers can speed up iteration and productivity.
+- (C) If 10M examples are enough for a good cat detector, train on 10M for ~10× faster experiments even if each model is slightly worse.
+- (D) Needing two weeks to train limits iteration speed.
+
+> [!EXAMPLE]+ 选 (B)(C)(D)
+>
+> - (A) 不选：猫/鸟任务与数据分布不同，**必须重新迭代**（可迁移预训练思想，不能原封不动套用鸟检测器与超参）。
+> - (B) 选：更强算力缩短单次训练 ⇒ 同样日历时间内更多实验。
+> - (C) 选：大数据项目中常用**子集快速试想法**，再全量训最终模型；单次略差可接受。
+> - (D) 选：单次两周 ⇒ 反馈周期长，**限制**迭代速度（与 (B)(C)  mitigation 不矛盾）。
+
+<br>
+
+> [!TIP]+ 标答速查（Peacetopia C3M1）
+>
+> | 题 | 答案 |
+> | :--- | :--- |
+> | Q1 | True |
+> | Q2 | (D) |
+> | Q3 | (B) |
+> | Q4 | (C) |
+> | Q5 | (B) |
+> | Q6 | (A)(D) |
+> | Q7 | (D) |
+> | Q8 | (B) |
+> | Q9 | (A) |
+> | Q10 | (B) |
+> | Q11 | (B)(D) |
+> | Q12 | (A)(D) |
+> | Q13 | (D) |
+> | Q14 | (A) |
+> | Q15 | (B)(C)(D) |
+
+<br>
+
+> [!NOTE]+ 与本站主笔记的索引
+>
+> | 题号 | 主笔记锚点 |
+> | :--- | :--- |
+> | Q1–Q3 | `## 评估指标` · 优化 vs 满足指标 |
+> | Q4 | `## 数据划分` · 按规模选比例 |
+> | Q5–Q6 | `### Dev 与 test 的分布` · train 可不同于 dev |
+> | Q7–Q10, Q12 | `## 人类水平` · 可避免偏差与例 6 |
+> | Q8–Q9 | $h$ 的定义；准确率/误差排序 |
+> | Q11 | dev/test 差距 · 对 dev 过拟合 |
+> | Q13 | 何时修改指标 · 召回/漏报 |
+> | Q14 | `## 分布不匹配` · 改 dev/test |
+> | Q15 | `### 迭代节奏` · 大数据与子集实验 |
 
 <br>
 
