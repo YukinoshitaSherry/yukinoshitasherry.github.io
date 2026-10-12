@@ -1483,7 +1483,7 @@ $$
 单次 I/O 平均耗时：
 
 $$
-T_{\mathrm{IO}} = \underbrace{T_{\mathrm{seek}} + T_{\mathrm{rotate}}}_{T_{\mathrm{access}}\ \text{（定位时间）}} + T_{\mathrm{transfer}} + T_{\mathrm{controller}}
+T_{\mathrm{IO}} = \underbrace{T_{\mathrm{seek}} + T_{\mathrm{rotate}}}\_{T_{\mathrm{access}}\ \text{（定位时间）}} + T_{\mathrm{transfer}} + T_{\mathrm{controller}}
 $$
 
 | 分量 | 含义 | 典型量级 |

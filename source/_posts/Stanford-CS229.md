@@ -375,7 +375,7 @@ $$
 因此单样本更新是
 
 $$
-\theta_j \leftarrow \theta_j + \alpha\big(y^{(i)}-h_{\theta}(x^{(i)})\big)x^{(i)}_{j}.
+\theta_j \leftarrow \theta_j + \alpha\big(y^{(i)}-h_{\theta}(x^{(i)})\big)x^{(i)}\_{j}.
 $$
 
 该式称为 LMS（least mean squares）更新，也叫 Widrow-Hoff 规则。误差 $y-h$ 大则步子大；已经拟合好的点几乎不推动 $\theta$。
@@ -838,7 +838,7 @@ $$
 >
 > $$
 > \frac{\partial h}{\partial\theta}=h(1-h)\,x,\qquad
-> \nabla^{2}_{\theta}\ell=-h(1-h)\,xx^{\top}.
+> \nabla^{2}\_{\theta}\ell=-h(1-h)\,xx^{\top}.
 > $$
 >
 > $n$ 个样本相加：$H=-X^{\top}RX$，$R$ 的对角是各点的 $h^{(i)}(1-h^{(i)})$。牛顿步用 $H^{-1}$ 去“除以曲率”：山谷窄的方向步子自动变小，山谷宽的方向步子变大。梯度下降对所有方向用同一个 $\alpha$，所以在被拉长的椭圆上走之字。
@@ -1999,7 +1999,7 @@ $$
 >
 > 矩阵情形：$\mathrm{d}Z=\mathrm{d}A\odot g'(Z)$，$\mathrm{d}W=\mathrm{d}Z\,A_{\mathrm{prev}}^{\top}/n$。形状必须满足 $(n,n^{[l]})=(n,n^{[l]})\times(n^{[l]},n^{[l-1]})$ 的右乘。
 >
-> 感性理解：反向模式把标量 $J$ 对中间量的偏导从输出层传回输入。每个模块只需要局部 Jacobian：上游传来的 $\mathrm{d}_{\mathrm{out}}$ 左乘或按元素乘 $g'$，再分配给输入与参数。线性层 $Z=A_{\mathrm{prev}}W$ 对 $W$ 的梯度是 $\mathrm{d}Z\,A_{\mathrm{prev}}^{\top}$，形状由矩阵乘法决定。各模块局部正确则总梯度正确，不必展开整条计算图。
+> 感性理解：反向模式把标量 $J$ 对中间量的偏导从输出层传回输入。每个模块只需要局部 Jacobian：上游传来的 $\mathrm{d}\_{\mathrm{out}}$ 左乘或按元素乘 $g'$，再分配给输入与参数。线性层 $Z=A_{\mathrm{prev}}W$ 对 $W$ 的梯度是 $\mathrm{d}Z\,A_{\mathrm{prev}}^{\top}$，形状由矩阵乘法决定。各模块局部正确则总梯度正确，不必展开整条计算图。
 
 <br>
 
@@ -2845,7 +2845,7 @@ $$
 反向 $p_\theta(x_{t-1}\mid x_t)$ 参数化为高斯，均值由网络给出。一种等价且稳定的训练是预测噪声 $\varepsilon_\theta(x_t,t)$，损失
 
 $$
-L=\mathbb{E}_{x_0,\varepsilon,t}\big[\|\varepsilon-\varepsilon_\theta(x_t,t)\|_{2}^{2}\big].
+L=\mathbb{E}\_{x_0,\varepsilon,t}\big[\|\varepsilon-\varepsilon_\theta(x_t,t)\|_{2}^{2}\big].
 $$
 
 该式来自 ELBO 各项在高斯假设下的加权简化；实践常对 $t$ 均匀采样并忽略复杂权重。采样：从 $x_T\sim\mathcal{N}(0,I)$ 出发，按

@@ -21,13 +21,13 @@
 预训练（pretraining）最小化下一词交叉熵，(1.1)：
 
 $$
-\mathcal{L}_{\mathrm{pretrain}}
+\mathcal{L}\_{\mathrm{pretrain}}
 =
--\mathbb{E}_{x\sim\mathcal{D}}
+-\mathbb{E}\_{x\sim\mathcal{D}}
 \left[\sum_{t=1}^{T}\log\pi_\theta(x_t\mid x_{<t})\right].
 $$
 
-对数评分（logarithmic scoring rule）$S(p,y)=\log p(y)$ 是严格恰当的（strictly proper）。真实分布为 $q$ 时，期望得分 $\mathbb{E}_{y\sim q}[S(p,y)]$ 只在预报 $p=q$ 时最大。交叉熵因此把语料里的频率拉向模型概率。能续写，不表示会停在有害续写前面。
+对数评分（logarithmic scoring rule）$S(p,y)=\log p(y)$ 是严格恰当的（strictly proper）。真实分布为 $q$ 时，期望得分 $\mathbb{E}\_{y\sim q}[S(p,y)]$ 只在预报 $p=q$ 时最大。交叉熵因此把语料里的频率拉向模型概率。能续写，不表示会停在有害续写前面。
 
 后训练（posttraining，书里也叫 alignment）换数据：同一提示 $x$ 下，标注者指出 $(y_1,y_2)$ 里哪条更好。RLHF 先拟合奖励 $r(x,y)$，再在靠近原模型的约束下把策略往奖励上推。DPO 跳过单独的奖励网络，损失就是 (1.2)，和前文的 $u=\beta(\Delta_\theta-\Delta_{\mathrm{ref}})$ 是同一个式子。把隐式奖励定义成 $r^\star(x,y)=\beta\log(\pi_\theta(y\mid x)/\pi_{\mathrm{ref}}(y\mid x))$ 之后，(1.3) 就是 Bradley–Terry。
 
@@ -172,7 +172,7 @@ $$
 GRPO（Group Relative Policy Optimization，Shao et al., 2024）不用 PPO 的价值网络（critic）。同一条提示抽出 $G$ 个回复，优势是组内奖励的 $z$ 分数，(3.74)：
 
 $$
-\hat A_i=\frac{r_i-\mathrm{mean}(\{r_j\}_{j=1}^{G})}{\mathrm{std}(\{r_j\}_{j=1}^{G})}.
+\hat A_i=\frac{r_i-\mathrm{mean}(\{r_j\}\_{j=1}^{G})}{\mathrm{std}(\{r_j\}\_{j=1}^{G})}.
 $$
 
 更新仍是截断的重要性比 $\rho_i=\pi_\theta(y_i\mid x)/\pi_{\theta_{\mathrm{old}}}(y_i\mid x)$，再减去对 $\pi_{\mathrm{ref}}$ 的 KL，(3.75)。组里分数都高时，只有最高的几条 $\hat A_i>0$。组里分数都低时，中等回复的优势也可以为正。
@@ -225,7 +225,7 @@ $$
 y^\star
 =
 \arg\max_y
-\mathbb{E}_{y'\sim\pi_{\mathrm{ref}}(\cdot\mid x)}
+\mathbb{E}\_{y'\sim\pi_{\mathrm{ref}}(\cdot\mid x)}
 \big[\mathbf{1}[y\succ y'\mid x]\big].
 $$
 

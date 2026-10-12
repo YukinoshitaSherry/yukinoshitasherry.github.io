@@ -314,7 +314,7 @@ $$
 | 逻辑 | $\log(1+e^{-ys})$ | $-\frac{y}{1+e^{ys}}\phi$ | 要概率 |
 | 平方 | $(s-y)^{2}$ | $2(s-y)\phi$ | 回归 |
 
-零一、感知机、铰链、逻辑都是 $ys$ 的单调降函数。铰链与逻辑是零一的凸上界：$\mathrm{Loss}_{\mathrm{0-1}}\le\mathrm{Loss}_{\mathrm{hinge}}$，$\mathrm{Loss}_{\mathrm{0-1}}\le\mathrm{Loss}_{\mathrm{logistic}}/\log 2$（差一个正常数）。最小化上界并不自动最小化零一，但给出可优化的凸目标。
+零一、感知机、铰链、逻辑都是 $ys$ 的单调降函数。铰链与逻辑是零一的凸上界：$\mathrm{Loss}\_{\mathrm{0-1}}\le\mathrm{Loss}\_{\mathrm{hinge}}$，$\mathrm{Loss}\_{\mathrm{0-1}}\le\mathrm{Loss}\_{\mathrm{logistic}}/\log 2$（差一个正常数）。最小化上界并不自动最小化零一，但给出可优化的凸目标。
 
 > [!INFO]+ 铰链梯度
 >
@@ -612,7 +612,7 @@ def uniform_cost_search(start, is_end, successors):
 > 边权 $\ge 0$。对弹出次序做归纳。起点以 $g=0$ 弹出，显然最优。设此前弹出的状态都已拿到最优 $g$。令 $s$ 是下一个弹出、键为 $g$ 的状态。若存在更短路径 $P$ 到达 $s$，看 $P$ 上第一个尚未弹出的点 $u$。$u$ 的前驱已弹出，故 $u$ 已在队列里，且
 >
 > $$
-> g(u)\le\mathrm{PastCost}_{P}(u)\le\mathrm{PastCost}_{P}(s)<g(s).
+> g(u)\le\mathrm{PastCost}\_{P}(u)\le\mathrm{PastCost}\_{P}(s)<g(s).
 > $$
 >
 > 非负边权给出第二个不等式。优先队列会先弹出 $u$，与“下一个弹出的是 $s$”矛盾。因此 $g(s)$ 最优。终点第一次弹出时即可停，不必清空队列。
@@ -846,7 +846,7 @@ $\hat y=y$ 时不更新。推断必须（近似）最优，否则 $\hat y$ 不�
 从 $s_0=s$ 出发、一直按 $\pi$ 走，折扣回报的期望是策略值（value）
 
 $$
-V_{\pi}(s)=\mathbb{E}_{\pi}\Big[\sum_{t=0}^{\infty}\gamma^{t}R(s_t,a_t,s_{t+1})\ \Big|\ s_0=s\Big].
+V_{\pi}(s)=\mathbb{E}\_{\pi}\Big[\sum_{t=0}^{\infty}\gamma^{t}R(s_t,a_t,s_{t+1})\ \Big|\ s_0=s\Big].
 $$
 
 动作值 $Q_{\pi}(s,a)$ 先强制走 $a$，此后再按 $\pi$。最优值 $V_{\mathrm{opt}}(s)=\max_{\pi}V_{\pi}(s)$，$Q_{\mathrm{opt}}(s,a)=\max_{\pi}Q_{\pi}(s,a)$。确定性最优策略 $\pi_{\mathrm{opt}}(s)=\arg\max_a Q_{\mathrm{opt}}(s,a)$。有限 MDP、$\gamma<1$ 时最优值唯一，最优策略可以不止一个。
@@ -1576,7 +1576,7 @@ $$
 
 ## 粒子滤波
 
-粒子滤波维护一组加权粒子 $\{z^{(k)},w^{(k)}\}_{k=1}^{K}$：
+粒子滤波维护一组加权粒子 $\{z^{(k)},w^{(k)}\}\_{k=1}^{K}$：
 
 1. 按转移核从上一时刻粒子前进一步（提议）；
 2. 用观测似然 $P(x_t\mid z^{(k)})$ 乘权；

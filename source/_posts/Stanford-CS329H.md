@@ -601,15 +601,15 @@ $$
 
 巢本身的系统效用为 $\lambda_k\mathrm{IV}_k$。与随机效用相容时 $\lambda_k\in(0,1]$。$\lambda_k=1$ 退回普通 logit；$\lambda_k\to 0$ 表示巢内完全相关。
 
-汽车单独成巢，$\lambda=1$，$V=0$，包容值 $\mathrm{IV}_{\mathrm{car}}=0$。红、蓝巴士成巢，$V=0$。
+汽车单独成巢，$\lambda=1$，$V=0$，包容值 $\mathrm{IV}\_{\mathrm{car}}=0$。红、蓝巴士成巢，$V=0$。
 
-$\lambda=1$ 时 $\mathrm{IV}_{\mathrm{bus}}=\log 2$，巢效用为 $\log 2$，
+$\lambda=1$ 时 $\mathrm{IV}\_{\mathrm{bus}}=\log 2$，巢效用为 $\log 2$，
 
 $$
 P(\mathrm{car})=\frac{1}{1+2}=\frac13,\qquad P(\mathrm{red})=\frac13.
 $$
 
-$\lambda=1/2$ 时 $\mathrm{IV}_{\mathrm{bus}}=\log 2$，巢效用为 $\tfrac12\log 2$，巢权重为 $\sqrt{2}$，
+$\lambda=1/2$ 时 $\mathrm{IV}\_{\mathrm{bus}}=\log 2$，巢效用为 $\tfrac12\log 2$，巢权重为 $\sqrt{2}$，
 
 $$
 P(\mathrm{car})=\frac{1}{1+\sqrt{2}}=\sqrt{2}-1\approx 0.4142,
@@ -1016,11 +1016,11 @@ KL 约束的奖励最大化
 
 $$
 \max_{\pi}
-\mathbb{E}_{x\sim\mathcal{D},\,y\sim\pi}
+\mathbb{E}\_{x\sim\mathcal{D},\,y\sim\pi}
 [r(x,y)]
 -
 \beta\,
-\mathbb{E}_{x}
+\mathbb{E}\_{x}
 \big[
 D_{\mathrm{KL}}(\pi(\cdot\mid x)\,\|\,\pi_{\mathrm{ref}}(\cdot\mid x))
 \big]
@@ -1255,7 +1255,7 @@ Christiano 等人（2017）在轨迹片段上收集成对偏好，拟合奖励�
 奖励模型的训练目标就是成对负对数似然：
 
 $$
-\mathcal{L}_{\mathrm{RM}}(\phi)
+\mathcal{L}\_{\mathrm{RM}}(\phi)
 =
 -\mathbb{E}
 \big[
@@ -1279,7 +1279,7 @@ $$
 $$
 D_{\mathrm{KL}}(\pi_\theta\|\pi_{\mathrm{ref}})
 =
-\mathbb{E}_{\pi_\theta}
+\mathbb{E}\_{\pi_\theta}
 \Big[
 \sum_t
 \log\frac{\pi_\theta(y_t\mid x,y_{<t})}{\pi_{\mathrm{ref}}(y_t\mid x,y_{<t})}
@@ -1328,7 +1328,7 @@ $\delta=0.5$ 时 $\sigma(0.5)=0.6225$，损失 $0.4741$，导数 $-0.3775$。梯
 
 若 $r=\phi^{\top}h(x,y)$ 且 $\phi$ 是最后一层，$h$ 是冻结的隐藏向量，则 $\phi$ 的梯度是 $(\sigma(\delta)-1)h_w+(1-\sigma(\delta))h_l$。胜者与败者的隐藏向量若几乎平行，这一对提供的方向很短，和 BT 里 $x=e_i-e_j$ 范数固定是同一几何。
 
-批次里把 $r$ 减均值，不改变任何 $\delta$，因此不改变 $\mathcal{L}_{\mathrm{RM}}$。在 PPO 里，减去的均值会改变优势的零点；再除以标准差会改变 $r$ 相对 $\beta$ KL 的尺度。$\beta$ 是在这个尺度下选定的。中途开始做白化（whitening）等于换了 $\beta$，需要重新看留出比较。
+批次里把 $r$ 减均值，不改变任何 $\delta$，因此不改变 $\mathcal{L}\_{\mathrm{RM}}$。在 PPO 里，减去的均值会改变优势的零点；再除以标准差会改变 $r$ 相对 $\beta$ KL 的尺度。$\beta$ 是在这个尺度下选定的。中途开始做白化（whitening）等于换了 $\beta$，需要重新看留出比较。
 
 <br>
 
@@ -1418,7 +1418,7 @@ $$
 Rafailov 等人（2023）把待求策略 $\pi_\theta$ 放进这个概率，最小化负对数似然
 
 $$
-\mathcal{L}_{\mathrm{DPO}}(\theta)
+\mathcal{L}\_{\mathrm{DPO}}(\theta)
 =
 -\mathbb{E}
 \Big[
@@ -1569,7 +1569,7 @@ $$
 =
 H[y\mid x]
 -
-\mathbb{E}_{w\sim p(w\mid\mathcal{D})}
+\mathbb{E}\_{w\sim p(w\mid\mathcal{D})}
 \big[
 H[y\mid x,w]
 \big].
@@ -1966,9 +1966,9 @@ $$
 $$
 v
 =
-\mathbb{E}[h\mid \mathrm{style}_{+}]
+\mathbb{E}[h\mid \mathrm{style}\_{+}]
 -
-\mathbb{E}[h\mid \mathrm{style}_{-}].
+\mathbb{E}[h\mid \mathrm{style}\_{-}].
 $$
 
 生成时把 $\alpha v$ 加到该层。$\alpha$ 控制强度。这改变的是条件分布的局部方向，不是一个在成对数据上重新估计的 $r_\phi$。它适合在已经训练好的策略上调节格式或语气；它不修正奖励模型里已经学到的长度偏好，除非负风格的语料恰好把该方向分离出来。
@@ -2033,7 +2033,7 @@ $$
 $$
 \mu(\tau_{\mathrm{demo}})
 -
-\mathbb{E}_{\tau\sim\pi_w}[\mu(\tau)].
+\mathbb{E}\_{\tau\sim\pi_w}[\mu(\tau)].
 $$
 
 再次出现「观测特征减去模型期望特征」。内层期望由当前 $w$ 的软最优策略给出，所以每一步外层梯度都要解或近似一个软强化学习问题。奖励的尺度与 softmax 温度同样绑在一起，实践中固定温度或固定 $\|w\|$。
@@ -2328,13 +2328,13 @@ $$
 预训练（pretraining）最小化下一词交叉熵，(1.1)：
 
 $$
-\mathcal{L}_{\mathrm{pretrain}}
+\mathcal{L}\_{\mathrm{pretrain}}
 =
--\mathbb{E}_{x\sim\mathcal{D}}
+-\mathbb{E}\_{x\sim\mathcal{D}}
 \left[\sum_{t=1}^{T}\log\pi_\theta(x_t\mid x_{<t})\right].
 $$
 
-对数评分（logarithmic scoring rule）$S(p,y)=\log p(y)$ 是严格恰当的（strictly proper）。真实分布为 $q$ 时，期望得分 $\mathbb{E}_{y\sim q}[S(p,y)]$ 只在预报 $p=q$ 时最大。交叉熵因此把语料里的频率拉向模型概率。有害续写只要在语料里出现过，这项损失同样会抬高它的概率。
+对数评分（logarithmic scoring rule）$S(p,y)=\log p(y)$ 是严格恰当的（strictly proper）。真实分布为 $q$ 时，期望得分 $\mathbb{E}\_{y\sim q}[S(p,y)]$ 只在预报 $p=q$ 时最大。交叉熵因此把语料里的频率拉向模型概率。有害续写只要在语料里出现过，这项损失同样会抬高它的概率。
 
 后训练（posttraining，书里也叫 alignment）换数据：同一提示 $x$ 下，标注者指出 $(y_1,y_2)$ 里哪条更好。RLHF 先拟合奖励 $r(x,y)$，再在靠近原模型的约束下把策略往奖励上推。DPO 跳过单独的奖励网络，损失就是 (1.2)，和前文的 $u=\beta(\Delta_\theta-\Delta_{\mathrm{ref}})$ 是同一个式子。把隐式奖励定义成 $r^\star(x,y)=\beta\log(\pi_\theta(y\mid x)/\pi_{\mathrm{ref}}(y\mid x))$ 之后，(1.3) 就是 Bradley–Terry。
 
@@ -2479,7 +2479,7 @@ $$
 GRPO（Group Relative Policy Optimization，Shao et al., 2024）不用 PPO 的价值网络（critic）。同一条提示抽出 $G$ 个回复，优势是组内奖励的 $z$ 分数，(3.74)：
 
 $$
-\hat A_i=\frac{r_i-\mathrm{mean}(\{r_j\}_{j=1}^{G})}{\mathrm{std}(\{r_j\}_{j=1}^{G})}.
+\hat A_i=\frac{r_i-\mathrm{mean}(\{r_j\}\_{j=1}^{G})}{\mathrm{std}(\{r_j\}\_{j=1}^{G})}.
 $$
 
 更新仍是截断的重要性比 $\rho_i=\pi_\theta(y_i\mid x)/\pi_{\theta_{\mathrm{old}}}(y_i\mid x)$，再减去对 $\pi_{\mathrm{ref}}$ 的 KL，(3.75)。组里分数都高时，只有最高的几条 $\hat A_i>0$。组里分数都低时，中等回复的优势也可以为正。
@@ -2532,7 +2532,7 @@ IIA'（modified IIA）：两个剖面里，若每个投票人对 $y$ 与 $y'$ �
 y^\star
 =
 \arg\max_y
-\mathbb{E}_{y'\sim\pi_{\mathrm{ref}}(\cdot\mid x)}
+\mathbb{E}\_{y'\sim\pi_{\mathrm{ref}}(\cdot\mid x)}
 \big[\mathbf{1}[y\succ y'\mid x]\big].
 \]
 
