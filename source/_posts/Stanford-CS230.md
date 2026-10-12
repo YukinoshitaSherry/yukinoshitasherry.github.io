@@ -23,7 +23,7 @@ desc: Stanford CS230 详细课程笔记：从感知机、逻辑回归与反向�
   - [Stanford Bulletin：CS230](https://bulletin.stanford.edu/courses/2198851)
   - [课程主页](https://cs230.stanford.edu/)
   - [Syllabus](https://cs230.stanford.edu/syllabus/)
-  - [CS230 Cheatsheets（Afshine & Shervine Amidi）](https://stanford.edu/~shervine/teaching/cs-230/)
+  - [CS230 Cheatsheets（Afshine & Shervine Amidi，Winter 2019 TA 整理）](https://stanford.edu/~shervine/teaching/cs-230/)：三份图解速查（CNN / RNN / Tips），对应 Coursera C2–C5 应用部分；非 Stanford 官方讲义，[GitHub 镜像与 PDF](https://github.com/afshinea/stanford-cs-230-deep-learning)。
 - **参考书**
   - 斋藤康毅《深度学习入门：基于 Python 的理论与实现》（*Deep Learning from Scratch*），下文简称“鱼书”。
 
@@ -771,6 +771,8 @@ $$
 ### 激活函数
 
 隐藏层的激活函数决定了网络能表示什么样的非线性。常用的选择如下，每个都给出公式、导数、用途与缺点。
+
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/img/20261011203420815.png" style="width:75%">
 
 > [!NOTE]+ 激活函数
 >
@@ -9417,14 +9419,13 @@ $$
 4. Stanford CS230. *Winter 2021 Exam* 与 [solution](https://cs230.stanford.edu/files/cs230exam_win21_soln.pdf)：英文题干、初始化、BatchNorm、卷积与反向传播题型。
 5. Stanford CS230. *Winter 2020 Exam Solution*. [https://cs230.stanford.edu/files/cs230exam_win20_soln.pdf](https://cs230.stanford.edu/files/cs230exam_win20_soln.pdf)
 6. Stanford CS230. *Fall 2025 Lecture 5: Deep Reinforcement Learning and RLHF*. [lecture_5.pdf](https://cs230.stanford.edu/syllabus/fall_2025/5/lecture_5.pdf)
-7. Amidi A, Amidi S. *CS230 Deep Learning Cheatsheets*（卷积、循环网络、训练技巧速查表）。[https://stanford.edu/~shervine/teaching/cs-230/](https://stanford.edu/~shervine/teaching/cs-230/)
+7. Amidi A, Amidi S. *Stanford CS230 Deep Learning Cheatsheets*（Afshine & Shervine 在 Winter 2019 任 CS230 TA 时整理的图解速查；覆盖 Coursera 专项中 CNN、RNN/NLP 与训练技巧，**不含** C1 浅层/深层推导、C3 ML Strategy、Transformer 与 2025 现场扩展）。入口：[Teaching · CS 230](https://stanford.edu/~shervine/teaching/cs-230/)；分册：[Convolutional Neural Networks](https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks)、[Recurrent Neural Networks](https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-recurrent-neural-networks)、[Deep Learning tips and tricks](https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-deep-learning-tips-and-tricks)；源码与 PDF：[afshinea/stanford-cs-230-deep-learning](https://github.com/afshinea/stanford-cs-230-deep-learning)。
 8. 斋藤康毅. *深度学习入门：基于 Python 的理论与实现*. 陆宇杰 译. 人民邮电出版社, 2018.（感知机、计算图、误差反向传播、im2col、CNN 可视化等例题）
 9. Katanforoosh K. *CS230 Lecture 2: Deep Learning Intuition / Decision Making in AI Projects*（昼夜分类、人脸验证、风格迁移、触发词案例）。[Fall 2018 slides](http://cs230.stanford.edu/fall2018/slides_week2.pdf)；[Spring 2022 slides](https://cs230.stanford.edu/syllabus/spring_2022/lecture_2.pdf)；[Autumn 2025 视频](https://www.youtube.com/watch?v=DNCn1BpCAUY)
 10. Ng A. *CS230 Autumn 2025 Lecture 3: Full Cycle of a DL Project*（数据收集速度、VAD、数据漂移、监控）。[视频](https://www.youtube.com/watch?v=MGqQuQEUXhk)
 11. Ng A. *CS230 Autumn 2018 Lecture 8: Career Advice / Reading Research Papers*. [视频](https://www.youtube.com/watch?v=733m6qBH-jI)
-12. Amidi A, Amidi S. *CS230 Deep Learning Tips and Tricks Cheatsheet*（数据增强、权重正则、小 batch 过拟合、梯度检查）。[链接](https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-deep-learning-tips-and-tricks)
-13. Stanford CS230. *Section 3: Baseline and Codebase*. [https://cs230.stanford.edu/section/3/](https://cs230.stanford.edu/section/3/)
-14. Deitke M. *CS230 Lecture Notes*（课堂讲座笔记整理）。[https://mattdeitke.com/notes/cs230](https://mattdeitke.com/notes/cs230)
+12. Stanford CS230. *Section 3: Baseline and Codebase*. [https://cs230.stanford.edu/section/3/](https://cs230.stanford.edu/section/3/)
+13. Deitke M. *CS230 Lecture Notes*（课堂讲座笔记整理）。[https://mattdeitke.com/notes/cs230](https://mattdeitke.com/notes/cs230)
 
 ## 优化与正则
 
