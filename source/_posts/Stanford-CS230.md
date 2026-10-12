@@ -524,22 +524,36 @@ $\alpha$ 称为**学习率**（learning rate），决定每一步走多远。它
 
 对逻辑回归，可以直接用链式法则求出梯度的解析式，不必数值微分。
 
-> [!INFO]+ 从损失到 $dz$
+> [!INFO]+ 从损失到 $\mathrm{d}z$（输出层误差怎么算）
 >
-> 令 $a=\sigma(z)$。对单个样本：
+> **符号**：$z$ 是进入 sigmoid 的**一个数**（logit）；$a=\sigma(z)\in(0,1)$ 是预测概率；$y\in\{0,1\}$ 是标签。反向传播里常把 $\partial\mathcal{L}/\partial z$ 记成 $\mathrm{d}z$，表示“$z$ 该往哪边微调、损失才会降”。
 >
+> **第一步：损失只通过 $a$ 依赖 $z$**。单样本二元交叉熵为 $\mathcal{L}=-\big[y\log a+(1-y)\log(1-a)\big]$，且 $a=\sigma(z)$，所以要用**链式法则**：
 > $$
-> \frac{\partial\mathcal{L}}{\partial a}=-\frac{y}{a}+\frac{1-y}{1-a},\qquad
-> \frac{\partial a}{\partial z}=a(1-a).
+> \mathrm{d}z=\frac{\partial\mathcal{L}}{\partial z}=\frac{\partial\mathcal{L}}{\partial a}\cdot\frac{\partial a}{\partial z}.
 > $$
+> 左因子 $\partial\mathcal{L}/\partial a$：损失对概率 $a$ 有多敏感；右因子 $\partial a/\partial z=a(1-a)$：sigmoid 在 $z$ 处的斜率。
 >
-> 相乘后：
+> **第二步：分别求两个因子**。
+> - 对 $a$ 求导（把 $y$ 当常数）：$\dfrac{\partial\mathcal{L}}{\partial a}=-\dfrac{y}{a}+\dfrac{1-y}{1-a}$。直觉：$y=1$ 时希望 $a$ 变大，$a$ 偏小时第一项 $-y/a$ 为负、损失偏大；$y=0$ 时希望 $a$ 变小，第二项为正。
+> - 对 $z$ 求导：$\dfrac{\partial a}{\partial z}=a(1-a)$（sigmoid 导数，见上文激活函数一节）。
 >
+> **第三步：代入并化简**（把 $a(1-a)$ 乘进括号，两项分别约分）：
 > $$
-> \frac{\partial\mathcal{L}}{\partial z}=\left(-\frac{y}{a}+\frac{1-y}{1-a}\right)a(1-a)=-y(1-a)+(1-y)a=a-y.
+> \begin{aligned}
+> \mathrm{d}z&=\left(-\frac{y}{a}+\frac{1-y}{1-a}\right)\cdot a(1-a)\\
+> &=-y(1-a)+(1-y)a\\
+> &=-y+ya+a-ya\\
+> &=a-y.
+> \end{aligned}
 > $$
+> 中间 $ya$ 与 $-ya$ **正好抵消**，所以 sigmoid 的 $a(1-a)$ 不会留在最终结果里——这是交叉熵与 sigmoid **配对使用**时才会出现的化简，不是随便哪个损失都有。
 >
-> 因此 sigmoid + 二元交叉熵的输出层误差就是“预测减标签” $a-y$，不需要再显式乘 $\sigma'(z)$。多分类中 softmax + 交叉熵有同样的简化：$\partial\mathcal{L}/\partial z = a-y$。这个简洁的结果不是巧合，而是交叉熵被设计成与 sigmoid / softmax 配套的结果。
+> **第四步：读一个具体数字**。设 $y=1$（正类）、$z=0$，则 $a=\sigma(0)=0.5$，$\mathrm{d}z=a-y=-0.5$。$z$ 增大时 $a$ 增大、损失下降，梯度为负表示“应增大 $z$”（与梯度下降 $z\leftarrow z-\eta\,\mathrm{d}z$ 一致：减去负数等于加上去）。若 $y=0$、$a=0.8$，则 $\mathrm{d}z=0.8$，为正，表示 $z$ 偏大、应减小。
+>
+> **和 MSE 对比**：若损失是 $\mathcal{L}=\frac12(a-y)^2$，链式法则给出 $\mathrm{d}z=(a-y)\cdot a(1-a)$，饱和区 $a(1-a)$ 很小，梯度会被压扁（见 callout「为何不用 MSE 做分类」）。交叉熵则直接得到 $\mathrm{d}z=a-y$，不乘 $a(1-a)$。
+>
+> **实现**：输出层用 sigmoid + BCE 时，代码里可直接写 `dz = a - y`（或 `sigmoid(z) - y`），不必先算 $\partial\mathcal{L}/\partial a$ 再乘 $a(1-a)$。多分类时 softmax + 交叉熵同样得到 $\partial\mathcal{L}/\partial z_j=a_j-y_j$（向量形式仍是「预测减 one-hot 标签」），见后文「softmax 交叉熵的 $\mathrm{d}z$」。
 
 再由 $z=w^{\top}x+b$ 得 $\partial z/\partial w=x$、$\partial z/\partial b=1$，乘上 $\partial\mathcal{L}/\partial z=a-y$，得到单样本梯度：
 
@@ -554,7 +568,7 @@ $$
 
 $$
 \mathrm{d}w=\frac{1}{m}X(A-Y)^{\top},\qquad
-\mathrm{d}b=\frac{1}{m}\sum_{i=1}^{m}(A-Y)_{i}.
+\mathrm{d}b=\frac{1}{m}\sum_{i=1}^{m}(A-Y)\_{i}.
 $$
 
 - 形状核对：$X$ 为 $(n_x,m)$，$(A-Y)^{\top}$ 为 $(m,1)$，乘积为 $(n_x,1)$，与 $w$ 同形。
@@ -3870,16 +3884,118 @@ def stratified_split(y, train_frac=0.8, dev_frac=0.1, seed=0):
 有了 $h$，就能把“偏差”说得更精确：
 
 - **可避免偏差**（avoidable bias）$=$ 训练误差 $-\ h$。训练误差不可能低于 Bayes 误差，所以只有超出 $h$ 的部分才“可避免”。
-- **方差** $=$ 开发集误差 $-$ 训练误差（训练与开发集分布不同时，改用 train-dev 误差 $-$ 训练误差）。
+- **方差差距**（variance gap）$=$ 开发集误差 $-$ 训练误差（训练与开发集**同分布**时；若分布不同，改用 train-dev 误差 $-$ 训练误差，见下文「Train-dev 集」）。
 
-> [!EXAMPLE]+ 例6 同样的误差，不同的结论
+Andrew Ng 在 Deep Learning Specialization 里强调：**训练误差与开发误差可以完全相同，但只要人类水平 $h$ 不同，该先降偏差还是先降方差就会完全相反**。不能只看“训练 $4\%$、dev $4.5\%$”就断定是 high bias 还是 high variance——必须同时看 $h$。
+
+> [!INFO]+ 原理：为什么要用 $h$ 把 dev 误差拆成两项
 >
-> 训练误差 $8\%$、开发集误差 $10\%$：
+> **要回答的问题**：下一周该加数据/正则，还是加大模型/多训几轮？这对应两类不同的失败模式——**在训练集上还没学好**（高偏差 / underfitting），与**在训练集上学好了但换一批同分布数据就变差**（高方差 / overfitting）。只看 $E_{\text{train}}$ 与 $E_{\text{dev}}$ 的差，只能看到第二种；第一种必须知道“训练误差离理论下限还有多远”。
 >
-> - 若人类水平为 $1\%$（清晰的猫图）：可避免偏差 $7\%$，方差 $2\%$，应**先降偏差**：加大网络、训练更久、换更好的优化器或架构。
-> - 若人类水平为 $7.5\%$（模糊的猫图）：可避免偏差只有 $0.5\%$，方差 $2\%$，应**先降方差**：加数据、正则。
+> **理论下限**：Bayes 误差 $E^*$ 是任何模型在该任务、该数据分布上能达到的最低期望错误率（标签噪声、输入模糊、类间不可分等都会把它抬高）。$E^*$ 算不出来，用人类水平 $h$ 当**可观测的上界**：$E^*\le h$（人都能错 $h$，模型不可能长期稳定地比 Bayes 还低）。
 >
-> 不知道 $h$，就无法决定先做哪个。
+> **第一项：可避免偏差** $E_{\text{train}}-h$。
+> - 含义：当前模型在**已见过的训练数据**上，比“人类/Bayes 所能达到的最好水平”还**多错**多少。
+> - 若这项大：说明训练集上仍有大量“本可以学对”的错误——常见原因是模型容量不够、训练步数不够、优化没收敛、实现有 bug，或损失/标签与任务不对齐。手段是**加容量、训更久、改优化/架构**。
+> - 若 $E_{\text{train}}\approx h$：在训练集上已接近 Bayes 代理，再堆大模型往往**降不了多少 train**，继续加容量主要是浪费算力。
+>
+> **第二项：方差差距** $E_{\text{dev}}-E_{\text{train}}$（train 与 dev **同分布**时）。
+> - 含义：模型在**同一分布**下，从“见过的 train”到“没见过的 dev”，错误率**又升高**多少。
+> - 若这项大：train 已经拟合得不错，但泛化差——常见原因是数据太少、模型相对数据过大、过拟合。手段是**更多数据、正则、数据增强**。
+> - 若这项小：同分布泛化不是主矛盾；若 dev 仍远高于 train，要怀疑 **train 与 dev 不同分布**（改用 train-dev 诊断，见后文）。
+>
+> **分解式** $E_{\text{dev}}\approx h+(E_{\text{train}}-h)+(E_{\text{dev}}-E_{\text{train}})$ 只是把 dev 上的总错误拆成三层：
+> 1. $h$：任务本身难度（Bayes 代理，**改模型也消不掉**）；
+> 2. $E_{\text{train}}-h$：训练集上**还没拟合到位**的部分（可避免偏差）；
+> 3. $E_{\text{dev}}-E_{\text{train}}$：拟合 train 之后，**同分布泛化**还损失多少（方差差距）。
+>
+> **为何 train、dev 相同而 $h$ 不同，策略会相反**（例 6a vs 6b 都是 $4.0\%/4.5\%$）：
+> - $h=0.5\%$：$E_{\text{train}}=4\%$ 远高于 $h$，主矛盾是“train 上还能学很多”（可避免偏差 $3.5\%$），dev 只比 train 高 $0.5\%$ 是次要的。
+> - $h=3.9\%$：$E_{\text{train}}=4\%$ 几乎贴住 $h$，**不是**“再加十层就能在 train 上掉到 $1\%$”——任务/标签噪声下人类也就 $3.9\%$。此时 dev 仍比 train 高 $0.5\%$，主矛盾变成**方差**（数据、正则），而不是容量。
+>
+> **没有 $h$ 时**：只能算 $E_{\text{dev}}-E_{\text{train}}$，无法知道 $4\%$ 的 train 是“离 Bayes 还很远”还是“已经贴顶”。因此不能单凭 train $4\%$ 就判 high bias。
+>
+> **与经典 bias–variance 分解的关系**：理论上期望泛化误差可写成偏差平方 + 方差 + 不可约噪声；CS230 这套是**工程上的可操作版本**——用 $h$ 代替不可约噪声，用 train/dev 两个数代替“拟合 vs 泛化”，便于决定下一实验。两项**哪个大，通常先动哪类**（也可能两个都改）。
+
+> [!TIP]+ 三个常用公式（以 $h$ 为 Bayes 误差的代理时）
+>
+> 记 $E_{\text{train}}$、$E_{\text{dev}}$ 为训练集、开发集上的**错误率**（error，不是 accuracy），$h=E_{\text{human}}$：
+>
+> $$
+> \boxed{\text{Avoidable Bias}\approx E_{\text{train}}-h}
+> $$
+>
+> $$
+> \boxed{\text{Variance Gap}=E_{\text{dev}}-E_{\text{train}}}
+> $$
+>
+> $$
+> \boxed{E_{\text{dev}}\approx h+(E_{\text{train}}-h)+(E_{\text{dev}}-E_{\text{train}})}
+> $$
+>
+> 即 $E_{\text{dev}}\approx h+\text{可避免偏差}+\text{方差差距}$（在 $h$ 近似 Bayes 误差、且 train/dev 同分布时成立）。哪一项**数值更大**，通常就先动哪一类手段（见下表）。
+
+> [!EXAMPLE]+ 例6 相同的 $E_{\text{train}}$、$E_{\text{dev}}$，不同的 $h$（Andrew Ng, DLS）
+>
+> 下列三例默认 train 与 dev **同分布**；方差差距 $=E_{\text{dev}}-E_{\text{train}}$。
+>
+> **例 6a：high bias（高偏差）**
+>
+> | 指标 | Error |
+> | :--- | :--- |
+> | Human-level | $0.5\%$ |
+> | Training | $4.0\%$ |
+> | Dev | $4.5\%$ |
+>
+> $$
+> \text{Avoidable Bias}=4.0\%-0.5\%=3.5\%,\qquad
+> \text{Variance Gap}=4.5\%-4.0\%=0.5\%.
+> $$
+>
+> 可避免偏差明显大于方差差距 → **先降偏差**：更大模型、训练更久、更好的优化器（Momentum、Adam 等）、检查实现 bug。
+>
+> **例 6b：high variance（高方差）**
+>
+> | 指标 | Error |
+> | :--- | :--- |
+> | Human-level | $3.9\%$ |
+> | Training | $4.0\%$ |
+> | Dev | $4.5\%$ |
+>
+> $$
+> \text{Avoidable Bias}=4.0\%-3.9\%=0.1\%,\qquad
+> \text{Variance Gap}=4.5\%-4.0\%=0.5\%.
+> $$
+>
+> 方差差距大于可避免偏差 → **先降方差**：更多训练数据、$L_2$/Dropout、数据增强；train 已接近 $h$，再加容量收益有限。
+>
+> **例 6c：偏差与方差都偏大**
+>
+> | 指标 | Error |
+> | :--- | :--- |
+> | Human-level | $0.5\%$ |
+> | Training | $4.0\%$ |
+> | Dev | $8.0\%$ |
+>
+> $$
+> \text{Avoidable Bias}=3.5\%,\qquad \text{Variance Gap}=4.0\%.
+> $$
+>
+> 两项都不小：训练集尚未拟合到接近 $h$，dev 上又比 train 差很多。实践中常**先处理数值更大的一项**（此处方差差距略大，可先加数据/正则），再回头加容量；也可分两轮实验，分别验证“只加数据”与“只加大模型”哪条曲线降得更快。
+>
+> **三例对照**（单位：百分点；差距越大，对应方向上的改进空间通常越大）：
+>
+> |  | $h$ | $E_{\text{train}}$ | $E_{\text{dev}}$ | 可避免偏差 | 方差差距 | 优先方向 |
+> | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+> | 6a | $0.5$ | $4.0$ | $4.5$ | $3.5$ | $0.5$ | 降偏差 |
+> | 6b | $3.9$ | $4.0$ | $4.5$ | $0.1$ | $0.5$ | 降方差 |
+> | 6c | $0.5$ | $4.0$ | $8.0$ | $3.5$ | $4.0$ | 两项都需处理 |
+>
+> 另一组常见数字（训练 $8\%$、dev $10\%$ 不变）：$h=1\%$ 时可避免偏差 $7\%$、方差 $2\%$，先降偏差；$h=7.5\%$ 时可避免偏差仅 $0.5\%$、方差仍 $2\%$，先降方差。与 6a/6b 是同一逻辑。
+
+> [!NOTE]+ 只有 $E_{\text{train}}$、$E_{\text{dev}}$、没有 $h$ 时
+>
+> 例如只给出 Training $=4.0\%$、Dev $=4.5\%$：**可以**算方差差距 $0.5\%$，但**无法**算可避免偏差，也就不能判断 high bias 还是 high variance。这也是为什么不能一见“训练误差 $4\%$”就默认 high bias。
 
 > [!NOTE]+ 怎么用 $h$
 >
