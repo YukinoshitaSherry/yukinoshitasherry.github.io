@@ -2,7 +2,10 @@
  * 把 Obsidian 风格的 callout 语法（> [!TYPE]+/- Title）转换成 HTML 结构。
  * - 在 markdown 渲染前运行，避免影响普通引用。
  * - 支持可折叠（+ 展开，- 折叠）和非折叠两种形式。
+ * - 正文在 marked 渲染前再走 protectSegment，避免 cases 里的 \\ 被吃掉。
  */
+
+const { protectSegment } = require("./protect-math-lib");
 
 const ICON_MAP = {
   note: '<i class="fa fa-info-circle" aria-hidden="true"></i>',
@@ -45,11 +48,12 @@ function renderBodyMarkdown(body) {
   return hexo.render.renderSync({ text: content, engine: "markdown" });
 }
 
-function buildCallout(typeRaw, title, bodyMd, collapseMark) {
+function buildCallout(typeRaw, title, bodyMd, collapseMark, mathStore) {
   const type = (typeRaw || "note").toLowerCase();
   const icon = ICON_MAP[type] || "💬";
   const header = escapeHtml(title || type);
-  const body = renderBodyMarkdown(bodyMd);
+  const store = mathStore || [];
+  const body = renderBodyMarkdown(protectSegment(bodyMd, store));
   const collapsible = collapseMark === "+" || collapseMark === "-";
   const openAttr = collapseMark === "-" ? "" : " open";
 
@@ -66,7 +70,7 @@ function buildCallout(typeRaw, title, bodyMd, collapseMark) {
 </div>`;
 }
 
-function transformCallouts(markdown) {
+function transformCallouts(markdown, mathStore) {
   const lines = (markdown || "").split("\n");
   const output = [];
 
@@ -116,7 +120,7 @@ function transformCallouts(markdown) {
     const [, type, collapseMark, customTitle] = meta;
     const bodyLines = blockLines.slice(1).map(stripBlockquotePrefix);
     const bodyMd = bodyLines.join("\n");
-    const html = buildCallout(type, customTitle && customTitle.trim(), bodyMd, collapseMark);
+    const html = buildCallout(type, customTitle && customTitle.trim(), bodyMd, collapseMark, mathStore);
 
     output.push(html);
     i = j;
@@ -127,7 +131,9 @@ function transformCallouts(markdown) {
 
 hexo.extend.filter.register("before_post_render", (data) => {
   if (!data || !data.content) return data;
-  data.content = transformCallouts(data.content);
+  const store = data._mathStore || [];
+  data._mathStore = store;
+  data.content = transformCallouts(data.content, store);
   return data;
-});
+}, 11);
 
