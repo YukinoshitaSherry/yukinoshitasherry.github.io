@@ -2907,17 +2907,396 @@ Cat detector: 100,000,000 images; full training $\approx$ two weeks. Agree with 
 <br>
 
 
-### C3M2 Autonomous Driving
+### C3M2 Autonomous Driving（自动驾驶路标与信号灯 · 全题）
 
-Decide when to use transfer learning, multi-task learning, end-to-end learning, and error analysis.
+Coursera Deep Learning Specialization · Course 3 Week 2 案例测验。与主笔记「项目策略 · 多任务 / train-dev / 误差分析 / 迁移与端到端」对应。题面与标答对齐 [deeplearning.ai 官方案例](https://learn.deeplearning.ai/specializations/deep-learning/lesson/f4f5y/autonomous-driving-(quiz-case-study))；逐题讨论可参考 [ChatGPT 对话整理](https://chatgpt.com/share/6acde7d6-a0d0-83e8-8e2d-5d5d8f67506c)（与下文「原则纲领」同源）。
 
-在自动驾驶案例中判断迁移学习、多任务、端到端与误差分析。
+**背景（中英）**
 
-- 迁移学习：源任务数据多、底层特征可复用、目标任务数据少；
-- 多任务：多个任务共享输入与低层特征，且每个任务都有足够标签；
-- 端到端：数据极多且输入到输出映射能覆盖中间知识；
-- 误差分析：先人工统计最大错误类别，再决定采集数据或改模型；
-- 合成数据：必须缩小目标分布误差，而不是只增加容易样本。
+You work at a startup building self-driving cars. Detect road signs (stop, pedestrian crossing, construction ahead) and traffic signals (red and green lights) in **front-facing camera** images. Each image may contain **zero or more** of these objects (multi-label). Example label $y^{(i)}=[1,0,0,1,0]$ means stop sign + red light.
+
+在自动驾驶创业项目中，用**车前摄像头**图像同时检测多种路标与红/绿灯（**多标签**，一张图可同时出现多个目标）。已有约 10 万张车载标注图（**部署分布**）；另可从网上下载约 90 万张路况图（**分布不同**）。ReLU 深度网络；项目刚启动。
+
+<br>
+
+#### Q1 项目刚启动，第一步做什么？（各选项耗时相当）
+
+You are just getting started. What is the **first** thing you do?
+
+- (A) Spend a few days checking what others have done on similar problems in academic literature.
+- (B) Spend a few days training a **basic model** and see what mistakes it makes.
+- (C) Spend a few days getting the largest possible dataset off the internet before any modeling.
+- (D) Spend a few days designing the full system architecture and interface before training.
+
+> [!EXAMPLE]+ 选 (B)
+>
+> ML 是**高度迭代**流程：先有一个能跑通的基线，用 dev 误差与**误差分析**找方向，再决定加数据、改结构或改划分。
+>
+> - (A) 不选作第一步：文献有用，但无基线时难以判断该抄哪条路。
+> - (B) 选：与 Coursera 一致——**先训 basic model，看错在哪**。
+> - (C) 不选：大数据重要，但在无基线前盲目堆数据会拖慢发现「真正瓶颈」。
+> - (D) 不选：架构与产品界面可并行，但**不能替代**第一轮训练—诊断循环。
+
+<br>
+
+#### Q2 隐藏层 ReLU，输出层用 softmax 合适吗？
+
+Multi-label detection (several signs/signals may appear together). Softmax on the output layer is a good choice because this is multi-task learning. **True / False?**
+
+多标签（可同时有 stop + 红灯等）。因是多任务学习，输出层用 softmax 很合适。对或错？
+
+- True
+- False
+
+> [!EXAMPLE]+ False
+>
+> **Softmax** 隐含「各类**互斥**、且恰有一类为真」；本题是**多标签**（每个输出维度独立 0/1），应使用**多个 sigmoid**（或等价的多标签损失），不是单一 softmax。
+>
+> - **True** 不选：把多标签当成多类单选会错设概率结构。
+> - **False** 选：多任务 **≠** 多类 softmax；标签向量 $[1,0,0,1,0]$ 正是多 sigmoid 的典型形式。
+
+<br>
+
+#### Q3 误差分析：该人工逐张看哪批图？
+
+Which dataset should you manually examine, one image at a time?
+
+- (A) 10,000 randomly chosen images
+- (B) 500 randomly chosen images
+- (C) **500 images on which the algorithm made a mistake**
+- (D) 10,000 images on which the algorithm made a mistake
+
+> [!EXAMPLE]+ 选 (C)
+>
+> 误差分析要盯**模型判错的样本**；全部错例太多，**随机抽 500 张错例**在成本与信息量之间平衡。
+>
+> - (A)(B) 不选：随机样本里大量是「已做对」的，对找**错误模式**效率低。
+> - (C) 选：Coursera 标答。
+> - (D) 不选：10,000 张人工看一遍成本过高，收益递减。
+
+<br>
+
+#### Q4 多任务标签缺省：$y=[0,?,1,1,?]$ 能否仍用于训练？
+
+Each $y^{(i)}$ indicates presence of signs/signals. If one example is $[0,?,1,1,?]$ (some entries unlabeled), the algorithm **cannot** use that example. True/False?
+
+若部分维度未标注，算法**完全不能**使用该样本。对或错？
+
+- True
+- False
+
+> [!EXAMPLE]+ False
+>
+> 多任务损失可对**已标注维度**求和/求平均；**缺失维度不参与**该样本的梯度，其余维度照常学习。
+>
+> - **True** 不选：不要求每个任务每个样本都标全。
+> - **False** 选：与 C3 多任务 lecture 一致。
+
+<br>
+
+#### Q5 10 万车载 + 90 万互联网图：如何划分 train / dev / test？
+
+Care about **car camera** distribution at deployment. How to split?
+
+- (A) Mix 1M, shuffle, 600k / 200k / 200k train/dev/test.
+- (B) Mix 1M, shuffle, 980k / 10k / 10k.
+- (C) Train: 900k internet + **80k car**; remaining **20k car** split equally dev/test.
+- (D) Train: 900k internet + 20k car; 80k car split equally dev/test.
+
+> [!EXAMPLE]+ 选 (C)
+>
+> **Dev/test 必须来自部署域（车载）**；train 可含大量互联网图增广，但需保留足够**车载 train** 与**纯车载 dev/test**。
+>
+> - (A)(B) 不选：混合 shuffle 后 dev/test 仍以**互联网为主**，指标不反映车载表现（与 Peacetopia Q5–Q6 同逻辑）。
+> - (C) 选：90 万 + 8 万 train，1 万 dev + 1 万 test 车载——与主笔记「例4 猫图方案二」同型。
+> - (D) 不选：车载仅 2 万进 train、8 万进 dev/test，train 中目标分布过少，不匹配更难训。
+
+<br>
+
+#### Q6 固定划分后的误差表：哪些成立？（多选）
+
+Human-level error $\approx 0.5\%$. Errors:
+
+| 集合 | 误差 |
+| :--- | :--- |
+| Training（94 万 internet+car 混合） | 8.8% |
+| Training-dev（2 万，与 train 同分布） | 9.1% |
+| Dev（2 万车载） | 14.3% |
+| Test（2 万车载） | 14.8% |
+
+Which are **True**? (Check all.)
+
+- (A) Large **avoidable-bias** problem: training error much higher than human-level.
+- (B) Large **data-mismatch** problem: model does much better on training-dev than on dev.
+
+> [!EXAMPLE]+ 选 (A)(B)
+>
+> - (A) 选：$8.8\%\gg 0.5\%$ ⇒ $E_{\text{train}}-h$ 大，优先**加容量/训更久/查 bug**（在混合 train 上仍远差于人类）。
+> - (B) 选：train-dev $9.1\%$ vs dev $14.3\%$，差距 $\approx 5.2\%$ ⇒ **train 分布（含大量 internet）与车载 dev 不匹配**，不是单纯同分布方差。
+> - 二者**同时成立**：先看清各自对应手段（正交化），勿只盯其中一个。
+
+<br>
+
+#### Q7 朋友说「train 分布比 dev/test 容易得多」— 对吗？
+
+A friend thinks the **training** distribution is much **easier** than dev/test. What do you think?
+
+- (A) Friend is right.
+- (B) Friend is wrong.
+- (C) **Insufficient information** to tell.
+
+> [!EXAMPLE]+ 选 (C)
+>
+> 算法在 train 上更好，可能因为**在 train 分布上训练**，也可能因为 train **确实更容易**；要区分需分别在两种分布上测**人类水平误差** $h$，本题未给出。
+>
+> - (A)(B) 不选：无 $h_{\text{train}}$、$h_{\text{dev}}$ 不能下结论。
+> - (C) 选：Coursera 标答（ChatGPT 对话 Q7 常卡在此）。
+
+<br>
+
+#### Q8 Dev 误差 14.3% 的误差表：最优先采集雾天图？（多选表述）
+
+Dev error breakdown (**fraction of entire dev set**, not only misclassified):
+
+| 原因 | 占 dev 比例 |
+| :--- | :--- |
+| 总 dev 误差 | 14.3% |
+| 错标 | 4.1% |
+| 雾天 | 8.0% |
+| 雨滴在镜头前 | 2.2% |
+| 其他 | 1.0% |
+
+Team’s **highest priority** should be to bring more **foggy** pictures into training to fix the 8.0% bucket. True/False?
+
+- (A) **False** — depends on cost of fog data and expected help.
+- (B) True — largest error category, prioritize it.
+- (C) True — fog $8.0\% > 4.1\%+2.2\%+1.0\%$.
+- (D) False — synthetic fog is always more efficient than real fog.
+
+> [!EXAMPLE]+ 选 (A)
+>
+> 误差表给出**上限**（若完美解决雾天，dev 最多约降 8 个百分点），**不等于**下一实验必做采集雾图：还要看**数据成本、合成是否够真、团队带宽**（主笔记「误差分析 · 上限与优先级」）。
+>
+> - (A) 选：Coursera 标答。
+> - (B)(C) 不选：**最大桶 ≠ 自动优先**；4.1% 错标可能「改标签一天就见效」。
+> - (D) 不选：合成有时更高效，有时引入**可匹配偏差**；不能一概而论。
+
+<br>
+
+#### Q9 雨刷最多能把 dev 误差改善多少？
+
+Special windshield wiper reduces **raindrop-on-lens** errors (2.2% of dev). Which do you agree with?
+
+- (A) 2.2% is a reasonable estimate of the **maximum** improvement from fixing raindrops.
+- (B) 2.2% is a reasonable estimate of the **minimum** improvement.
+- (C) 2.2% is exactly how much performance **will** improve.
+- (D) 2.2% is how much performance could **worsen** in the worst case.
+
+> [!EXAMPLE]+ 选 (A)
+>
+> 表中 2.2% 是「因雨滴导致错误」占**整个 dev** 的比例 ⇒ 完美消除该类错误，dev 误差**最多**约降 2.2%（ChatGPT 对话 Q9 易误选 (C)「必然改善 2.2%」）。
+>
+> - (A) 选：**上界**估计。
+> - (B)(C)(D) 不选：不是下界、不是点估计、也不是恶化量。
+
+<br>
+
+#### Q10 合成雾图（1000 张 internet 雾 + 叠加到清晰图）：同意哪些？（多选）
+
+Data augmentation: synthesize foggy images. Check all you agree with.
+
+- (A) Little risk of overfitting to 1,000 fog images if combined with **much larger** clean set.
+- (B) Realistic-looking synthetic fog **cannot** help because it introduces avoidable bias.
+- (C) If synthetic fog looks realistic to humans, you can be **confident** it matches the **true fog distribution** because human vision is accurate for driving.
+
+> [!EXAMPLE]+ 选 (A)
+>
+> - (A) 选：1000 张雾图相对百万级清晰图，**过拟合 fog 模板**风险小；合成仍可能分布偏，但通常值得试。
+> - (B) 不选：合成雾**可能**帮助，不必然只带来偏差。
+> - (C) 不选：**人眼觉得真 ≠ 统计分布与真实车载雾一致**；不能据此「 confident 分布对齐」（对话 Q10 陷阱）。
+
+<br>
+
+#### Q11 修正 dev 上的错标：同意哪些？（多选）
+
+You correct mislabeled examples on **dev**. Check all.
+
+- (A) You should **not** relabel **training** set, to avoid train becoming even more different from dev.
+- (B) You **should** relabel **test** set too so dev and test stay **same distribution**.
+
+> [!EXAMPLE]+ 选 (A)(B)
+>
+> Coursera 标答为**两项都勾**（与 [公开题解归档](https://github.com/anukarsh1/deep-learning-coursera/blob/master/Structuring%20Machine%20Learning%20Projects/Week%202%20Quiz%20-%20Autonomous%20driving%20(case%20study).md) 一致）：
+>
+> - (A) 选：课上强调 **train 与 dev 可以不同分布**；若在改 dev 错标的同时大改 train 标签，可能让 train 与 dev 的**相对关系**更难解释；实践中仍可在确认 train 也有同类错标后**同步修 train**，但测验按「不必为了对齐 dev 而必须改 train」理解。
+> - (B) 选：**test 错标也要改**，dev/test 保持同分布，最终数字才可信。
+
+<br>
+
+#### Q12 同事要做「黄灯」检测，数据很少—怎么帮？
+
+Rare yellow lights; small dataset. Colleague asks for help via **transfer learning** vs other ideas.
+
+- (A) **Fine-tune** from your pretrained weights on her yellow-light data.
+- (B) Randomly sample 10k from your data, merge with hers so your data does not swamp hers.
+- (C) You cannot help—your labels and distribution differ too much.
+- (D) Use **multi-task learning** on all data instead.
+
+> [!EXAMPLE]+ 选 (A)
+>
+> 同源视觉（路、交通设施），你方**大数据预训练**的低层特征可迁移；她方**换最后一层 + 小数据微调**是标准 transfer learning。
+>
+> - (A) 选。
+> - (B) 不选：随机合并会**稀释**稀有黄灯样本，且标签空间不对齐。
+> - (C) 不选：分布相近、任务相关，正是迁移场景。
+> - (D) 不选：她缺黄灯标签维度，**无法**与你现有多任务头直接联合训全标签。
+
+<br>
+
+#### Q13 同事用**车外麦克风**听警笛—怎么帮？
+
+Different modality (audio), little data. Transfer or multi-task?
+
+- (A) Transfer learning from your vision model.
+- (B) Multi-task with your vision labels.
+- (C) **Neither** transfer nor multi-task seems promising.
+
+> [!EXAMPLE]+ 选 (C)
+>
+> 输入模态、任务结构与你**差异过大**，预训练视觉权重**无法直接接**音频管道；多任务也需**共享输入**与对齐标签。
+>
+> - (A)(B) 不选：不是「数据少就迁移」的泛化规则。
+> - (C) 选：Coursera 标答。
+
+<br>
+
+#### Q14 端到端 vs 两步：谁更「端到端」？
+
+- (A) One network: image $x$ → directly predict red/green lights $y$.
+- (B) Two steps: detect traffic light, then classify lamp color.
+
+**Approach B** is more end-to-end because it has distinct input and output steps. True/False?
+
+- True
+- False
+
+> [!EXAMPLE]+ False
+>
+> **端到端**指 $x\to y$ **单一可微映射**（中间不显式拆人工管线）。(A) 是端到端；(B) 是**传统流水线**（检测 + 分类），数据少时往往更好调试。
+>
+> - **True** 不选：步骤多 ≠ 更端到端。
+> - **False** 选。
+>
+> 旧版测验在此后还有一题填空：「Approach A 比 B 更有希望，若拥有 ______」⇒ 标答 **Large training set**（数据少时两步流水线 + 中间监督往往更稳）。现行 Coursera 卷末改为下方 Q15。
+
+<br>
+
+#### Q15 端到端是否不必手工设计特征？
+
+True or False: An end-to-end approach **doesn't require** that we hand-design useful features; it **only requires** a large enough model.
+
+对或错：端到端方法**不需要**手工设计有用特征；**只需要**足够大的模型。
+
+- True
+- False
+
+> [!EXAMPLE]+ True
+>
+> Coursera 官方解析：端到端模型**不必**再手工构造中间特征（如 SIFT、HOG、显式检测框特征），表示由网络从数据中学出；前提是**容量与数据**足够支撑这种学习（课上常把「大模型 + 大数据」放在一起说，但本题判断焦点是「免手工特征」）。
+>
+> - **True** 选：与线上一致。勿因「还需要大量数据」就选 False——题干说的是**不需要 hand-design features**，不是说「只有一个旋钮、别的都不要」。
+> - **False** 不选：容易误把「还需要大数据」理解成「题干不成立」；手工特征正是端到端要省掉的那部分。
+
+<br>
+
+> [!TIP]+ 标答速查（Autonomous Driving C3M2）
+>
+> | 题 | 答案 |
+> | :--- | :--- |
+> | Q1 | (B) |
+> | Q2 | False |
+> | Q3 | (C) |
+> | Q4 | False |
+> | Q5 | (C) |
+> | Q6 | (A)(B) |
+> | Q7 | (C) |
+> | Q8 | (A) |
+> | Q9 | (A) |
+> | Q10 | (A) |
+> | Q11 | (A)(B) |
+> | Q12 | (A) |
+> | Q13 | (C) |
+> | Q14 | False |
+> | Q15 | True |
+
+<br>
+
+> [!NOTE]+ 与本站主笔记的索引
+>
+> | 题号 | 主笔记锚点 |
+> | :--- | :--- |
+> | Q1 | `## 动机` · 迭代与基线 |
+> | Q2–Q4 | 多标签 vs softmax；`### 误差分析`；多任务缺失标签 |
+> | Q5–Q7 | `### Dev 与 test 的分布` · 例4；`## Train-dev 集` · 不匹配 |
+> | Q6 | 可避免偏差 vs 方差 vs **mismatch** |
+> | Q8–Q9 | 误差表 · **上限**与优先级；雨刷 = 最多约 2.2% |
+> | Q10 | 合成数据 · 分布是否对齐 |
+> | Q11 | dev/test 同分布 · 错标 |
+> | Q12–Q13 | `### 迁移学习` · 何时可用 / 何时不可用 |
+> | Q14–Q15 | 端到端 vs 流水线；免手工特征（Q15） |
+
+<br>
+
+### C3 两次案例 · 原则纲领
+
+Peacetopia（C3M1）与自动驾驶（C3M2）合起来，是 Ng「ML Strategy」的**操作清单**。下列条目与 [ChatGPT：讲解机器学习策略](https://chatgpt.com/share/6acde7d6-a0d0-83e8-8e2d-5d5d8f67506c) 中逐题核对结论一致，并并入主笔记 `# 项目策略` 章节。
+
+**一、指标与决策速度**
+
+- 多个维度都重要时：**一个 optimizing metric + 若干 satisficing 阈值**（Peacetopia Q1–Q3）；否则每次实验无法快速判优劣。
+- 产品偏好变化（如少漏报鸟、少漏报黄灯）⇒ **改 optimizing metric** 并据此驱动后续全部实验（Q13），不是「顺便多看一列」。
+
+**二、数据划分（靶心）**
+
+- **Dev = test 同分布**，且对准**部署域**（车载摄像头、安防天空图）；**Train 可以不同分布**（互联网图、社交图增广 train，Peacetopia Q5；自动驾驶 Q5）。
+- **不要把非部署域数据放进 dev/test**（Peacetopia Q6；混合 shuffle 占 dev 多数 ⇒ Q5 错项）。
+- **分布漂移**（新鸟种、新州路况）⇒ **先重建 dev/test** 再谈加 train（Peacetopia Q14；自动驾驶隐含于 Q5–Q7）。
+- 大数据：dev/test **绝对数量**仍要够估 bias/variance（Peacetopia Q4）；子集快速试想法再全量训（Q15）。
+
+**三、偏差、方差、不匹配（先算再动）**
+
+- 写清 $h$（**专家级** human-level，Peacetopia Q8）再判：可避免偏差 $=E_{\text{train}}-h$，方差差距 $=E_{\text{dev}}-E_{\text{train}}$（同分布时）；**缺 $h$ 则不能**从 train/dev  alone 断言 bias vs variance（Peacetopia Q7）。
+- **Train-dev 集**：train 与 dev 不同分布时，用 $E_{\text{train-dev}}-E_{\text{train}}$ 看方差、$E_{\text{dev}}-E_{\text{train-dev}}$ 看 **mismatch**（自动驾驶 Q6–Q7）。
+- **Accuracy 排序**（error 反向）：常见阶段为算法 $\to$ 人类 $\to$ Bayes；**勿**把 Bayes 当成比算法更差的 accuracy（Peacetopia Q9）。
+
+**四、误差分析（人工 + 表）**
+
+- 优先看**模型判错**的样本，随机抽几百张（自动驾驶 Q3）。
+- 误差桶占 dev **整体**比例 ⇒ 该类问题的**改善上界**（雾 8%、雨 2.2%）；**最大桶不自动排第一**（Q8–Q9），还要看成本与替代（改标、合成、硬件）。
+- 合成/增强：可试，但**人眼像真 ≠ 分布一致**（Q10）。
+
+**五、标签与评估 hygiene**
+
+- Dev 错标要改；**test 也要改**以保持与 dev 同分布（自动驾驶 Q11）。
+- **Test 不参与日常调参**；dev–test 差距大 ⇒ 可能对 dev 过拟合或 dev 太小（Peacetopia Q11）。
+
+**六、学习范式选择**
+
+- **多标签** ⇒ 多 sigmoid，不是互斥 softmax（Q2）；多任务可**部分维度缺标**（Q4）。
+- **Transfer**：同源视觉、大数据预训练 + 小数据新头/微调（黄灯 Q12）；**模态或任务无关**则不硬迁（麦克风 Q13）。
+- **端到端** $x\to y$ **免手工中间特征**，靠模型从数据学表示（Q15 True）；数据/容量不足时仍宜拆检测+分类（Q14；主笔记自动驾驶案例 bullet）。
+
+**七、迭代节奏**
+
+- **先 baseline，再文献/大数据/架构大改**（自动驾驶 Q1；Peacetopia 隐含于全流程）。
+- 算力与日历时间限制迭代 ⇒ 子集实验、更强硬件（Peacetopia Q15）。
+
+> [!TIP]+ 两案例标答一页纸
+>
+> | 模块 | Q1–Q5 主题 | Q6–Q10 主题 | Q11–Q15 主题 |
+> | :--- | :--- | :--- | :--- |
+> | **C3M1 Peacetopia** | 指标；划分；互联网数据 | $h$ 与 bias/variance | dev/test；改指标；新分布 |
+> | **C3M2 Driving** | baseline；softmax；误差分析 | 划分；train-dev；雾/雨 | 错标；迁移；端到端 |
 
 <br>
 
