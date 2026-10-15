@@ -443,6 +443,64 @@ for dW in [np.ones_like(W), 2 * np.ones_like(W)]:
    ```
    从 `l = 0` 开始会去读 `layers_dims[-1]`，也就是最后一层的宽度，不报错但形状全错。字典的键要用 `"W" + str(l)`，不能写 `"W" + l`（字符串不能直接加整数）。
 
+### 逐元素平方：`np.square`
+
+C2M1 Regularization 作业里，$L_2$ 正则的代价项要算“每一层权重矩阵所有元素的平方和”，也就是 Frobenius 范数的平方 $\lVert W\rVert_F^2=\sum_{i,j}W_{ij}^2$。写成代码分两步：`np.square(W)` 把每个元素各自平方，形状不变；`np.sum(...)` 再把所有元素加起来，得到一个标量。公式与推导见后文“正则化”一节的 $L_2$ 部分，这里只讲函数怎么用。
+
+**用法**
+
+```python
+import numpy as np
+
+W = np.array([[1.0, -2.0],
+              [3.0,  0.5]])
+
+np.square(W)              # [[1.  4.  ]
+                          #  [9.  0.25]]   逐元素平方，形状仍是 (2, 2)
+np.sum(np.square(W))      # 14.25          所有元素的平方和 = ||W||_F^2
+```
+
+下面几种写法结果相同，都等于 14.25：
+
+| 写法 | 说明 |
+| :--- | :--- |
+| `np.sum(np.square(W))` | 作业的写法 |
+| `np.sum(W ** 2)` / `(W ** 2).sum()` | `**` 也是逐元素运算 |
+| `np.sum(W * W)` | `*` 是逐元素乘，不是矩阵乘 |
+| `np.linalg.norm(W) ** 2` | 矩阵默认取 Frobenius 范数，再平方 |
+
+**在作业里的两处用法**
+
+一是正则化的代价。作业的三层网络有 $W^{[1]},W^{[2]},W^{[3]}$，代价写成交叉熵加上
+$\frac{1}{m}\cdot\frac{\lambda}{2}\sum_{l}\lVert W^{[l]}\rVert_F^2$：
+
+```python
+def compute_cost_with_regularization(A3, Y, parameters, lambd):
+    m = Y.shape[1]
+    W1, W2, W3 = parameters["W1"], parameters["W2"], parameters["W3"]
+
+    cross_entropy_cost = compute_cost(A3, Y)          # 不带正则的交叉熵，作业已给出
+    L2_regularization_cost = (1 / m) * (lambd / 2) * (
+        np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)))
+
+    return cross_entropy_cost + L2_regularization_cost
+```
+
+二是反向传播。$\frac{\partial}{\partial W}\frac{\lambda}{2m}\lVert W\rVert_F^2=\frac{\lambda}{m}W$，平方求导后只剩 $W$ 本身，所以反向里**不再出现 `np.square`**，只在每个 $\mathrm{d}W$ 上加一项：
+
+```python
+dW3 = 1. / m * np.dot(dZ3, A2.T) + (lambd / m) * W3     # 每层同理；db 不加
+```
+
+**易错点**
+
+1. **只惩罚 $W$，不惩罚 $b$。** 求和里只放 `W1`、`W2`、`W3`。若用循环遍历 `parameters`，要先判断键名以 `"W"` 开头（后文正则化一节的 `l2_cost` 就是这样写的）。
+2. **不要写 `axis`。** `np.sum` 默认对所有元素求和，正好是需要的标量。写成 `np.sum(np.square(W), axis=1)` 得到的是每一行的平方和，形状 $(n^{[l]},)$，再和交叉熵相加会变成数组，代价不再是一个数。
+3. **`^` 不是乘方。** Python 里 `3 ^ 2` 是按位异或，结果是 `1`；乘方要写 `3 ** 2` 或 `np.square(3)`。
+4. **整数数组会溢出。** `np.square(np.array([50000], dtype=np.int32))` 得到 `-1794967296`，因为结果超出了 int32 的范围，而且不报错。权重本来就是 float64，不会遇到；自己造测试数据时注意用浮点数。
+5. **变量名用 `lambd`。** `lambda` 是 Python 关键字，不能当变量名，作业因此写成 `lambd`。
+6. **系数不要漏。** 代价里是 $\frac{\lambda}{2m}$，梯度里是 $\frac{\lambda}{m}$：那个 $\frac12$ 正是为了让平方求导后的 2 消掉。两处任何一处系数写错，梯度检查都会对不上。
+
 <br>
 
 ## 复杂度
@@ -3763,6 +3821,34 @@ def l2_grad_add(grads, params, lambda_, m):
     return grads
 ```
 
+**C2M1 Regularization 作业里的 $L_2$**
+
+作业用一个三层网络（LINEAR→RELU→LINEAR→RELU→LINEAR→SIGMOID）在二维点集上做分类，比较三种做法：不正则、$L_2$、Dropout。$L_2$ 部分要改两个函数：
+
+- **代价**：交叉熵加上 $\frac{1}{m}\frac{\lambda}{2}\sum_l\lVert W^{[l]}\rVert_F^2$，每层用 `np.sum(np.square(Wl))`（写法与易错点见代码一章的 `np.square` 小节）。作业测试用例的期望输出为 `cost = 1.78648594516`。
+- **反向**：只有 $\mathrm{d}W$ 多一项，$\mathrm{d}b$ 与各层的 $\mathrm{d}Z$、$\mathrm{d}A$ 都不变：
+
+```python
+dW3 = 1. / m * np.dot(dZ3, A2.T) + (lambd * W3) / m
+dW2 = 1. / m * np.dot(dZ2, A1.T) + (lambd * W2) / m
+dW1 = 1. / m * np.dot(dZ1, X.T)  + (lambd * W1) / m
+```
+
+取 $\lambda=0.7$ 训练，结果：
+
+| 模型 | 训练集准确率 | 测试集准确率 |
+| :--- | :--- | :--- |
+| 不正则 | 94.8% | 91.5% |
+| $L_2$（$\lambda=0.7$） | 93.8% | 93% |
+
+训练集准确率略降、测试集准确率上升，决策边界不再为了个别训练点绕弯，变得更平滑。作业的观察是：$\lambda$ 是要在 dev 集上调的超参数；$\lambda$ 太大会“过度平滑”（oversmooth），变成高偏差。
+
+> **What you should remember**（notebook 原话）-- the implications of L2-regularization on:
+>
+> - The cost computation: A regularization term is added to the cost
+> - The backpropagation function: There are extra terms in the gradients with respect to weight matrices
+> - Weights end up smaller ("weight decay"): Weights are pushed to smaller values.
+
 ### Dropout
 
 > [!INFO]+ Dropout
@@ -3786,9 +3872,8 @@ $$
 
 为什么有效：
 
-- **不能依赖个别神经元**：任何一个隐藏单元都可能被删掉，网络只能把特征分散编码在多个单元中，效果类似于把权重的“负担”摊开，与 $L_2$ 收缩权重有相似作用。
-- **集成学习的近似**：集成学习（ensemble）训练多个模型、推理时取平均，通常能把精度提高几个百分点。Dropout 每次训练的都是一个随机子网络，相当于训练了指数级多个共享权重的子网络；推理时按比例缩放，相当于对这些子网络取平均。即**用一个网络近似实现了集成学习的效果**。
-
+- **不能依赖个别神经元**：任何一个隐藏单元都可能被删掉，网络只能把特征分散编码在多个单元中。从下一层的某个神经元看，它的任何一个输入都可能消失，所以不能把太多权重押在某一个输入上，只能把权重分散到各个输入上。分散权重会让 $\lVert W\rVert^2$ 变小，与 $L_2$ 收缩权重有相似作用；Andrew Ng 在课上把 Dropout 描述为一种更具适应性的 $L_2$（不同权重受到的收缩程度不同）。
+- **集成学习的近似**：集成学习（ensemble）训练多个模型、推理时取平均，通常能把精度提高几个百分点。Dropout 每次训练的都是一个随机子网络，相当于训练了指数级多个共享权重的子网络（$n$ 个可丢弃的单元对应 $2^n$ 种子网络）；推理时用全部神经元、按比例缩放（weight scaling inference rule），**近似**于对这些子网络的预测取平均。这个近似只在单层线性 + softmax 时是精确的（等于子网络预测的几何平均），多层非线性网络中只是一个经验上效果很好的近似。即**用一个网络近似实现了集成学习的效果**。
 > [!EXAMPLE]+ 例11 Dropout 的效果（鱼书 6.4.3 节）
 >
 > 同样的 7 层网络，加入 dropout 比例 0.15（即保留 85%）：训练集与测试集准确率的差距变小，训练集准确率也不再达到 100%。即使是表现力很强的网络，也能用 Dropout 抑制过拟合。
@@ -3796,9 +3881,10 @@ $$
 实践要点：
 
 - $p$ 常用：输入层 $0.8$，隐藏层 $0.5$；参数多、易过拟合的层可以用更小的 $p$。
-- 卷积层因参数已共享，Dropout 效果较弱；常改用空间 Dropout，或只在全连接头使用。
-- 与 BatchNorm 同时使用时，二者都在改变激活分布，调参需更小心。许多现代卷积架构主要靠 BatchNorm、数据增强与权重衰减。
-- 使用 Dropout 后损失函数 $J$ 不再有明确定义（每次前向都不同），调试时先关掉 Dropout 确认 $J$ 单调下降，再打开。
+- 卷积层的激活在空间上高度相关：相邻像素的特征几乎一样，逐个像素随机置零后，被删的值很容易由邻居补回来，正则效果弱。常改用空间 Dropout（SpatialDropout，整张特征图一起丢；PyTorch 的 `nn.Dropout2d`），或只在全连接头使用。
+- 与 BatchNorm 同时使用时，二者都在改变激活分布，调参需更小心：训练时 Dropout 改变了激活的方差，推理时关掉 Dropout，BN 用训练时统计的方差就对不上（Li et al., 2019 称为 variance shift）。常见做法是把 Dropout 放在所有 BN 之后，例如只放在最后的分类层前。许多现代卷积架构主要靠 BatchNorm、数据增强与权重衰减。
+- 使用 Dropout 后损失函数 $J$ 不再有明确定义（每次前向都不同），调试时先关掉 Dropout（`keep_prob = 1`）确认 $J$ 单调下降，再打开。
+- **梯度检查时必须关掉 Dropout。** 数值梯度要算两次 $J(\theta\pm\varepsilon)$，若每次前向都重新抽掩码，两次 $J$ 来自不同的子网络，差值主要是掩码不同造成的，与梯度无关（下面有可运行的例子）。先用 `keep_prob = 1` 做梯度检查，通过后再打开 Dropout。
 
 ```python
 def inverted_dropout_forward(A, keep_prob, rng):
@@ -3812,6 +3898,142 @@ def inverted_dropout_forward(A, keep_prob, rng):
 def inverted_dropout_backward(dA, mask, keep_prob):
     return dA * mask / keep_prob
 ```
+
+**C2M1 Regularization 作业：三层网络的 Dropout**
+
+上面两个函数是通用写法；作业要求把 Dropout 直接写进三层网络的前向和反向。只对两个隐藏层 $A^{[1]},A^{[2]}$ 做 Dropout，**输入层和输出层都不做**。前向每层四步：造随机矩阵 → 与 `keep_prob` 比较得到 0/1 掩码 → 乘掩码关掉一部分神经元 → 除以 `keep_prob`。掩码 $D^{[1]},D^{[2]}$ 要存进 `cache`，反向时用的必须是同一张：
+
+```python
+import numpy as np
+
+def relu(Z): return np.maximum(0, Z)
+def sigmoid(Z): return 1 / (1 + np.exp(-Z))
+
+def forward_propagation_with_dropout(X, parameters, keep_prob=0.5):
+    """LINEAR -> RELU + DROPOUT -> LINEAR -> RELU + DROPOUT -> LINEAR -> SIGMOID"""
+    W1, b1 = parameters["W1"], parameters["b1"]
+    W2, b2 = parameters["W2"], parameters["b2"]
+    W3, b3 = parameters["W3"], parameters["b3"]
+
+    Z1 = W1 @ X + b1
+    A1 = relu(Z1)
+    D1 = np.random.rand(A1.shape[0], A1.shape[1])   # 第 1 步：与 A1 同形的 [0,1) 均匀随机数
+    D1 = D1 < keep_prob                            # 第 2 步：以 keep_prob 为阈值变成 True/False（即 1/0）
+    A1 = A1 * D1                                   # 第 3 步：关掉一部分神经元
+    A1 = A1 / keep_prob                            # 第 4 步：放大剩下的，保持期望不变
+
+    Z2 = W2 @ A1 + b2
+    A2 = relu(Z2)
+    D2 = np.random.rand(A2.shape[0], A2.shape[1]) < keep_prob
+    A2 = A2 * D2 / keep_prob
+
+    Z3 = W3 @ A2 + b3
+    A3 = sigmoid(Z3)                               # 输出层不做 Dropout
+
+    cache = (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3)
+    return A3, cache
+
+
+def backward_propagation_with_dropout(X, Y, cache, keep_prob):
+    m = X.shape[1]
+    (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3) = cache
+
+    dZ3 = A3 - Y
+    dW3 = dZ3 @ A2.T / m
+    db3 = np.sum(dZ3, axis=1, keepdims=True) / m
+
+    dA2 = W3.T @ dZ3
+    dA2 = dA2 * D2                 # 第 1 步：用前向的同一张掩码 D2，关掉同样的神经元
+    dA2 = dA2 / keep_prob          # 第 2 步：同样除以 keep_prob
+    dZ2 = dA2 * (A2 > 0)           # ReLU 的导数
+    dW2 = dZ2 @ A1.T / m
+    db2 = np.sum(dZ2, axis=1, keepdims=True) / m
+
+    dA1 = W2.T @ dZ2
+    dA1 = dA1 * D1 / keep_prob
+    dZ1 = dA1 * (A1 > 0)
+    dW1 = dZ1 @ X.T / m
+    db1 = np.sum(dZ1, axis=1, keepdims=True) / m
+
+    return {"dZ3": dZ3, "dW3": dW3, "db3": db3, "dA2": dA2, "dZ2": dZ2, "dW2": dW2,
+            "db2": db2, "dA1": dA1, "dZ1": dZ1, "dW1": dW1, "db1": db1}
+```
+
+逐行要注意的几处：
+
+- **用 `rand` 不用 `randn`。** 掩码要的是“以概率 `keep_prob` 为 1”：$[0,1)$ 上的均匀随机数小于 `keep_prob` 的概率正好是 `keep_prob`。用正态的 `randn` 时，这个概率是 $\Phi(\text{keep\_prob})$，不对。
+- **形状与 $A$ 相同。** 每个样本、每个神经元各自抽一次，所以同一个神经元在不同样本上可能一个保留、一个被关掉。
+- **布尔掩码可以直接乘。** `D1 < keep_prob` 得到布尔数组，与浮点数相乘时 `True` 当 1、`False` 当 0；要显式得到整数可以写 `(D1 < keep_prob).astype(int)`。
+- **反向判断 ReLU 的正区间时用的是除过 `keep_prob` 的 `A1`。** 被关掉的位置 `A1 = 0`，`(A1 > 0)` 也是 0，与乘掩码的结果一致；保留的位置除以正数不改变符号，所以与用 $Z^{[1]}>0$ 判断等价。
+- **反向乘掩码与 ReLU 导数的顺序无所谓**：两者都是逐元素乘，交换顺序结果相同（作业一章的 `backward_relu_dropout` 就是先做 ReLU 再乘掩码）。
+
+作业用 `keep_prob = 0.86`、`learning_rate = 0.3` 训练。每次迭代里，第 1、2 层的每个神经元以 $1-0.86=14\%$ 的概率被关掉（notebook 正文写作 24%，按 $1-\text{keep\_prob}$ 应为 14%）。三种做法放在一起：
+
+| 模型 | 训练集准确率 | 测试集准确率 |
+| :--- | :--- | :--- |
+| 不正则 | 94.8% | 91.5% |
+| $L_2$（$\lambda=0.7$） | 93.8% | 93% |
+| Dropout（`keep_prob = 0.86`） | 92.9% | 95% |
+
+正则化都会让训练集准确率下降：它限制了网络对训练集的过拟合能力。但测试集准确率上升，所以对整个系统是有利的。
+
+两个可以直接运行的检查（沿用上面两个函数）：
+
+```python
+# 检查 1：inverted dropout 不改变激活的期望
+rng = np.random.default_rng(0)
+A = rng.random((100, 10000))
+for kp in (0.5, 0.86):
+    D = rng.random(A.shape) < kp
+    print(kp, round(A.mean(), 4), round((A * D / kp).mean(), 4))
+# 0.5  0.5002 0.4999
+# 0.86 0.5002 0.5001      除以 keep_prob 后均值不变
+
+# 检查 2：梯度检查只有在掩码固定时才有意义
+np.random.seed(1)
+X = np.random.randn(3, 5); Y = (np.random.rand(1, 5) > 0.5).astype(float)
+P = {"W1": np.random.randn(2, 3), "b1": np.random.randn(2, 1),
+     "W2": np.random.randn(3, 2), "b2": np.random.randn(3, 1),
+     "W3": np.random.randn(1, 3), "b3": np.random.randn(1, 1)}
+kp = 0.8
+np.random.seed(7); A3, cache = forward_propagation_with_dropout(X, P, kp)
+g = backward_propagation_with_dropout(X, Y, cache, kp)
+
+def cost(P, fix_mask=True):
+    if fix_mask:
+        np.random.seed(7)                  # 重设同一个种子 => 每次前向抽到同一张掩码
+    A3, _ = forward_propagation_with_dropout(X, P, kp)
+    return float(-(Y * np.log(A3) + (1 - Y) * np.log(1 - A3)).mean())
+
+def numeric(k, idx, fix_mask, eps=1e-7):
+    old = P[k][idx]
+    P[k][idx] = old + eps; jp = cost(P, fix_mask)
+    P[k][idx] = old - eps; jm = cost(P, fix_mask)
+    P[k][idx] = old
+    return (jp - jm) / (2 * eps)
+
+num = np.array([numeric(k, i, True) for k in P for i in np.ndindex(P[k].shape)])
+ana = np.array([g["d" + k][i] for k in P for i in np.ndindex(P[k].shape)])
+print(np.linalg.norm(num - ana) / (np.linalg.norm(num) + np.linalg.norm(ana)))
+# 约 2.8e-09：掩码固定时，反向传播与数值梯度一致
+
+np.random.seed(123)
+print(numeric("W1", (0, 0), fix_mask=False), g["dW1"][0, 0])
+# 约 -3.1e5 对 0.0014：每次前向重新抽掩码，数值“梯度”完全是噪声（具体数值随种子变化）
+```
+
+第二个检查说明了为什么梯度检查前要先把 Dropout 关掉（或固定掩码）：$J(\theta+\varepsilon)$ 和 $J(\theta-\varepsilon)$ 来自不同的子网络，二者之差主要由掩码不同造成，除以 $2\varepsilon$ 之后被放大成一个巨大的、毫无意义的数。
+
+> [!WARNING]+ 作业强调的常见错误
+>
+> A **common mistake** when using dropout is to use it both in training and testing.（notebook 原话）只在训练时随机删节点；预测、计算 dev/test 准确率时调用的是不带 Dropout 的 `forward_propagation`。
+
+> **What you should remember about dropout**（notebook 原话）:
+>
+> - Dropout is a regularization technique.
+> - You only use dropout during training. Don't use dropout (randomly eliminate nodes) during test time.
+> - Apply dropout both during forward and backward propagation.
+> - During training time, divide each dropout layer by keep_prob to keep the same expected value for the activations.
 
 PyTorch 的 `nn.Dropout(p)` 中 `p` 是**丢弃**概率，即 CS230 的 $1-\text{keep\_prob}$；它同样是 inverted 实现，`eval()` 时直接恒等：
 
