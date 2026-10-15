@@ -34,7 +34,7 @@ desc: Stanford CS230 详细课程笔记：从感知机、逻辑回归与反向�
 
 # 预备知识
 
-这一部分不讲模型，只统一两件事：一是全文使用的记号与矩阵形状，二是估算计算量与显存的方法。后面每一条反向传播公式都要靠形状来核对，所以先把记号固定下来。
+## 数学
 
 KL 散度的定义、非负证明、数值例子，以及蒸馏、VAE、RLHF 与最大似然四种用法，见 [信息论基础 · 相对熵](/信息论熵/#kl)。
 
@@ -233,6 +233,215 @@ $$
 验证方法是逐元素写出来：$Z_{kj}=\sum_{r}W_{kr}A_{rj}$，所以 $\partial Z_{kj}/\partial W_{kr}=A_{rj}$，对所有 $j$ 求和得 $\partial J/\partial W_{kr}=\sum_j \mathrm{d}Z_{kj}A_{rj}=(\mathrm{d}Z\,A^{\top})_{kr}$。写不出转置放哪边时，用形状反推最快：$\mathrm{d}W$ 必须是 $(n^{[l]},n^{[l-1]})$，而 $\mathrm{d}Z$ 是 $(n^{[l]},m)$、$A$ 是 $(n^{[l-1]},m)$，唯一能拼出来的就是 $\mathrm{d}Z\,A^{\top}$。
 
 外积视角：$\mathrm{d}W=\mathrm{d}Z A^{\top}/m$ 等于把 $m$ 个样本各自的外积 $(n^{[l]},1)\times(1,n^{[l-1]})$ 加起来再平均。矩阵乘法只是把这个求和交给 BLAS 一次做完。
+
+<br>
+
+## 代码
+
+Coursera C1M2（Python Basics with NumPy）与后续所有作业都假设：会用 **NumPy 向量化**代替 Python 循环，并能在写 `mean` / `sum` 时选对 **`axis`**，必要时加上 **`keepdims=True`**（PyTorch 里同名参数写作 `keepdim=True`）。本节约定与上文一致：**样本在列**，矩阵 $X\in\mathbb{R}^{n_x\times m}$ 的第 $j$ 列是第 $j$ 个样本。
+
+### 广播（broadcasting）
+
+**定义**：两个数组做 `+`、`*`、`/` 等**逐元素**运算时，NumPy 从**最后一维**开始对齐形状；某一维长度为 $1$ 时，该维会被**复制**到与另一边相同；若某维既不相等、又不是 $1$，则报错 `operands could not be broadcast together`。
+
+| 左 shape | 右 shape | 结果 shape | 含义（列样本） |
+| :--- | :--- | :--- | :--- |
+| $(n,m)$ | $(n,1)$ | $(n,m)$ | **偏置 $b$（正确）**：$(n,1)$ 先变成 $(n,m)$，**每一列**（每个样本）加上**同一组** $n$ 个偏置 |
+| $(n,m)$ | $(1,m)$ | $(n,m)$ | 长度为 $m$ 的向量贴在**一行**，沿**行方向**复制 $n$ 次（每行相同） |
+| $(n,m)$ | $(m,)$ | $(n,m)$ | 与上一行同类：$(m,)\to(1,m)$，**每一列一个数**，该列内 $n$ 行相同（像「按样本」的缩放，不是 $(n,1)$ 偏置） |
+| $(n,m)$ | $(n,)$ | **常错** | $n\neq m$ 时末维对不齐，**直接 ValueError**；勿与第一行混淆 |
+
+前向 $Z=W A+b$ 中 $W A$ 是 $(n^{[l]},m)$，$b$ 必须是 $(n^{[l]},1)$（**第二维为 1**），对应表格**第一行**：不是把长度为 $n$ 的一维数组 `(n,)` 丢进去。此shape 在 $n^{[l]}\neq m$ 时不能相加，即便 $n=m$ 凑巧能加，语义也不是「每个神经元一份偏置、复制到 $m$ 个样本」。
+
+> [!NOTE]+ 「沿列复制」在说什么
+>
+> - **第一行** $(n,1)$：$b$ 只有一**列**，NumPy 把它**横向复制** $m$ 次，对齐 $(n,m)$ 的 $m$ 个样本列；**同一神经元（同一行）** 在所有样本上共享一个偏置。口语里常说「沿列方向复制 $m$ 份」。
+> - **第四行** $(n,)$：这是一维、长度为 $n$，**没有** `(n,1)` 那个「列长为 1」的轴。和 $(n,m)$ 相加时，NumPy 从**最后一维**对齐：要比的是 $m$ 与 $n$，通常 **$n^{[l]}\neq m$ → 报错**。所以第四行写「常错」，不是说它和第一行做同一件事；**正确偏置是第一行，不是第四行**。
+> - 更易混的是 **`(m,)`**（第三行）：能合法加到 $(n,m)$，但是「**每个样本列一个标量、列内各行相同**」，与「**每个神经元一行一个偏置、整列复制**」的 $(n,1)$ 不同。
+
+> [!EXAMPLE]+ 广播：合法、非法与「静默错位」
+>
+> ```python
+> import numpy as np
+>
+> n, m = 3, 4
+> Z = np.arange(n * m, dtype=float).reshape(n, m)   # (3, 4)，行=特征/神经元，列=样本
+> b = np.array([[10.0], [20.0], [30.0]])            # (3, 1)
+> assert (Z + b).shape == (n, m)
+>
+> row_scale = np.array([1.0, 0.0, -1.0, 2.0])       # (m,)→(1,m)：每列（样本）一个因子
+> assert (Z * row_scale).shape == (n, m)
+>
+> # 非法： (3,4) 与 (3,) 逐元素加 —— NumPy 会把 (3,) 当成 (1,3) 对齐，无法与 4 列对齐
+> # Z + np.array([1.0, 2.0, 3.0])  # ValueError
+>
+> # 危险： (2,3) 与 (3,) 能广播成 (2,3)，但语义是「每一行加上同一个长度-3 向量」
+> A = np.zeros((2, 3))
+> A + np.array([1.0, 2.0, 3.0])   # 不报错；与「给每个样本加偏置」不是同一回事
+> ```
+
+> [!WARNING]+ 广播不会代替矩阵乘法
+>
+> - `A * B` 是**逐元素**乘，不是线性代数里的矩阵积。
+> - 前向：$Z=WA+b$ 必须写 `Z = W @ A + b`（或 `np.dot(W, A)`），不能写 `W * A`。
+> - 反向（列样本）：$\mathrm{d}W=\mathrm{d}Z\,A^{\top}/m$ 必须写 `dW = dZ @ A.T / m`。若写成 `dW = dZ * A.T`，NumPy 可能按广播规则凑出与 `W` **相同 shape** 的数组，但每个元素不是 $\partial J/\partial W$。
+>
+> ```python
+> # 形状 (n, m) 与 (m, p)：矩阵乘 vs 逐元素（后者常因广播不报错）
+> dW_ok  = dZ @ A.T / m      # (n, p)，正确
+> dW_bad = dZ * A.T          # 勿用；广播后 shape 可能仍是 (n, p)，数值错误
+> ```
+
+### `axis`：沿哪一维聚合
+
+对二维数组 `arr`，`axis=0` 表示**竖着切**：固定列、在**行方向**合并（对 CS230 的 $(n_x,m)$，沿 axis=0 是在**所有特征/神经元行**上聚合，得到长度为 $m$ 的向量）。`axis=1` 表示**横着切**：固定行、在**列方向**合并（对 $(n_x,m)$，沿 axis=1 是在**样本列**上聚合，得到长度为 $n_x$ 的向量）。
+
+| 数组 | 操作 | 结果 shape | 典型用途 |
+| :--- | :--- | :--- | :--- |
+| $X$ $(n_x,m)$ | `X.mean(axis=0)` | $(m,)$ | 每个样本在特征维上的均值（少用） |
+| $X$ $(n_x,m)$ | `X.mean(axis=1)` | $(n_x,)$ | 每个特征跨样本的均值（BatchNorm 统计常沿「非 batch 维」） |
+| $\mathrm{d}Z$ $(n,m)$ | `dZ.sum(axis=1)` | $(n,)$ | 对 $m$ 个样本的梯度求和 → $\mathrm{d}b$ 的向量形式 |
+| $\mathrm{d}Z$ $(n,m)$ | `dZ.sum(axis=1, keepdims=True)` | $(n,1)$ | 与 $b$ 同形，可直接写回参数 |
+
+**记忆（列样本）**：偏置 $b$ 的每个分量被**所有样本共用**，反向时要把 $\mathrm{d}Z$ 在**样本维**上累加，即 **`axis=1`**（$m$ 在 axis=1）。若误用 `axis=0`，会把不同神经元/特征上的梯度混在一起。
+
+> [!EXAMPLE]+ 数值对照
+>
+> ```python
+> import numpy as np
+> X = np.array([[1.0, 2.0, 3.0],    # 特征 0，3 个样本
+>               [10.0, 20.0, 30.0]]) # 特征 1
+> # shape (2, 3)：行=特征，列=样本
+>
+> X.mean(axis=0)   # array([ 5.5, 11. , 16.5])  每个样本上两特征的均值
+> X.mean(axis=1)   # array([ 2., 20.])           每个特征跨 3 个样本的均值
+>
+> dZ = np.array([[0.1, 0.2, 0.3],
+>                [1.0, 2.0, 3.0]])              # (2, 3)，与 Z 同形
+> dZ.sum(axis=1)                   # array([0.6, 6. ])  shape (2,)
+> dZ.sum(axis=1, keepdims=True)    # [[0.6], [6. ]]   shape (2, 1)
+> ```
+
+高维时 `axis` 可以是**元组**：例如 NHWC 的 `img` 为 `(m, H, W, C)`，对 batch 求均值用 `axis=0`；对空间求均值用 `axis=(1,2)`。CS230 全连接段以二维 $(n,m)$ 为主，先把二维写对再推广。
+
+### `keepdims=True`：聚合后保留长度为 1 的维
+
+`mean` / `sum` / `max` 默认会**删掉**被聚合的那一维：$(n,m)$ 上 `axis=1` → $(n,)$。参数 $b$ 与 $\mathrm{d}b$ 在 CS230 里形状是 $(n,1)$，不是 $(n,)$。加上 **`keepdims=True`** 后，被聚合的维保留为 $1$，结果 $(n,1)$，可与 $b$、$\mathrm{d}Z$ 直接相加或赋值给 `b.grad` 形状检查。
+
+| 写法 | shape | 能否与 $(n,m)$ 的 $\mathrm{d}Z$ 逐元素加后再广播 |
+| :--- | :--- | :--- |
+| `dZ.mean(axis=1)` | $(n,)$ | 能广播，但 `db.shape != b.shape`，`assert` 失败 |
+| `dZ.mean(axis=1, keepdims=True)` | $(n,1)$ | 与 $b$ 一致 |
+| `dZ.mean(axis=1)[:, None]` | $(n,1)$ | 与 `keepdims=True` 等价 |
+| `dZ.mean(axis=1, keepdims=True) / m` | $(n,1)$ | mini-batch 上 $\mathrm{d}b=\frac{1}{m}\sum_j \mathrm{d}Z_{\cdot j}$ |
+
+> [!NOTE]+ Coursera C1M2 · Python Basics with NumPy（assignment wording）
+>
+> With `keepdims=True` the result will broadcast correctly against the original `x`.
+>
+> `axis=1` means you are going to get the norm in a **row-wise** manner. If you need the norm in a **column-wise** way, you would need to set `axis=0`.
+>
+> `numpy.linalg.norm` has another parameter `ord` where we specify the type of normalization to be done (in the exercise below you'll do **2-norm**). To get familiar with the types of normalization you can visit [numpy.linalg.norm](https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html).
+>
+> 与上文**列样本** $(n_x,m)$ 对照：`x` 的每一**行**是一条特征在 $m$ 个样本上的取值；`np.linalg.norm(x, axis=1, keepdims=True)` 对**每一行**做 2-范数（row-wise），结果 shape $(n_x,1)$，可与 `x` 做逐元素除法（L2 归一化每行）。若要对**每个样本列**求范数，用 `axis=0`。作业里的 `ord=2` 即欧几里得范数 $\lVert\cdot\rVert_2$；`ord=1` 为 L1，`ord=np.inf` 为最大绝对值等，见文档。
+
+> [!NOTE]+ `mean` 与 `sum`：作业里两种写法
+>
+> 对 $\mathrm{d}b$，有的 notebook 写 `dZ.sum(axis=1, keepdims=True) / m`，有的写 `dZ.mean(axis=1, keepdims=True)`；在**除以 $m$ 的损失**定义下，两者对应同一偏置梯度。关键是 **axis=1** 与 **keepdims** 同时正确，而不是混用 `axis=0`。
+
+> [!EXAMPLE]+ 逻辑回归与一层 Affine：完整形状链
+>
+> ```python
+> import numpy as np
+> n_x, m = 5, 8
+> X = np.random.randn(n_x, m)           # (5, 8)
+> w = np.random.randn(n_x, 1)             # (5, 1)
+> b = 0.1
+> Z = w.T @ X + b                         # (1, 8)；标量 b 广播到整行
+> A = 1 / (1 + np.exp(-Z))                # (1, 8)
+> Y = np.random.randint(0, 2, size=(1, m))
+> dZ = A - Y                              # (1, 8)
+> dw = (X @ dZ.T) / m                     # (5, 1)，与 w 同形；等价于 dZ @ X.T 再转置
+> db = float(dZ.mean())                   # 标量 b 的梯度
+>
+> W = np.random.randn(4, n_x)             # (4, 5)
+> b_vec = np.random.randn(4, 1)           # (4, 1)
+> Z2 = W @ X + b_vec                      # (4, 8)
+> dZ2 = np.random.randn(4, m)
+> dW = dZ2 @ X.T / m                      # (4, 5)
+> db_vec = dZ2.sum(axis=1, keepdims=True) / m   # (4, 1)
+> assert db_vec.shape == b_vec.shape
+> ```
+
+#### PyTorch 对照
+
+| NumPy | PyTorch | 说明 |
+| :--- | :--- | :--- |
+| `keepdims=True` | `keepdim=True` | 拼写差一个 `s` |
+| 样本在列 $(n,m)$ | 样本在行 $(m,n)$ | `nn.Linear` 默认 `x` 为 `(batch, in_features)` |
+| `dZ.mean(axis=1, keepdims=True)` | `dZ.mean(dim=1, keepdim=True)` | `dim` 与 `axis` 同义 |
+
+从 NumPy 作业迁到 PyTorch 时，先改样本维位置，再改 `axis`→`dim`；广播规则相同。
+
+> [!NOTE]+ 与上文「例0 / 形状表实例」的关系
+>
+> 「单样本与整批」与形状表里的 `db1 = dZ1.mean(axis=1, keepdims=True)` 是本节在 $(n^{[l]},m)$ 上的具体实例。实现每层反向时，应对每个 `mean`/`sum` 写一行注释：`# axis=1: sum over m samples; keepdims -> (n,1)`.
+
+<br>
+
+### 零数组：`np.zeros` 
+
+作业里到处要“先造一个全 0 的数组再往里填”：初始化偏置 $b$、Adam 的动量 $v$ 和 $s$、累加梯度用的容器。下面先讲这几个函数怎么用，再讲最常踩的坑。权重为什么不能全 0、应当怎样随机初始化（随机、He、Xavier 的完整代码），见后文“初始化”一节。
+
+**四个函数**
+
+| 函数 | 作用 | 例子 | 结果 |
+| :--- | :--- | :--- | :--- |
+| `np.zeros(shape)` | 按给定形状造全 0 数组 | `np.zeros((3, 1))` | 3 行 1 列，`float64` |
+| `np.zeros_like(a)` | 造一个和 `a` **形状、类型都一样**的全 0 数组 | `np.zeros_like(W)` | 与 `W` 同形 |
+| `np.ones(shape)` / `np.full(shape, c)` | 全 1 / 全填常数 `c` | `np.full((2, 2), 0.5)` | 每个元素都是 0.5 |
+| `np.empty(shape)` | 只分配内存，**不清零** | `np.empty((2, 2))` | 里面是内存里的旧数据，不能当 0 用 |
+
+**典型用法**
+
+```python
+import numpy as np
+
+n_prev, n_cur = 4, 3
+b = np.zeros((n_cur, 1))            # 偏置：(3, 1)，每个神经元一个
+W = np.random.randn(n_cur, n_prev) * 0.01
+
+v_dW = np.zeros_like(W)             # Momentum / Adam 的一阶矩，形状自动跟 W 走
+s_dW = np.zeros_like(W)             # 二阶矩
+
+total = np.zeros_like(W)            # 累加多个 mini-batch 的梯度
+for dW in [np.ones_like(W), 2 * np.ones_like(W)]:
+    total += dW
+```
+
+`zeros_like` 的好处是不用自己再写一遍形状：以后 `W` 改了大小，`v_dW` 跟着变，不会出现形状对不上。
+
+**易错点**
+
+1. **形状要写成元组。** `np.zeros(3, 4)` 会报 `TypeError: Cannot interpret '3' as a data type`，因为第二个位置参数是 `dtype`。正确写法是 `np.zeros((3, 4))`，外面多一层括号。
+2. **`(n,)` 和 `(n, 1)` 不是一回事。** `np.zeros(3)` 得到一维的 `(3,)`；偏置要用 `np.zeros((3, 1))`。用 `(3,)` 做偏置，加到 `(3, m)` 上时会按“最后一维”去对齐，结果要么报错，要么加错方向（见上文广播一节）。作业的 `assert b.shape == (n, 1)` 就是在查这个。
+3. **`zeros_like` 会继承类型。** 如果 `a` 是整数数组，`np.zeros_like(a)` 也是整数数组：
+   ```python
+   a = np.array([1, 2, 3])
+   z = np.zeros_like(a)
+   z[0] = 0.7          # 存进去的是 0，小数被截掉
+   z += 0.7            # 直接报错：float 不能原地写进 int 数组
+   ```
+   需要小数时写 `np.zeros_like(a, dtype=float)`。
+4. **`W = b = np.zeros(...)` 是同一个数组。** 这样写只造了一个数组，`W` 和 `b` 两个名字都指向它：`W += 1` 之后 `b` 也变成了 1。要两个独立的数组，就分开写两次 `np.zeros`。
+5. **`np.empty` 不是 0。** 它更快，但里面是随机残留值，只能在“马上会把每个位置都覆盖掉”时使用。拿它当累加器，结果是错的。
+6. **层号对齐。** `layers_dims = [n_x, n1, n2, n3]` 时，第 `l` 层的权重形状是 `(layers_dims[l], layers_dims[l-1])`，循环从 `l = 1` 开始：
+   ```python
+   for l in range(1, len(layers_dims)):
+       parameters["W" + str(l)] = np.zeros((layers_dims[l], layers_dims[l - 1]))
+       parameters["b" + str(l)] = np.zeros((layers_dims[l], 1))
+   ```
+   从 `l = 0` 开始会去读 `layers_dims[-1]`，也就是最后一层的宽度，不报错但形状全错。字典的键要用 `"W" + str(l)`，不能写 `"W" + l`（字符串不能直接加整数）。
 
 <br>
 
@@ -1045,11 +1254,31 @@ def dead_relu_fraction(Z):
 
 选择的原则：
 
+【是否(0,1), 是否需要加和=1，是分类还是回归，，是否门控，负值分布情况。】
+
 1. **输出层由任务决定，并且和损失函数配对**（见下面的“损失函数的选择”）：回归用恒等，二分类和多标签用 sigmoid，单标签多分类用 softmax，必须为正的量用 Softplus 或 $\exp$。
+   - 输出层的值域要和目标的值域一致：房价可正可负、没有上下界，用恒等；“是不是猫”是一个概率，要落在 $(0,1)$，用 sigmoid；“是猫、狗、鸟中的哪一个”要求几个概率加起来等于 1，用 softmax。
+   - 多标签（一张图可以同时有猫和狗）不是多分类：每个标签各自是一个是/否问题，所以每个输出单独用 sigmoid，而不是整体 softmax。
+   - 配对的损失：恒等配 MSE，sigmoid 配二元交叉熵，softmax 配交叉熵。这样配对时，输出层的梯度会化简成 $\hat y - y$，既好算又不会因为饱和而消失。
+   - 方差、价格、计数这类必须为正的量，用 Softplus $\log(1+e^z)$ 或 $\exp(z)$ 把任意实数映射到正数。
 2. **隐藏层先用 ReLU**，配 He 初始化。出现大量死亡单元时换 Leaky ReLU；做 Transformer 或追求最后一点精度时用 GELU / SiLU；FFN 可以用 SwiGLU。
+   - ReLU 计算便宜，正半轴梯度恒为 1，深层网络中梯度不容易衰减，所以作为默认选项。
+   - “死亡单元”指某个神经元的输入总是负数，输出恒为 0、梯度也恒为 0，再也学不动。学习率过大或初始化不当时容易出现。Leaky ReLU 在负半轴留一个小斜率（如 0.01），让梯度还能流过。
+   - GELU / SiLU 是 ReLU 的平滑版本，在 0 附近没有折角，大模型里通常稍好一点，代价是计算略贵。BERT、GPT 用 GELU。
+   - SwiGLU 是带门控的变体：一路做 SiLU，另一路做线性变换，两路逐元素相乘。LLaMA 等模型的前馈层（FFN）使用它。
 3. **门控结构保留 sigmoid 和 tanh**：LSTM / GRU 的门需要 $(0,1)$ 之间的“开关比例”，只能用 sigmoid；候选值需要有正有负，用 tanh。这里的饱和反而是想要的：门要么开、要么关。
+   - 门的作用是决定“保留多少旧记忆、写入多少新信息”，这是一个 0 到 1 之间的比例，所以用 sigmoid。ReLU 没有上界，不能当比例。
+   - 候选值是要写进记忆的新内容，可能需要增加也可能需要减少，所以用值域为 $(-1,1)$ 的 tanh，而且有界，不会让记忆数值越滚越大。
+   - 在隐藏层里，饱和意味着梯度消失，是缺点；在门里，输出接近 0 或 1 正好表示“完全关”或“完全开”，是想要的行为。
 4. **激活与初始化要成对**：ReLU 系列配 He（$\mathrm{Var}=2/n_{\mathrm{in}}$），tanh / sigmoid 配 Xavier，SELU 配 LeCun（$1/n_{\mathrm{in}}$）。
+   - 初始化的目标是让每一层输出的方差大致不变，信号既不逐层放大，也不逐层缩小到 0。
+   - ReLU 把负半边全部置 0，大约丢掉一半方差，所以 He 初始化把方差设为 $2/n_{\mathrm{in}}$，用多出来的一倍补回来。
+   - tanh 和 sigmoid 在 0 附近近似线性、两边对称，不需要这个补偿，用 Xavier（$1/n_{\mathrm{in}}$ 或 $2/(n_{\mathrm{in}}+n_{\mathrm{out}})$）。
+   - SELU 的自归一化性质是在 LeCun 初始化下推出来的，换成别的初始化，这个性质就不成立了。
+   - 配错不一定立刻报错，但深层网络会出现 loss 不降、梯度为 0 或变成 NaN。具体推导见后文“初始化”一节。
 5. 换激活函数通常只带来很小的提升，排在数据、架构、学习率之后再调。
+   - 调参的优先级：先保证数据质量和数据量，再选合适的网络结构，再调学习率；这些都定了之后，换激活函数一般只带来不到 1 个百分点的变化。
+   - 训练不收敛时，原因通常在学习率、初始化或数据，不在激活函数。
 
 补充的几种激活的 NumPy 实现，并用 PyTorch 核对导数：
 
@@ -1998,11 +2227,92 @@ print(gradcheck(my_layer, (x, W, b), eps=1e-6, atol=1e-4))   # True
 
 Xavier 与 He 初始化按层宽设定方差，使初始化时刻每层的预激活保持 $O(1)$。深层网络中信号要先传得动，才谈得上正则。
 
+下面按 C2M1 Initialization 作业的三个练习展开：全零（Exercise 1）、大随机数（Exercise 2）、He（Exercise 3），再补上作业没有要求的 Xavier。
+
 ### 不能全零
 
 **全零（或全部相同）会导致对称性问题**。若同一层每一行权重都相等，前向时这一层所有神经元的预激活相等、输出相等；反向时每一行收到的梯度也相等（回忆乘法节点：梯度依赖另一个输入，而这些输入都相同），更新后仍然相等。于是整层只学到同一个特征，有 100 个神经元也只相当于 1 个。随机初始化打破这组相等。偏置仍可取 $0$，因为权重已经不对称了。
 
 注意，问题不在于“零”，而在于“相同”：同层权重若完全相同，即使不是零，梯度也相同，对称性同样破不掉。
+
+**Exercise 1：全零初始化**
+
+```python
+import numpy as np
+
+def initialize_parameters_zeros(layers_dims):
+    """
+    layers_dims -- 各层宽度，例如 [n_x, n_h1, n_h2, n_y]
+    返回 parameters 字典：W1, b1, ..., WL, bL（全为 0）
+    """
+    parameters = {}
+    L = len(layers_dims)               # 层数（含输入层）
+    for l in range(1, L):
+        parameters["W" + str(l)] = np.zeros((layers_dims[l], layers_dims[l - 1]))
+        parameters["b" + str(l)] = np.zeros((layers_dims[l], 1))
+    return parameters
+```
+
+C2M1 Initialization 作业的 Exercise 1 就是这样做的：把所有 $W$、$b$ 都设成 0，然后训练 15000 步。结果 loss 几乎不动，准确率约 50%，和瞎猜一样。原因可以直接顺着前向和反向走一遍：
+
+- **前向**：$W^{[1]}=0$，所以第一层每个神经元算出来都是 $0$，ReLU 后还是 $0$。后面每一层也一样，输出只剩偏置决定的一个常数，跟输入 $X$ 无关。
+- **反向**：$\mathrm{d}W^{[l]}=\mathrm{d}Z^{[l]}A^{[l-1]\top}/m$，而 $A^{[l-1]}$ 全是 0，所以 $\mathrm{d}W^{[l]}=0$；往前传的 $\mathrm{d}A^{[l-1]}=W^{[l]\top}\mathrm{d}Z^{[l]}$，因为 $W^{[l]}=0$，也是 0。**所有权重的梯度都是 0，一步也动不了。**
+
+就算不是全 0，而是同一层每一行都相同（比如都填 0.5），问题也一样：同一层的神经元收到相同的输入、算出相同的值、拿到相同的梯度、做相同的更新，永远一模一样。10 个神经元等于 1 个。这叫**对称性没有被打破**。下面是一个可以直接运行的小实验，训练 200 步后，三个隐藏神经元的权重行仍然完全相同：
+
+```python
+import numpy as np
+np.random.seed(0)
+X = np.random.randn(2, 5)
+Y = (X[0:1] > 0).astype(float)
+
+W1 = np.full((3, 2), 0.5); b1 = np.zeros((3, 1))   # 三行一样
+W2 = np.full((1, 3), 0.1); b2 = np.zeros((1, 1))
+for _ in range(200):
+    A1 = np.tanh(W1 @ X + b1)
+    A2 = 1 / (1 + np.exp(-(W2 @ A1 + b2)))
+    dZ2 = A2 - Y
+    dW2 = dZ2 @ A1.T / 5
+    dZ1 = (W2.T @ dZ2) * (1 - A1 ** 2)
+    dW1 = dZ1 @ X.T / 5
+    W1 -= 0.5 * dW1
+    W2 -= 0.5 * dW2
+print(W1)
+# [[1.351 0.64 ]
+#  [1.351 0.64 ]
+#  [1.351 0.64 ]]   三行始终相同
+```
+
+**偏置可以是 0。** 只要 $W$ 是随机的，各个神经元从一开始算出的值就不同，梯度也不同，自然会分开，偏置从 0 开始没有影响。所以实际写法是：$W$ 用随机数（具体缩放见下文），$b$ 用 `np.zeros((n, 1))`。
+
+> **What you should remember**（notebook 原话）:
+>
+> - The weights $W^{[l]}$ should be initialized randomly to break symmetry.
+> - It's okay to initialize the biases $b^{[l]}$ to zeros. Symmetry is still broken so long as $W^{[l]}$ is initialized randomly.
+
+### 用 `np.random` 生成随机权重
+
+既然权重必须随机，先看 NumPy 里造随机数组的几个函数，以及写初始化代码时最常见的错误。
+
+**常用函数**
+
+| 函数 | 分布 | 例子 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `np.random.randn(d0, d1, ...)` | 标准正态 $\mathcal{N}(0,1)$ | `np.random.randn(3, 2)` | 形状**直接写成几个整数**，不是元组 |
+| `np.random.rand(d0, d1, ...)` | 均匀分布 $[0,1)$ | `np.random.rand(3, 2)` | 全是正数，不能直接当权重 |
+| `np.random.seed(s)` | — | `np.random.seed(3)` | 固定全局随机数种子，结果可复现 |
+| `rng = np.random.default_rng(s)` | — | `rng.standard_normal((3, 2))` | 新式写法，形状写成元组；`rng.normal(0, std, size)` 直接指定标准差 |
+| `np.random.uniform(low, high, size)` | 均匀分布 $[\text{low},\text{high})$ | `np.random.uniform(-0.1, 0.1, (3, 2))` | Xavier 的均匀分布版本会用到 |
+
+`randn` 生成的数均值为 0、标准差为 1。乘上常数 $c$ 之后，标准差变成 $c$、方差变成 $c^2$。所以“用方差为 $v$ 的正态分布初始化”写成代码就是 `np.random.randn(...) * np.sqrt(v)`：**乘的是标准差，不是方差**。
+
+**易错点**
+
+1. **`randn` 和 `zeros` 的形状写法不同。** `np.zeros((3, 2))` 要元组；`np.random.randn(3, 2)` 要两个整数，写成 `np.random.randn((3, 2))` 会报 `TypeError`。新式的 `rng.standard_normal((3, 2))` 又要元组。
+2. **`rand` 不是 `randn`。** `rand` 是 $[0,1)$ 上的均匀分布，全为正数、均值 0.5，用来初始化权重时所有神经元的输入都往同一个方向偏，起不到“零均值、对称”的作用。
+3. **种子只设一次，设在循环外面。** 作业里 `np.random.seed(3)` 写在函数开头，之后每层依次从同一个随机数流里取数。若把 `seed` 放进 `for` 循环里，每层都从同一个起点取数，各层权重的开头部分会一模一样。
+4. **乘的是标准差。** He 初始化的方差是 $2/n^{[l-1]}$，代码是 `* np.sqrt(2 / n_prev)`；写成 `* 2 / n_prev` 就把方差当成了标准差，权重整体小了一个数量级。
+5. **形状顺序是（本层，前一层）。** 与 `np.zeros` 一节相同：`np.random.randn(layers_dims[l], layers_dims[l-1])`。两个参数写反，形状变成 $(n^{[l-1]},n^{[l]})$，前向 `W @ A` 会直接报错（或在两层宽度相同时悄悄算错）。
 
 ### 尺度太小或太大
 
@@ -2021,6 +2331,66 @@ Xavier 与 He 初始化按层宽设定方差，使初始化时刻每层的预激
 - **方差过小**（标准差 $0.01$）：激活和梯度的标准差逐层一起变小，信号消失。
 - **方差过大**（标准差 $1$）：ReLU 与线性层上两者逐层变大，梯度爆炸；tanh / sigmoid 则进入饱和区，局部导数接近 $0$，同样学不动。
 - **按 Xavier 或 He 取值**：激活与梯度跨层保持同一量级。
+
+下面按 C2M1 Initialization 作业的顺序，用代码复现“尺度太大”的情形。
+
+**Exercise 2：随机初始化（大方差）**
+
+作业先故意用一个很大的尺度：标准正态再乘 10。代码与 `initialize_parameters_zeros` 只差一行：
+
+```python
+import numpy as np
+
+def initialize_parameters_random(layers_dims):
+    """
+    layers_dims -- 各层宽度，例如 [n_x, n_h1, n_h2, n_y]
+    返回 parameters 字典：W1, b1, ..., WL, bL
+        Wl: (layers_dims[l], layers_dims[l-1])
+        bl: (layers_dims[l], 1)
+    """
+    np.random.seed(3)                  # 只设一次，保证结果与作业一致
+    parameters = {}
+    L = len(layers_dims)               # 层数（含输入层）
+
+    for l in range(1, L):
+        parameters["W" + str(l)] = np.random.randn(layers_dims[l], layers_dims[l - 1]) * 10
+        parameters["b" + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters
+
+
+parameters = initialize_parameters_random([3, 2, 1])
+print("W1 =", parameters["W1"])
+print("b1 =", parameters["b1"])
+print("W2 =", parameters["W2"])
+print("b2 =", parameters["b2"])
+```
+
+输出（与作业的期望输出一致）：
+
+```text
+W1 = [[ 17.88628473   4.36509851   0.96497468]
+      [-18.63492703  -2.77388203  -3.54758979]]
+b1 = [[0.]
+      [0.]]
+W2 = [[-0.82741481 -6.27000677]]
+b2 = [[0.]]
+```
+
+用这组参数训练作业里的三层网络（LINEAR→RELU→LINEAR→RELU→LINEAR→SIGMOID，`layers_dims = [2, 10, 5, 1]`，15000 次迭代），结果如下：
+
+- 第 0 次迭代的 cost 打印出来是 `inf`。权重太大，最后一层的 $z$ 绝对值很大，sigmoid 输出被推到非常接近 0 或 1。对答错的样本，交叉熵里的 $\log(a)$ 或 $\log(1-a)$ 会变成 $\log 0$，于是 cost 变成无穷大。
+- cost 下降之后，训练集准确率约 83%，测试集约 86%。网络打破了对称性，比全 0 的 50% 好，但决策边界不好，学得也慢。
+- 原因：权重大，激活就落在 sigmoid 的饱和区，局部导数接近 0，梯度很小；而且一开始预测“很自信又是错的”，损失很大，要用很多步才能把权重拉回合理范围。
+
+> **What you should remember**（notebook 原话）:
+>
+> - The cost starts very high.
+> - Poor initialization can lead to vanishing/exploding gradients, which also slows down the optimization algorithm.
+> - Initializing weights to very large random values does not work well.
+> - Hopefully intializing with small random values does better.
+>
+> 第一条对应上面的 `inf`：作业说明这个无穷大是数值舍入造成的，sigmoid 输出在浮点数里被舍成了恰好 0 或 1，$\log$ 就变成 $\log 0$。最后一条留下的问题是“小到多少”，下面的 He 初始化给出答案。
 
 ### Xavier 初始化
 
@@ -2041,9 +2411,62 @@ W^{[l]}\sim\mathcal{N}\left(0,\frac{2}{n^{[l-1]}+n^{[l]}}\right)
 \quad\text{或均匀分布等价尺度}.
 $$
 
-Caffe 等框架常简化为只看输入，即 $v_w=1/n_{\mathrm{in}}$、标准差 $1/\sqrt{n}$。直观上，前一层节点越多，求和项越多，每个权重就应越小。
+Caffe 等框架常简化为只看输入，即 $v_w=1/n_{\mathrm{in}}$、标准差 $1/\sqrt{n}$；课程讲座给 tanh 用的也是这个写法。直观上，前一层节点越多，求和项越多，每个权重就应越小。
 
 Xavier 的推导假设激活函数在 0 附近近似线性。sigmoid 和 tanh 关于中心对称、中间段近似线性，所以适用 Xavier。
+
+作业只要求 He，Xavier 的代码按讲座与原论文补齐。两种形式对应：
+
+- 课程讲座的写法只看输入宽度：$\mathrm{Var}(W^{[l]})=\dfrac{1}{n^{[l-1]}}$，代码 `* np.sqrt(1 / n_prev)`；
+- Glorot 原论文同时兼顾前向与反向：$\mathrm{Var}(W^{[l]})=\dfrac{2}{n^{[l-1]}+n^{[l]}}$，代码 `* np.sqrt(2 / (n_prev + n_cur))`。均匀分布版本取 $W\sim U\!\left[-\sqrt{\tfrac{6}{n^{[l-1]}+n^{[l]}}},\ \sqrt{\tfrac{6}{n^{[l-1]}+n^{[l]}}}\right]$，它的方差同样是 $\tfrac{2}{n^{[l-1]}+n^{[l]}}$（区间 $[-a,a]$ 上均匀分布的方差是 $a^2/3$）。
+
+```python
+def initialize_parameters_xavier(layers_dims, variant="lecture", uniform=False):
+    """
+    Xavier / Glorot 初始化；适合 tanh、sigmoid 隐藏层。b 为 0。
+    variant="lecture": Var(W) = 1 / n_prev               （课程讲座写法）
+    variant="glorot" : Var(W) = 2 / (n_prev + n_cur)     （Glorot & Bengio 2010）
+    uniform=True     : 改用方差相同的均匀分布 U[-a, a]，a = sqrt(3 * Var)
+    """
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims) - 1
+
+    for l in range(1, L + 1):
+        n_cur, n_prev = layers_dims[l], layers_dims[l - 1]
+        if variant == "lecture":
+            var = 1.0 / n_prev
+        elif variant == "glorot":
+            var = 2.0 / (n_prev + n_cur)
+        else:
+            raise ValueError(variant)
+
+        if uniform:
+            a = np.sqrt(3.0 * var)                         # glorot 时 a = sqrt(6 / (n_prev + n_cur))
+            W = np.random.uniform(-a, a, size=(n_cur, n_prev))
+        else:
+            W = np.random.randn(n_cur, n_prev) * np.sqrt(var)
+
+        parameters["W" + str(l)] = W
+        parameters["b" + str(l)] = np.zeros((n_cur, 1))
+
+    return parameters
+
+
+parameters = initialize_parameters_xavier([2, 4, 1])
+print("W1 =", parameters["W1"])
+print("W2 =", parameters["W2"])
+```
+
+输出（讲座写法、正态分布；与 He 用的是同一组随机数，每个元素正好是 He 结果的 $1/\sqrt2$）：
+
+```text
+W1 = [[ 1.26475132  0.30865908]
+      [ 0.06823401 -1.31768833]
+      [-0.19614308 -0.25085248]
+      [-0.05850706 -0.44335643]]
+W2 = [[-0.02190908 -0.23860902 -0.65693238  0.44231119]]
+```
 
 ### He 初始化
 
@@ -2069,7 +2492,65 @@ $$
 >
 > Xavier / Glorot (2010) 按层宽设定 $\mathrm{Var}(W)$，使初始化时预激活保持 $O(1)$，适合 tanh 与 sigmoid。He et al. (2015) 考虑到 ReLU 丢掉负半轴、二阶矩约折半，改用 $2/n_{\mathrm{in}}$。二者都只约束初始化时刻；训练开始后方差仍会变化，这也是后面需要 BatchNorm 的原因之一。
 
-<br>
+**Exercise 3：He 初始化**
+
+Exercise 2 留下的问题是“小到多少”。按上面的公式，标准差取 $\sqrt{2/n^{[l-1]}}$，代码只是把 Exercise 2 的 `* 10` 换成 `* np.sqrt(2 / layers_dims[l - 1])`：
+
+```python
+def initialize_parameters_he(layers_dims):
+    """
+    He 初始化：W 的标准差为 sqrt(2 / n_prev)，适合 ReLU 隐藏层；b 为 0。
+    """
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims) - 1           # 带参数的层数（不含输入层）
+
+    for l in range(1, L + 1):
+        parameters["W" + str(l)] = (np.random.randn(layers_dims[l], layers_dims[l - 1])
+                                    * np.sqrt(2.0 / layers_dims[l - 1]))
+        parameters["b" + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters
+
+
+parameters = initialize_parameters_he([2, 4, 1])
+print("W1 =", parameters["W1"])
+print("b1 =", parameters["b1"])
+print("W2 =", parameters["W2"])
+print("b2 =", parameters["b2"])
+```
+
+输出：
+
+```text
+W1 = [[ 1.78862847  0.43650985]
+      [ 0.09649747 -1.8634927 ]
+      [-0.2773882  -0.35475898]
+      [-0.08274148 -0.62700068]]
+b1 = [[0.]
+      [0.]
+      [0.]
+      [0.]]
+W2 = [[-0.03098412 -0.33744411 -0.92904268  0.62552248]]
+b2 = [[0.]]
+```
+
+可以对照着看：$W^{[1]}$ 的前一层宽度是 2，标准差 $\sqrt{2/2}=1$，所以 `W1` 就是原始的标准正态数；$W^{[2]}$ 的前一层宽度是 4，标准差 $\sqrt{2/4}\approx0.707$，所以 `W2` 是原始数乘 0.707。注意这里的循环写法 `L = len(layers_dims) - 1`、`range(1, L + 1)`，与 Exercise 2 的 `L = len(layers_dims)`、`range(1, L)` 遍历的是同一组层，只是 `L` 的含义不同。
+
+同样的三层网络用 He 初始化训练 15000 次：训练集准确率约 99.3%，测试集约 96%，决策边界把两类分得很干净。
+
+### 实现与对照
+
+作业的三个函数各自写死一种尺度；下面的 `init_params` 把几种尺度合在一个函数里，用 `mode` 切换，便于做对比实验。
+
+**几种初始化放在一起**
+
+| 初始化 | `W` 的写法 | 训练集准确率（作业三层网络） | 问题 |
+| :--- | :--- | :--- | :--- |
+| 全 0 | `np.zeros((n_l, n_prev))` | 约 50% | 对称性没打破，同层神经元永远相同 |
+| 大随机数 | `np.random.randn(n_l, n_prev) * 10` | 约 83% | 权重太大，sigmoid 饱和，初始 cost 为 `inf`，学得慢 |
+| He | `np.random.randn(n_l, n_prev) * np.sqrt(2 / n_prev)` | 约 99% | 推荐用于 ReLU |
+| Xavier | `np.random.randn(n_l, n_prev) * np.sqrt(1 / n_prev)` | 作业未比较 | 推荐用于 tanh / sigmoid |
 
 ```python
 def init_params(layer_dims, mode="he", seed=1):
@@ -2113,6 +2594,24 @@ print(activation_stats(lambda n: np.sqrt(2.0 / n)))   # [0.83, 0.87, 0.88, 0.95,
 - Xavier（ReLU 下）：每层约乘 $1/\sqrt2$；
 - He：各层基本不变。
 
+把层数加到 10（每层 100 个 ReLU 神经元），再加上作业里“乘 10”的大尺度，看最后一层激活的标准差，差别更明显：
+
+```python
+import numpy as np
+
+def last_layer_std(scale_fn, n=100, L=10, m=500, seed=0):
+    rng = np.random.default_rng(seed)
+    A = rng.standard_normal((n, m))
+    for _ in range(L):
+        W = rng.standard_normal((n, n)) * scale_fn(n)
+        A = np.maximum(0.0, W @ A)          # ReLU
+    return float(A.std())
+
+print(last_layer_std(lambda n: 10.0))               # 极大：每层放大约 70 倍，10 层后溢出到 1e18 量级
+print(last_layer_std(lambda n: np.sqrt(1.0 / n)))   # Xavier（ReLU 下）：每层约缩小到 1/sqrt(2)，越来越小
+print(last_layer_std(lambda n: np.sqrt(2.0 / n)))   # He：保持在 O(1)
+```
+
 PyTorch 的 `nn.Linear` 默认用 Kaiming-uniform（$a=\sqrt5$），方差比 He 小，等价于 $\mathrm{Var}(W)=1/(3n_{\mathrm{in}})$。要与作业一致，需要显式重设：
 
 ```python
@@ -2134,6 +2633,13 @@ model = nn.Sequential(nn.Linear(12288, 20), nn.ReLU(),
                       nn.Linear(5, 1))
 model.apply(init_he)          # apply 会递归作用到每个子模块
 ```
+
+> **What you should remember**（notebook 原话）:
+>
+> - Different initializations lead to different results
+> - Random initialization is used to break symmetry and make sure different hidden units can learn different things
+> - Don't intialize to values that are too large
+> - He initialization works well for networks with ReLU activations.
 
 ### 梯度消失与爆炸的连乘解释
 
