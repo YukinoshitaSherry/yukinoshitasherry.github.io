@@ -6,7 +6,7 @@ categories:
 tags:
   - LLM
   - Agent
-desc: 整理自多篇综述与论文，以《A Survey of LLM-Driven AI Agent Communication- Protocols, Security Risks, and Defense Countermeasures》为主线。
+desc: 整理自多篇综述与论文，以《A Survey of LLM-Driven AI Agent Communication- Protocols, Security Risks, and Defense Countermeasures》为主线；MCP 与 A2A 部分自顶向下讲解原理并附源码。
 ---
 
 综述地址：
@@ -24,6 +24,10 @@ desc: 整理自多篇综述与论文，以《A Survey of LLM-Driven AI Agent Com
     - Kim, S., et al. Agent-to-Agent (A2A) Communication Protocols: Design and Evaluation
     - Patel, D., et al. MCP and Beyond: Protocols for Agent Interoperability
     - Gupta, A., et al. A Survey of Communication Mechanisms in LLM-Based Multi-Agent Systems
+- MCP / A2A 协议原理部分另参考：
+  - <a href="https://zhuanlan.zhihu.com/p/29001189476">MCP (Model Context Protocol)，一篇就够了。</a>
+  - <a href="https://zhuanlan.zhihu.com/p/1895786881360316389">A2A协议(Agent to Agent Protocol)详解与官方案例实践分享</a>
+  - <a href="https://modelcontextprotocol.io/">MCP 官方文档</a>、<a href="https://a2a-protocol.org/">A2A 官方文档</a>、<a href="https://github.com/a2aproject/a2a-samples">a2a-samples</a>
 
 
 <br>
@@ -39,7 +43,7 @@ desc: 整理自多篇综述与论文，以《A Survey of LLM-Driven AI Agent Com
 | **U-A (User-to-Agent)** | 用户与智能体之间的交互通道，通常以自然语言或结构化指令形式存在 | - 输入为自由文本，需经意图识别（Intent Recognition）<br>- 安全风险包括 Prompt Injection、Jailbreaking、Privacy Leakage |
 | **A-A (Agent-to-Agent)** | 两个或多个智能体之间的协作通信，用于任务分解、协商、同步 | - 可基于自然语言（如 Meta Cicero）或结构化协议（如 A2A、MCP）<br>- 需解决身份认证、消息序列化、一致性保证等问题 |
 | **A-E (Agent-to-Environment)** | 智能体与外部环境（工具、API、数据库、传感器等）的交互 | - 通过 MCP、RAG、Function Calling 等机制实现<br>- 环境可为云端服务、本地文件或物理设备 |
-| **Capability Expression** | 智能体声明其可执行功能的方式，包含功能签名与语义描述 | - 在 MCP 中通过 `tool_spec` JSON 对象表达<br>- 包含 name, description, parameters (JSON Schema), returns |
+| **Capability Expression** | 智能体声明其可执行功能的方式，包含功能签名与语义描述 | - 在 MCP 中通过 `tools/list` 返回的工具对象表达<br>- 包含 name, description, inputSchema (JSON Schema)，可选 outputSchema<br>- 在 A2A 中通过 Agent Card 的 skills 表达 |
 | **Schema-Agnostic** | 协议不依赖特定数据序列化格式，支持多种底层表示 | - MCP 内部使用统一抽象模型<br>- Host 负责格式转换（如 YAML ↔ JSON ↔ Protobuf） |
 | **Host (MCP)** | 本地可信中介，非网络主机，而是安全策略执行点 | - 运行在用户可控环境<br>- 实施细粒度访问控制（如“仅允许读取日历”）<br>- 防止恶意工具窃取用户数据或越权操作 |
 
@@ -100,121 +104,587 @@ desc: 整理自多篇综述与论文，以《A Survey of LLM-Driven AI Agent Com
 
 <br>
 
-## MCP（Model Context Protocol）
+## MCP 与 A2A：自顶向下理解
 
-核心通信协议。
+> 本节在综述基础上，结合下列两篇文章重写，按「全景 → 动机 → MCP → A2A → 二者如何配合」的顺序展开：
+> - <a href="https://zhuanlan.zhihu.com/p/29001189476">MCP (Model Context Protocol)，一篇就够了。</a>（LastWhisper）
+> - <a href="https://zhuanlan.zhihu.com/p/1895786881360316389">A2A协议(Agent to Agent Protocol)详解与官方案例实践分享</a>（Tommy学习录）
+> - 官方文档：<a href="https://modelcontextprotocol.io/">modelcontextprotocol.io</a>、<a href="https://a2a-protocol.org/">a2a-protocol.org</a>（原 google.github.io/A2A）
 
-### 概念
+### 第 0 层：一句话 + 一张图
 
-**Model Context Protocol (MCP)** 是一种开源、轻量级、上下文感知的通信协议，旨在标准化 LLM 智能体与外部资源（工具、API、知识库、工作流引擎）之间的交互方式。其核心目标是解耦智能体逻辑与具体工具实现，使智能体能够通过统一接口发现、调用和组合任意注册的能力。
+- **MCP 管「Agent ↔ 工具/数据」**（对应上文 A-E）：让一个 Agent 用统一接口去用各种工具、读各种数据。
+- **A2A 管「Agent ↔ Agent」**（对应上文 A-A）：让不同厂商、不同框架做的 Agent 互相发现、分派任务、交付结果。
+- 简记：**MCP for Tools，A2A for Agents**。二者是互补的两层，不是二选一。
 
-MCP 最初由 Chroma、LangChain 社区及多个初创公司联合提出，并于 2024 年正式发布 v0.1 规范（<a href="https://github.com/modelcontextprotocol/spec">https://github.com/modelcontextprotocol/spec</a>）。至 2025 年，已有超过 30 个工具提供者（Tool Providers）实现 MCP Server，涵盖向量数据库、Web API、代码解释器、企业 SaaS 系统等。
+```
+                       用户 (U-A)
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │   主 Agent（Host）   │
+              │   LLM + 编排逻辑     │
+              └─────────────────────┘
+          MCP │                     │ A2A
+   (竖向：用工具)                    (横向：找同事)
+     ┌────────┼────────┐       ┌────┴────────────┐
+     ▼        ▼        ▼       ▼                 ▼
+ 文件系统   数据库    Web API   酒店 Agent        航班 Agent
+ Server    Server    Server   (别家框架做的)     (别家公司部署的)
+                                │ MCP              │ MCP
+                                ▼                  ▼
+                            它自己的工具         它自己的工具
+```
 
-### 设计原则
-1. **解耦（Decoupling）**：智能体无需了解底层 API 的认证方式、请求格式或错误码；
-2. **能力注册（Capability Registration）**：所有工具通过标准接口声明其功能签名（Function Signature）与上下文提示（Contextual Prompt）；
-3. **混合操作支持**：
-   - **声明式（Declarative）**：描述任务目标（如“获取北京未来三天天气”）；
-   - **命令式（Imperative）**：指定执行细节（如“调用 get_weather(city='Beijing', days=3)”）；
-4. **上下文保留（Context Preservation）**：每次调用携带会话上下文（如用户偏好、历史对话），避免信息丢失。
-
-### 架构详解
-
-MCP 采用三层模块化架构，各组件职责明确，形成端到端的安全通信链路：
-
-<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/20251220002804704.png" style="width:80%"><br>
-
-### 组件角色
-
-#### Host（本地可信协调器）
-
-- **角色定位**：Trusted Local Orchestrator
-- **技术职责**：
-  - 管理所有 MCP Client 生命周期
-  - 执行访问控制策略（ACL/RBAC/OAuth2）
-  - 中介 Client 与 Server 通信
-  - 记录审计日志
-- **实现要求**：
-  - 必须运行在用户可控环境（如本地设备、VPC 内）
-  - 支持插件化策略引擎
-- **安全意义**：
-  - 防止未授权调用
-  - 隔离多租户会话
-  - 阻断恶意工具的数据窃取
-
-#### Client（智能体交互线程）
-
-- **角色定位**：智能体交互线程
-- **技术职责**：
-  - 发现可用工具（调用 `list_tools()`）
-  - 构造结构化调用（`call_tool(name, args)`）
-  - 处理同步/异步响应（支持流式输出）
-- **实现要求**：
-  - 需集成 LLM 推理引擎（如 LangChain AgentExecutor）
-  - 支持重试、超时、回退机制
-- **安全意义**：
-  - 代表单一用户会话或智能体身份
-  - 可嵌入安全过滤器（如 Llama Guard）
-
-#### Server（中央注册中心）
-
-- **角色定位**：Centralized Registry
-- **技术职责**：
-  - 注册工具能力（`register_tool(spec)`）
-  - 提供工具描述（name, description, parameters, returns）
-  - 可选提供上下文提示模板（prompt_template）
-- **实现要求**：
-  - 需实现 MCP 协议定义的 gRPC/HTTP 接口
-  - 支持热更新与版本管理
-- **安全意义**：
-  - 工具提供者只需实现 Server，即可被任意 MCP 生态调用
-
-> 示例：旅行规划任务
-> 1. U-A：用户输入“帮我制定一个北京三日游计划”；
-> 2. A-E：主智能体（MCP Client）向 Host 请求可用工具列表；
-> 3. Host 返回注册的 Server 列表（Weather、Flights、Hotels、TouristSpots）；
-> 4. A-A：主智能体依次调用各 Server 获取数据；
-> 5. 各 Server 执行实际 API 调用（如调用 OpenWeatherMap、Amadeus API）；
-> 6. 主智能体整合结果，生成结构化行程（U-A 输出）。
+一个直观类比：
+- MCP 像 **USB-C 接口**：任何外设（工具）只要做成 USB-C，就能插到任何电脑（AI 应用）上。
+- A2A 像 **公司之间的外包合同 + 名片**：你不需要知道外包团队内部怎么干活（Agent 是「不透明」的），只需要看名片（Agent Card）知道他们能干什么，然后发任务、等交付。
 
 <br>
 
-### Schema-Agnostic 机制实现
+### 第 1 层：为什么需要协议
 
-MCP 通过抽象能力描述（Capability Description）实现模式无关性：
+把「给模型提供外部信息」的演进按时间排：
+
+| 阶段 | 做法 | 问题 |
+|------|------|------|
+| 手工 Prompt | 人工查数据库/文件，复制粘贴进 prompt | 任务一复杂就不可行 |
+| Function Calling | 模型输出结构化调用，由应用执行预定义函数 | 各家 API 格式不一样（OpenAI ≠ Google），换模型要重写；工具和应用强绑定 |
+| **MCP** | 工具做成独立的 MCP Server，任何支持 MCP 的应用都能接 | 解决了「Agent 用工具」的标准化 |
+| **A2A** | Agent 之间用统一的发现与任务协议通信 | 解决了「Agent 和 Agent 协作」的标准化 |
+
+核心收益是把集成成本从 **M×N 降到 M+N**：M 个 AI 应用、N 个工具，没有协议时要写 M×N 个适配器；有了协议，每个应用实现一次 Client、每个工具实现一次 Server 即可。A2A 对「Agent 之间」做的是同一件事。
+
+注意一个关键区分：**Function Calling 是模型的能力**（模型能输出「我要调哪个函数、参数是什么」），**MCP 是工具接入的协议**（工具怎么被发现、怎么被调用、结果怎么返回）。二者不冲突——MCP Client 通常就是把 MCP 工具翻译成模型的 function calling / tool use 格式交给模型。
+
+<br>
+
+### 第 2 层：MCP 是什么
+
+#### 起源与定位
+
+MCP 由 **Anthropic 于 2024 年 11 月 25 日**发布（<a href="https://www.anthropic.com/news/model-context-protocol">Introducing the Model Context Protocol</a>），开源，定义了 AI 应用与外部数据源/工具之间交换上下文的方式。之后 OpenAI、Google、Microsoft 等也陆续支持，成为事实标准。
+
+> 勘误：原综述译文称 MCP「由 Chroma、LangChain 社区联合提出」、Server 实现「gRPC 接口」，均不准确。MCP 由 Anthropic 提出，消息格式是 JSON-RPC 2.0（见下文）。
+
+#### 三个角色：Host / Client / Server
+
+<img src="https://raw.githubusercontent.com/YukinoshitaSherry/qycf_picbed/main/20251220002804704.png" style="width:80%"><br>
+
+| 角色 | 是什么 | 例子 | 职责 |
+|------|------|------|------|
+| **Host** | 用户直接使用的 AI 应用 | Claude Desktop、Cursor、Claude Code、自己写的 Agent | 跑 LLM、管理多个 Client、做权限确认（「是否允许此工具？」） |
+| **Client** | Host 内部的连接器，**与一个 Server 一一对应** | Host 为每个配置的 Server 起一个 Client | 建立连接、能力协商、转发请求和结果 |
+| **Server** | 一个独立的小程序，把某类能力暴露出来 | filesystem、GitHub、PostgreSQL、浏览器 Server | 提供 Tools / Resources / Prompts，执行实际操作 |
+
+> 勘误：原综述把 Server 称为「中央注册中心」。实际上 MCP 没有中心化注册：每个 Server 是独立进程/服务，Host 通过本地配置文件知道要连哪些 Server（社区另有 MCP Registry 用于「发现」Server，但不在调用链路上）。
+
+以「我桌面上有哪些文档？」走一遍：
+
+```
+你的问题 → Claude Desktop (Host) → Claude 模型
+       → 模型判断需要文件信息 → Host 内的 MCP Client
+       → filesystem MCP Server 扫描桌面 → 返回文件列表
+       → 结果回到模型 → 模型生成回答 → 显示给你
+```
+
+开发者通常只需要写 Server，Host 和 Client 由应用方实现好了。
+
+#### Server 能提供什么：三类原语
+
+| 原语 | 谁来控制 | 含义 | 例子 |
+|------|--------|------|------|
+| **Tools（工具）** | 模型决定何时调用 | 可执行的函数，可能有副作用，一般需用户批准 | `run_sql(query)`、`send_email(...)` |
+| **Resources（资源）** | 应用/用户决定是否附加 | 只读的、类文件的数据，用 URI 标识 | 表结构、文件内容、API 响应 |
+| **Prompts（提示模板）** | 用户主动选择 | 预写好的任务模板，常显示为斜杠命令 | 「/分析这张表」 |
+
+反方向（Server 向 Client 请求）还有 **Sampling**（Server 借用 Host 的 LLM 生成内容）、**Roots**（告诉 Server 可以访问哪些目录）、**Elicitation**（Server 向用户追问信息）等，入门可以先不管。
+
+#### 线上怎么传：JSON-RPC 2.0 + 两种传输
+
+- **消息格式**：JSON-RPC 2.0（请求 / 响应 / 通知）。
+- **传输方式**：
+  - **stdio**：Host 把 Server 当子进程启动，通过标准输入输出通信。本地工具最常见，前面 Claude Desktop 的配置就是这种。
+  - **Streamable HTTP**：Server 部署为远程服务（早期版本是 HTTP + SSE），适合云端工具，配合 OAuth 做认证。
+
+一次会话的生命周期：
+
+```
+1. initialize        Client ↔ Server 交换协议版本和各自支持的能力（capability negotiation）
+2. tools/list        Client 问：你有哪些工具？Server 返回名称、描述、inputSchema
+3. tools/call        模型选定工具后，Client 发 {name, arguments}，Server 执行并返回 content
+4. （可选）resources/read、prompts/get、通知（如工具列表变更 notifications/tools/list_changed）
+```
+
+`tools/list` 返回的单个工具大致长这样（真实字段名是 `inputSchema`，可选 `outputSchema`）：
 
 ```json
 {
   "name": "get_weather",
   "description": "Retrieve current weather for a given city",
-  "parameters": {
+  "inputSchema": {
     "type": "object",
     "properties": {
       "city": {"type": "string", "description": "City name"},
       "days": {"type": "integer", "minimum": 1, "maximum": 7}
     },
     "required": ["city"]
-  },
-  "returns": {
-    "type": "object",
-    "properties": {
-      "temperature": {"type": "number"},
-      "condition": {"type": "string"}
-    }
-  },
-  "prompt_template": "You can call get_weather(city, days) to fetch weather data."
+  }
 }
 ```
 
-- Client 仅需解析上述 JSON，无需关心底层 API 是 REST、GraphQL 还是 gRPC；
-- Host 可在内部将参数映射为目标工具的实际请求格式；
-- Server 负责将工具返回值转换为统一 JSON 结构。
+综述所说的 **Schema-Agnostic** 就体现在这里：Client 和模型只看这份 JSON Schema 描述，不关心 Server 背后调的是 REST、GraphQL、gRPC 还是本地函数——转换工作由 Server 自己完成。这让新工具「即插即用」。
 
-此机制极大降低集成成本，使新工具“即插即用”。
+#### 原理：模型是怎么决定用哪个工具的？
+
+这是理解 MCP 最关键的一点：**MCP 本身不做决策，决策完全由 LLM 根据工具描述文本做出。**
+
+以官方 Python client 示例（简化）为例，过程分两步：
+
+**① 选工具：工具描述被拼进 prompt**
+
+```python
+# 1. 连接所有 server，收集工具
+all_tools = []
+for server in self.servers:
+    all_tools.extend(await server.list_tools())
+
+# 2. 把每个工具的 name / description / 参数说明格式化成文本
+tools_description = "\n".join(tool.format_for_llm() for tool in all_tools)
+
+# 3. 放进 system prompt，要求模型需要工具时只输出 JSON
+system_message = (
+    "You are a helpful assistant with access to these tools:\n\n"
+    f"{tools_description}\n"
+    "Choose the appropriate tool based on the user's question. "
+    "If no tool is needed, reply directly.\n\n"
+    'When you need a tool, respond ONLY with: {"tool": "tool-name", "arguments": {...}}'
+)
+```
+
+而用 Python SDK 写 Server 时，`@mcp.tool()` 装饰器会直接把**函数名当作工具名、docstring 当作 description、类型注解生成 inputSchema**。
+
+**② 执行并回填结果**
+
+```python
+llm_response = llm.get_response(messages)
+result = await self.process_llm_response(llm_response)   # 若是工具调用 JSON 就执行，非法/幻觉调用会被跳过
+
+if result != llm_response:            # 执行了工具
+    messages.append({"role": "assistant", "content": llm_response})
+    messages.append({"role": "system", "content": result})
+    final = llm.get_response(messages)  # 带着工具结果再问一次模型，生成自然语言回答
+```
+
+> 生产级 Host（Claude Desktop 等）用的是模型原生的 tool use 接口而非这种手写 JSON prompt，但本质相同：**工具描述作为上下文进入模型，模型输出结构化调用，Host 执行后把结果回填上下文**。
+
+由此得到三个推论：
+1. **工具描述就是工具的「说明书」**：名称、docstring、参数说明写得好不好，直接决定模型会不会选对、填对参数。
+2. **任何模型都能用 MCP**，只要能把工具描述喂给它；但没针对性训练的模型效果难保证。
+3. **工具描述也是攻击面**：既然描述会原样进入模型上下文，恶意 Server 就能在描述里藏指令——这正是下文「安全威胁 → 工具相关风险」与「MCP 实验 → 工具中毒」的根源。Host 层的用户确认、权限控制就是为此而设。
+
+#### 最小实践：写一个 MCP Server
+
+```python
+from pathlib import Path
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("桌面 TXT 文件统计器")
+
+@mcp.tool()
+def count_desktop_txt_files() -> int:
+    """Count the number of .txt files on the desktop."""
+    return len(list((Path.home() / "Desktop").glob("*.txt")))
+
+@mcp.tool()
+def list_desktop_txt_files() -> str:
+    """Get a list of all .txt filenames on the desktop."""
+    files = list((Path.home() / "Desktop").glob("*.txt"))
+    if not files:
+        return "No .txt files found on desktop."
+    return "\n".join(f"- {f.name}" for f in files)
+
+if __name__ == "__main__":
+    mcp.run()   # 默认 stdio 传输
+```
+
+- 环境：`uv init txt_counter && uv add "mcp[cli]"`
+- 调试：`mcp dev txt_counter.py` 打开 MCP Inspector，可在网页里手动调工具看结果。
+- 接入 Claude Desktop：在 `claude_desktop_config.json` 中登记启动命令，重启即可：
+
+```json
+{
+  "mcpServers": {
+    "txt_counter": {
+      "command": "/绝对路径/uv",
+      "args": ["--directory", "/你的项目路径", "run", "txt_counter.py"]
+    }
+  }
+}
+```
+
+之后问「能推测我桌面上 txt 文件名的含义吗？」，Claude 会请求权限，然后调用这两个工具。
+
+#### 源码：线上的 JSON-RPC 报文长什么样
+
+Client 和 Server 之间（stdio 下就是一行一个 JSON）实际传的是这些消息：
+
+```json
+// ① Client → Server：握手，声明协议版本与自身能力
+{"jsonrpc": "2.0", "id": 1, "method": "initialize",
+ "params": {"protocolVersion": "2025-06-18",
+            "capabilities": {"roots": {}, "sampling": {}},
+            "clientInfo": {"name": "claude-desktop", "version": "1.0"}}}
+
+// Server → Client：声明自己支持 tools
+{"jsonrpc": "2.0", "id": 1,
+ "result": {"protocolVersion": "2025-06-18",
+            "capabilities": {"tools": {"listChanged": true}},
+            "serverInfo": {"name": "桌面 TXT 文件统计器", "version": "1.0"}}}
+
+// Client → Server：握手完成通知（通知没有 id，不需要响应）
+{"jsonrpc": "2.0", "method": "notifications/initialized"}
+
+// ② 列工具
+{"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+{"jsonrpc": "2.0", "id": 2,
+ "result": {"tools": [{"name": "count_desktop_txt_files",
+                       "description": "Count the number of .txt files on the desktop.",
+                       "inputSchema": {"type": "object", "properties": {}}}]}}
+
+// ③ 模型决定调用后，Client 发起调用
+{"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+ "params": {"name": "count_desktop_txt_files", "arguments": {}}}
+{"jsonrpc": "2.0", "id": 3,
+ "result": {"content": [{"type": "text", "text": "3"}], "isError": false}}
+```
+
+可以看到 `@mcp.tool()` 里的函数名和 docstring 原样变成了 `name` 和 `description`——这就是模型看到的全部「说明书」。
+
+#### 源码：用官方 SDK 写一个最小 MCP Client（Host 侧）
+
+把上面的报文封装起来，再接上 LLM，就是一个 Host。下面用 `mcp` Python SDK + Anthropic API，演示完整的「列工具 → 模型选择 → 执行 → 回填」循环：
+
+```python
+import asyncio
+from anthropic import Anthropic
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+server = StdioServerParameters(command="uv", args=["run", "txt_counter.py"])
+llm = Anthropic()
+
+async def main(question: str):
+    # 1. 以子进程方式启动 Server，建立 stdio 连接（一个 Client 对应一个 Server）
+    async with stdio_client(server) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()                       # initialize + initialized
+
+            # 2. tools/list：把 MCP 工具翻译成模型的 tool use 格式
+            tools = (await session.list_tools()).tools
+            llm_tools = [{"name": t.name,
+                          "description": t.description,
+                          "input_schema": t.inputSchema} for t in tools]
+
+            messages = [{"role": "user", "content": question}]
+            while True:
+                resp = llm.messages.create(model="claude-sonnet-5-5", max_tokens=1024,
+                                           tools=llm_tools, messages=messages)
+                messages.append({"role": "assistant", "content": resp.content})
+                if resp.stop_reason != "tool_use":           # 模型不再需要工具 → 结束
+                    print(resp.content[0].text)
+                    return
+
+                # 3. tools/call：执行模型选中的每个工具，把结果作为 tool_result 回填
+                results = []
+                for block in resp.content:
+                    if block.type == "tool_use":
+                        r = await session.call_tool(block.name, block.input)
+                        results.append({"type": "tool_result",
+                                        "tool_use_id": block.id,
+                                        "content": r.content[0].text})
+                messages.append({"role": "user", "content": results})
+
+asyncio.run(main("我桌面上有几个 txt 文件？分别叫什么？"))
+```
+
+对照前面的原理：**MCP 只负责第 1、2、3 步里「和 Server 说话」的部分**；「选哪个工具」发生在 `llm.messages.create` 里，是模型自己的 tool use 能力。
+
+<br>
+
+### 第 3 层：A2A 是什么
+
+#### 起源与定位
+
+A2A（Agent2Agent Protocol）由 **Google 于 2025 年 4 月**发布，开源，2025 年 6 月捐给 Linux Foundation。目标是让**不透明（opaque）的 Agent** 之间互通：
+
+- 「不透明」= 协作双方**不共享内存、思考过程和工具**，只交换上下文、状态、指令和数据。
+- 这和「把另一个 Agent 包装成一个工具」不同：被调用方保留自己的自主性，可以多轮交互、追问、跑很久。
+
+典型场景：供应链规划 Agent 协调库存、物流、采购 Agent，哪怕它们来自不同供应商、用不同框架（LangGraph、CrewAI、ADK、各类平台）构建。
+
+#### 五条设计原则
+
+1. **拥抱 Agent 能力**：以 Agent 的自然方式（可非结构化）协作，而不是降级成工具调用；
+2. **基于现有标准**：HTTP、SSE、JSON-RPC，容易接入企业现有 IT 栈；
+3. **默认安全**：企业级认证授权，认证方案对齐 OpenAPI；
+4. **支持长任务**：从秒级到数小时、数天（含人在回路），过程中可持续推送状态；
+5. **模态无关**：文本、文件、结构化数据，乃至音视频流。
+
+#### 核心对象
+
+| 对象 | 作用 | 要点 |
+|------|------|------|
+| **Agent Card** | Agent 的「名片」，用于**发现** | 公开 JSON，早期放在 `/.well-known/agent.json`，v1.0 规范为 `/.well-known/agent-card.json`；写明名称、描述、接口地址、skills、能力（streaming / pushNotifications）、认证方式；也可通过注册中心/市场发现 |
+| **Task** | 一个工作单元，有唯一 ID 和**生命周期** | 状态：`submitted → working → (input-required / auth-required) → completed / failed / canceled / rejected` |
+| **Message** | 一轮通信，角色为 user（客户端）或 agent（远端） | 用于指令、追问、对话；有 `messageId`，可带 `contextId` / `taskId` 串起多轮 |
+| **Part** | Message / Artifact 中的内容片段 | 早期分 `TextPart` / `FilePart` / `DataPart`；v1.0 统一为一个 Part，含 `text` / `raw` / `url` / `data` 之一 + `mediaType`；双方据此**协商格式/UI**（表单、iframe、视频） |
+| **Artifact** | 任务的**产出物** | 与 Message 区分：Message 是「对话」，Artifact 是「交付结果」（报告、图片、表格…） |
+| **Streaming** | 实时推送进度 | SSE |
+| **Push Notification** | 长任务回调 | 远端主动 POST 到客户端提供的 webhook，客户端不必轮询或保持连接 |
+
+> 版本提示：A2A 迭代很快，JSON-RPC 方法名经历了 `tasks/send`、`tasks/sendSubscribe`（v0.1，即参考文章所用）→ `message/send`、`message/stream`（v0.2–0.3）→ `SendMessage`、`SendStreamingMessage`、`GetTask`、`CancelTask`（v1.0）。概念不变，看代码时注意对照版本。
+
+#### 一次完整交互
+
+```
+Client Agent                                         Remote Agent
+    │  1. GET /.well-known/agent-card.json                 │
+    │ ───────────────────────────────────────────────────▶ │
+    │ ◀─────────────── Agent Card（技能、端点、认证）       │
+    │                                                      │
+    │  2. 根据 skills 判断它能做「汇率换算」，按要求认证      │
+    │                                                      │
+    │  3. SendMessage（旧：tasks/send、message/send）         │
+    │ ───────────────────────────────────────────────────▶ │
+    │ ◀──── Task{state: input-required, "请问换多少?"}      │  ← 可多轮追问
+    │  4. 补充信息（同一 Task / context）                    │
+    │ ───────────────────────────────────────────────────▶ │
+    │ ◀──── (SSE) TaskStatusUpdate: working ...            │
+    │ ◀──── Artifact{DataPart: {"rate": 7.12, ...}}        │
+    │ ◀──── Task{state: completed}                         │
+```
+
+远端 Agent 内部如何完成任务（用什么模型、调哪些 MCP 工具）对客户端完全不可见。
+
+#### 源码：Agent Card 与 JSON-RPC 报文（v1.0）
+
+Agent Card（`GET /.well-known/agent-card.json` 的返回）：
+
+```json
+{
+  "name": "Hello World Agent",
+  "description": "Just a hello world agent",
+  "version": "0.0.1",
+  "supportedInterfaces": [
+    {"protocolBinding": "JSONRPC", "url": "http://127.0.0.1:9999", "protocolVersion": "1.0"}
+  ],
+  "capabilities": {"streaming": true, "extendedAgentCard": true},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [{
+    "id": "echo_bot",
+    "name": "Echo Bot",
+    "description": "Acknowledges client request and responds with a \"Hello World\" message.",
+    "tags": ["a2a", "echo-example"],
+    "examples": ["hi", "how are you"]
+  }]
+}
+```
+
+客户端 Agent 发任务，远端返回一个已完成的 Task（含 Artifact）：
+
+```json
+// Client → Remote
+{"jsonrpc": "2.0", "id": 1, "method": "SendMessage",
+ "params": {"message": {"messageId": "m-001", "role": "ROLE_USER",
+                        "parts": [{"text": "hi"}]}}}
+
+// Remote → Client
+{"jsonrpc": "2.0", "id": 1,
+ "result": {"task": {
+   "id": "t-123", "contextId": "c-456",
+   "status": {"state": "TASK_STATE_COMPLETED"},
+   "artifacts": [{"artifactId": "a-1",
+                  "parts": [{"text": "Hello, World! I have received your request (hi)",
+                             "mediaType": "text/plain"}]}]}}}
+```
+
+和 MCP 的 `tools/call` 对比：MCP 返回的是一次函数调用的 `content`；A2A 返回的是一个**有状态的 Task**，可以先回 `WORKING` / `INPUT_REQUIRED`，之后再通过 `GetTask`、SSE 或 webhook 拿到最终 Artifact。
+
+#### 源码：用 a2a-sdk 写一个 A2A Server
+
+以下摘自官方 <a href="https://github.com/a2aproject/a2a-samples/tree/main/samples/python/agents/helloworld">a2a-samples/helloworld</a>（a2a-sdk 1.0），分两部分：**AgentExecutor 写业务逻辑**，**`__main__` 声明名片并起 HTTP 服务**。
+
+`agent_executor.py`——核心是把一次请求变成 Task 的状态流转：
+
+```python
+from a2a.helpers import (get_message_text, new_task_from_user_message,
+                         new_text_message, new_text_part)
+from a2a.server.agent_execution import AgentExecutor, RequestContext
+from a2a.server.events import EventQueue
+from a2a.server.tasks import TaskUpdater
+from a2a.types import TaskState
 
 
+class HelloWorldAgent:
+    """真正干活的 Agent：这里可以换成 LangGraph / CrewAI / 任意 LLM 应用，对外不可见。"""
+    async def invoke(self, user_request: str) -> str:
+        return f'Hello, World! I have received your request ({user_request})'
 
 
+class HelloWorldAgentExecutor(AgentExecutor):
+    def __init__(self) -> None:
+        self.agent = HelloWorldAgent()
+
+    async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+        # 1. 取得或新建 Task（新任务要先入队，客户端才能拿到 task id）
+        if context.current_task:
+            task = context.current_task
+        else:
+            task = new_task_from_user_message(context.message)
+            await event_queue.enqueue_event(task)
+
+        # 2. 状态 → WORKING（流式客户端会通过 SSE 实时收到这条更新）
+        updater = TaskUpdater(event_queue=event_queue, task_id=task.id,
+                              context_id=task.context_id)
+        await updater.update_status(state=TaskState.TASK_STATE_WORKING,
+                                    message=new_text_message('Processing request...'))
+
+        # 3. 取出用户输入，交给内部 Agent
+        query = get_message_text(context.message)
+        result = await self.agent.invoke(user_request=query) if query else 'No text input is provided!'
+
+        # 4. 结果作为 Artifact 交付
+        await updater.add_artifact(parts=[new_text_part(text=result, media_type='text/plain')])
+
+        # 5. 状态 → COMPLETED
+        await updater.update_status(state=TaskState.TASK_STATE_COMPLETED,
+                                    message=new_text_message('Request is completed!'))
+
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        raise NotImplementedError('Cancel is not supported.')
+```
+
+`__main__.py`——声明 Skill 与 Agent Card，挂上两类路由：
+
+```python
+import uvicorn
+from starlette.applications import Starlette
+from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill
+from agent_executor import HelloWorldAgentExecutor
+
+skill = AgentSkill(
+    id='echo_bot', name='Echo Bot',
+    description='An example agent that responds with a "Hello World" message.',
+    input_modes=['text/plain'], output_modes=['text/plain'],
+    tags=['a2a', 'echo-example'], examples=['hi', 'how are you'],
+)
+
+agent_card = AgentCard(
+    name='Hello World Agent', description='Just a hello world agent', version='0.0.1',
+    default_input_modes=['text/plain'], default_output_modes=['text/plain'],
+    capabilities=AgentCapabilities(streaming=True),
+    supported_interfaces=[AgentInterface(protocol_binding='JSONRPC',
+                                         url='http://127.0.0.1:9999',
+                                         protocol_version='1.0')],
+    skills=[skill],
+)
+
+request_handler = DefaultRequestHandler(
+    agent_executor=HelloWorldAgentExecutor(),   # 业务逻辑
+    task_store=InMemoryTaskStore(),             # Task 状态存储（长任务、断线重连靠它）
+    agent_card=agent_card,
+)
+
+routes = []
+routes.extend(create_agent_card_routes(agent_card))          # GET /.well-known/agent-card.json
+routes.extend(create_jsonrpc_routes(request_handler, '/'))   # POST /  (SendMessage 等)
+uvicorn.run(Starlette(routes=routes), host='127.0.0.1', port=9999)
+```
+
+原示例还演示了「扩展名片」：未认证用户只看到公开 skill，认证后通过 `GetExtendedAgentCard` 看到更多 skill——这对应设计原则里的「默认安全」。
+
+#### 源码：不用 SDK 的最小 A2A Client
+
+协议层其实就是「一次 GET + 一次 POST」，用 httpx 就能写出来，更容易看清本质：
+
+```python
+import uuid, httpx
+
+BASE = "http://127.0.0.1:9999"
+
+# 1. 发现：拉取 Agent Card，看看它会什么
+card = httpx.get(f"{BASE}/.well-known/agent-card.json").json()
+print(card["name"], [s["name"] for s in card["skills"]])
+endpoint = card["supportedInterfaces"][0]["url"]
+
+# 2. 委托：发一条消息，开启一个 Task
+req = {
+    "jsonrpc": "2.0", "id": 1, "method": "SendMessage",
+    "params": {"message": {"messageId": str(uuid.uuid4()),
+                           "role": "ROLE_USER",
+                           "parts": [{"text": "hi"}]}},
+}
+task = httpx.post(endpoint, json=req).json()["result"]["task"]
+
+# 3. 读取状态与产出物
+print(task["status"]["state"])                      # TASK_STATE_COMPLETED
+for art in task.get("artifacts", []):
+    print(art["parts"][0]["text"])
+```
+
+实际系统中这一步通常由「主 Agent」完成：它读多个 Agent Card，让 LLM 根据 skills 的 description 决定委托给谁——和 MCP 中「模型根据工具描述选工具」是同一个思路，因此 **Agent Card 的描述同样是攻击面**（见下文「A2A 实验 → 智能体选择操纵」）。
+
+#### 官方示例跑通要点（google/A2A samples，LangGraph 汇率 Agent）
+
+1. 申请 Google API Key，并启用 Generative Language API；写入 `.env`：`GOOGLE_API_KEY=...`
+2. 国内/受限地区可能报 `400 FAILED_PRECONDITION: User location is not supported`，需设置可用区域（如 `export FIREBASE_FUNCTIONS_DEFAULT_REGION=us-west1`）或使用可用网络环境；
+3. 在 langgraph 示例目录 `uv run .` 启动 A2A Agent Server；
+4. 在 hosts 目录 `uv run hosts/cli` 启动客户端，它会拉取 Agent Card 完成发现（Server 端会打出对应日志）；
+5. 在 CLI 中提问汇率相关问题即可。
+
+<br>
+
+### 第 4 层：MCP 与 A2A 如何配合
+
+#### 对比
+
+| 维度 | MCP | A2A |
+|------|-----|-----|
+| 提出方 / 时间 | Anthropic，2024-11 | Google，2025-04（现属 Linux Foundation） |
+| 解决的关系 | Agent ↔ 工具/数据（A-E，纵向） | Agent ↔ Agent（A-A，横向） |
+| 对方是什么 | **透明的**工具：参数、返回值都由 schema 定义 | **不透明的**自主 Agent：只知其能力，不知其实现 |
+| 交互粒度 | 一次函数调用，通常即时返回 | 一个 Task，可多轮、可跑几小时、可追问 |
+| 发现机制 | Host 本地配置 + `tools/list` | Agent Card（well-known URL / 注册中心 / 市场） |
+| 核心对象 | Tool / Resource / Prompt | Agent Card / Task / Message / Part / Artifact |
+| 传输 | JSON-RPC 2.0，stdio 或 Streamable HTTP | JSON-RPC 2.0 over HTTP，SSE 流式，Webhook 推送 |
+| 典型风险（见下文） | 工具中毒、命令注入、恶意代码执行 | Agent Card 伪造、智能体选择操纵、MITM |
+
+#### 组合示例：旅行规划
+
+> 用户：「帮我制定一个北京三日游计划。」
+
+```
+1. U-A   用户 → 旅行规划主 Agent（Host）
+2. A-A   主 Agent 读取酒店 Agent、航班 Agent 的 Agent Card，通过 A2A 分别下发 Task
+3. A-E   主 Agent 自己通过 MCP 调用 Weather Server 查天气、Maps Server 查景点
+4. A-E   酒店 Agent 内部用它自己的 MCP Server 查库存、下单（主 Agent 看不到这一步）
+5. A-A   酒店/航班 Agent 以 Artifact 形式返回报价与预订结果
+6. U-A   主 Agent 汇总，输出结构化行程
+```
+
+> 勘误：原综述示例把「主 Agent 调用各 MCP Server」标为 A-A。按本文术语，调用 MCP Server 属于 A-E；只有 Agent 之间的委托（步骤 2、5）才是 A-A。
+
+#### 常见误区
+
+- **「A2A 会取代 MCP」**：不会。一个是「用工具」，一个是「找同事」，一个完整的 Agent 往往两者都用。
+- **「MCP 让模型能调用工具」**：调用能力来自模型的 function calling / tool use；MCP 规范的是工具如何被接入和描述。
+- **「把 Agent 包成 MCP Tool 也能多 Agent 协作」**：能做到简单委托，但丢失了长任务、多轮追问、状态推送、能力协商等，这正是 A2A 要补的部分。
+- **「协议标准化 = 安全」**：恰恰相反，标准化让发现与接入变容易，也让攻击变得可规模化，见下文。
 
 <br>
 
