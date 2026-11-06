@@ -170,6 +170,11 @@ Bordes 等人的 Meta 入门综述按**训练目标**分四类：对比式（CLI
 
 ### 2.4 架构：双塔
 
+<img src="https://raw.githubusercontent.com/openai/CLIP/main/CLIP.png" alt="CLIP 架构" style="width: 95%; height: auto;">
+
+> 官方架构图：(1) 对比预训练；(2) 用类别名构造文本分类器；(3) 零样本预测。图源：<a href="https://github.com/openai/CLIP">openai/CLIP</a>
+
+
 ```
    图像 ──► Image Encoder (ResNet / ViT) ──► I_f ──► W_i 线性投影 ──► L2 归一化 ──► I_e ─┐
                                                                                        ├─► 余弦相似度矩阵 N×N
@@ -349,6 +354,11 @@ CLIP 的真正价值不在于零样本分类本身，而在于它提供了一个
 
 ### 3.2 架构
 
+<img src="https://raw.githubusercontent.com/salesforce/ALBEF/main/img.png" alt="ALBEF 架构" style="width: 95%; height: auto;">
+
+> 官方架构图：图像编码器 12 层、文本编码器 6 层、多模态编码器 6 层；ITC 选出难负样本供 ITM 使用；右侧是动量模型。图源：<a href="https://github.com/salesforce/ALBEF">salesforce/ALBEF</a>
+
+
 ```
 图像 ──► ViT-B/16（12 层）──────────────────────────────┐
                                                        │ 交叉注意力
@@ -409,6 +419,11 @@ text_neg = text_embeds[neg_idx]
 - → BLIP 提出 **CapFilt**：用模型自己给网图生成更好的描述，并过滤掉噪声描述，即“**自举（Bootstrapping）**”——这也是名字里 B 的来源。
 
 ### 4.2 MED：多模态混合编码器-解码器
+
+<img src="https://raw.githubusercontent.com/salesforce/BLIP/main/BLIP.gif" alt="BLIP 架构动图" style="width: 95%; height: auto;">
+
+> 官方动图：演示图像编码器、图像引导的文本编码器（双向自注意力 + 交叉注意力）和解码器（因果自注意力 + 交叉注意力）如何配合，最后一帧以 VQA 为例。图源：<a href="https://github.com/salesforce/BLIP">salesforce/BLIP</a>
+
 
 MED（Multimodal mixture of Encoder-Decoder）可以在三种模式下工作，知乎原文称之为“大杂烩”。加上图像编码器一共四个部分：
 
@@ -541,6 +556,11 @@ with torch.no_grad():
 - **阶段二：生成学习**——让 Q-Former 的输出能被 LLM “读懂”（视觉-语言生成）。
 
 ### 5.2 总体架构
+
+<img src="https://raw.githubusercontent.com/salesforce/LAVIS/main/projects/blip2/blip2_illustration.png" alt="BLIP-2 概览" style="width: 95%; height: auto;">
+
+> 官方概览图：左边是第一阶段（冻结图像编码器 + Q-Former，做表示学习），右边是第二阶段（接冻结的 LLM，做生成学习）。图源：<a href="https://github.com/salesforce/LAVIS/tree/main/projects/blip2">salesforce/LAVIS · projects/blip2</a>
+
 
 ```
              冻结                    可训练（188M）              冻结
@@ -802,6 +822,11 @@ print(processor.batch_decode(out, skip_special_tokens=True)[0].strip())
 ## 7. BLIP-3（xGen-MM）：回归简单，数据为王
 
 ### 7.1 动机：BLIP-2 的三个痛点
+
+<img src="https://raw.githubusercontent.com/salesforce/LAVIS/xgen-mm/assets/intro-1.png" alt="BLIP-2 与 BLIP-3 框架对比" style="width: 95%; height: auto;">
+
+> 官方对比图：BLIP-2 用 COCO 式短描述数据、复杂的 Q-Former 和多个损失；BLIP-3 用大规模交错数据、可扩展的视觉 token sampler 和统一的 next-token 损失。图源：<a href="https://github.com/salesforce/LAVIS/tree/xgen-mm">salesforce/LAVIS · xgen-mm 分支</a>
+
 
 1. **数据**：BLIP-2 的预训练数据规模和多样性有限，且是“一图一文”，缺少图文交错数据 → 没有上下文学习能力。
 2. **架构**：Q-Former 结构繁琐，阶段一要用 ITC、ITM、ITG 三个损失，阶段二又换成 LM 损失，目标不一致、难以扩展。
