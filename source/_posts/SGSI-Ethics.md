@@ -333,9 +333,13 @@ Designing AI Policy
 
 <br>
 
-## 学校立场 · Public Trust, Institutional Neutrality, Academic Freedom
+## 学校立场 
 
-### 1. 这堂课在问什么 · The Big Picture
+Public Trust, Institutional Neutrality, Academic Freedom
+
+### 1. 这堂课在问什么 
+
+The Big Picture
 
 - **起点**：大众对高等教育的信任（public trust）在下降
     - 为什么下降？大学能做什么？
@@ -475,7 +479,9 @@ Intrinsic vs Instrumental
 - 大学使命通常**两头都沾**
 - 课上同学观点：第一种（知识本身的价值）更难被验证，但在 AI 能替代很多工作的时代可能更珍贵
 
-#### 2.5 “创造、传播、保存”三项功能 · Create, Disseminate, Preserve
+#### 2.5 “创造、传播、保存”三项功能 
+
+Create, Disseminate, Preserve
 
 | 功能 | 通过什么 | 评估时问 |
 | :--- | :--- | :--- |
@@ -615,7 +621,9 @@ Institutional neutrality（机构中立）
     - 中立可以意味着“机构不采取官方立场”
     - 但**不**意味着“机构对政治和社会生活没有影响”
 
-#### 4.4 什么时候可以说话 · When Should a University Speak?
+#### 4.4 什么时候可以说话 
+
+When Should a University Speak?
 
 - 判断标准：<span style="background:#ffe58f">看议题和使命的距离，不看议题有多热。</span>
 - **与核心使命无关的全国 / 国际政治议题 → 倾向不说**
@@ -748,7 +756,9 @@ Institutional values（价值）→ Institutional rules（规则）→ Incentive
 
 <br>
 
-### 6. 信任 · Public Trust
+### 6. 信任 
+
+Public Trust
 
 #### 6.1 信任为什么下降 
 
@@ -858,7 +868,9 @@ Representation and Diversity
 - 于是问：*Is demographic diversity sufficient?*（只有人口多样性够吗？）
 - 课上提到的担忧：教职员中某些政治观点的比例严重失衡，学生感到某些观点不受欢迎
 
-#### 7.2 代表性不足的多种解释 · Multiple Explanations
+#### 7.2 代表性不足的多种解释 
+
+Multiple Explanations
 
 - 假设：**Group X is underrepresented in field Y**（X 群体在 Y 领域代表性不足）
 - 先区分“代表性”本身和“造成代表性的原因”
@@ -1072,7 +1084,9 @@ What a Good Discussion Sounds Like
 坏：Hear opposing view → Judge person → Defend identity → Attack → Conversation ends
 ```
 
-#### 8.9 跨文化 · Cross-Cultural Differences
+#### 8.9 跨文化 
+
+Cross-Cultural Differences
 
 - 不同教育系统对这些的预期不同：authority（权威）、professors、questioning（提问）、disagreement（反对）、participation（参与）、hierarchy（等级）
     - 有的系统里：质疑教授很少见，参与更讲等级
@@ -1129,7 +1143,9 @@ Takeaways
 
 Concept Maps
 
-**复习逻辑图 · Review Logic Map**
+**复习逻辑图**
+
+Review Logic Map
 
 ```text
                  UNIVERSITY
@@ -1180,7 +1196,9 @@ Concept Maps
                DISCOURSE
 ```
 
-**整体概念图 · Overall Concept Map**
+**整体概念图**
+
+Overall Concept Map
 
 ```text
                     UNIVERSITY
@@ -1259,7 +1277,9 @@ Key Concepts
 
 Graduate Education, Inclusion, Academic Community
 
-### 1. 开场：这堂课在问什么 · Framing
+### 1. 开场：这堂课在问什么 
+
+Framing
 
 - **大问题**
     - 大学究竟是什么？
@@ -1457,7 +1477,9 @@ Belonging
 
 Responsibility
 
-#### 5.1 大学的责任边界 · How Much Responsibility Does an Institution Have?
+#### 5.1 大学的责任边界 
+
+How Much Responsibility Does an Institution Have?
 
 - 大学可能提供：academic support, financial support, housing, mental health, physical safety, career development, mentoring, community, cultural adjustment, international student support, teaching support
 - **边界问题**：*University ≠ family.*（大学不是家庭。）
@@ -1888,7 +1910,9 @@ Individual（个人）→ Classroom（课堂）→ Community（共同体）→ I
 - 个人行为影响课堂；课堂文化影响共同体；共同体又反过来影响机构
 
 
-**整体结构图 · Overall Structure Map**
+**整体结构图**
+
+Overall Structure Map
 
 ```text
                  GRADUATE EDUCATION
@@ -1936,7 +1960,9 @@ Individual（个人）→ Classroom（课堂）→ Community（共同体）→ I
 ```
 
 
-#### 10.3 Summary
+#### 10.3 总结 
+
+Summary
 
 - <span style="background:#ffe58f">Graduate education is not only about what you learn or what you produce. It is also about the kind of academic community we create, how we support one another, and how we take responsibility for shaping our own experience and the experience of others.（研究生教育不只是你学到什么、产出什么，还关乎我们创造什么样的学术共同体、如何互相支持、如何为塑造自己和他人的经历负责。）</span>
 - <span style="background:#ffe58f">A university is not just a place that gives students knowledge. It is a community that students and faculty collectively create.（大学不只是给学生知识的地方，而是师生共同创造的共同体。）</span>
@@ -2166,7 +2192,9 @@ Mentorship and Friendship
 - 但 mentor 仍需意识到：professional boundaries（职业边界）、power differences（权力差异）、conflicts of interest（利益冲突）
 - 尤其当 mentor 同时是 **supervisor / evaluator / employer** 时，边界更重要
 
-#### 7.4 指导是双向的 · Mutual Learning
+#### 7.4 指导是双向的 
+
+Mutual Learning
 
 - *Mentoring is not necessarily one-directional.*（指导不一定是单向的。）
 - 传统：Mentor gives → mentee receives
@@ -2262,7 +2290,9 @@ Representation
 
 Mentoring Network
 
-#### 10.1 不必找到“唯一的那个人” · Not THE ONE Mentor
+#### 10.1 不必找到“唯一的那个人” 
+
+Not THE ONE Mentor
 
 - 课上反对：“我必须找到 THE ONE mentor。”
 - 一个人可能同时需要：
@@ -2278,7 +2308,9 @@ Mentoring Network
 - 更合理的是 **mentoring network（指导网络）**，而不是一个唯一的 mentor
 - **不要理想化 mentor**：一个人不可能满足所有指导需求；别期待“一个教授解决我所有问题”
 
-#### 10.2 同辈指导 · Peer Mentoring
+#### 10.2 同辈指导 
+
+Peer Mentoring
 
 - Mentor 不一定比你大很多；同学之间也会发生 mentoring
     - senior student → junior student
@@ -2322,7 +2354,9 @@ Mentor vs Sponsor
 
 Care and Autonomy
 
-#### 11.1 指导包含关心 · Mentoring Involves Care
+#### 11.1 指导包含关心 
+
+Mentoring Involves Care
 
 - 不只是“我告诉你怎么发 paper”，而是“**我关心这个人**”
 - Care 可以表现为：记得学生的情况、询问近况、注意学生是否 struggling、困难时提供支持、尊重学生的个人情况、把学生当作完整的人
@@ -2492,10 +2526,14 @@ Encounter（相遇）→ Conversation（对话）→ Trust（信任）→ Relati
 
 <br>
 
-### 15. Takeaways
+### 15. 总结 
+
+Takeaways
 
 
-**整节课的逻辑图 · Concept Map**
+**整节课的逻辑图**
+
+Concept Map
 
 ```text
                          MENTORSHIP
@@ -2571,7 +2609,9 @@ Encounter（相遇）→ Conversation（对话）→ Trust（信任）→ Relati
                      NEXT GENERATION
 ```
 
-#### 15.1 The Core Chain of Reasoning
+#### 15.1 思想链 
+
+The Core Chain of Reasoning
 
 ```text
 Mentorship
@@ -2601,7 +2641,9 @@ Mentorship
 并把这种支持传给下一代
 ```
 
-#### 15.2 Summary
+#### 15.2 一句话总结 
+
+Summary
 
 - <span style="background:#ffe58f">Mentorship is not simply about transferring knowledge from an expert to a novice. It is a relational, contextual, and often transformative process through which people develop their identities, agency, understanding of institutions, professional possibilities, and sense of belonging.（指导不只是专家把知识传给新手，而是一个关系性的、依赖情境的、常常改变人的过程——人在其中发展身份认同、能动性、对机构的理解、职业可能性和归属感。）</span>
 - 整堂课一直在追问一个更大的问题：**我们究竟希望通过 mentorship 培养什么样的人，以及什么样的学术共同体？**
