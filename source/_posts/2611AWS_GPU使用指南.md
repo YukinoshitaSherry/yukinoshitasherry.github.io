@@ -1,5 +1,5 @@
 ---
-title: AWS GPU 从零上手：EC2 与 SageMaker（CS230 课程项目实录）
+title: AWS GPU 从零上手：EC2 与 SageMaker
 date: 2026-11-15
 categories:
   - 学CS/SE
@@ -8,14 +8,12 @@ tags:
   - GPU
   - SSH
   - Linux
-  - 上斯坦福
-desc: 斯坦福 CS230 官方 AWS 教程的中英双语精读版。从账号、额度、配额讲到 g4dn.xlarge 是什么、AMI、EBS、安全组、SSH 密钥、uv、tmux、scp、Jupyter 隧道和停机计费，每个名词都有解释。后半部分记录我们组 EC2 配额一直是 0 之后改走 SageMaker Studio 的全过程，包括共享空间、SSH 远程连接和 30 分钟自动关机。
+desc: 做 CS230 课程项目时遇到的。一份 AWS GPU 官方教程的中英双语精读版。从账号、额度、配额讲到 g4dn.xlarge 是什么、AMI、EBS、安全组、SSH 密钥、uv、tmux、scp、Jupyter 隧道和停机计费，每个名词都有解释。后半部分记录 EC2 配额一直是 0 之后改走 SageMaker Studio 的全过程，包括共享空间、SSH 远程连接和 30 分钟自动关机。
 ---
 
 本文主要参考：
 
-- <a href="https://cs230.stanford.edu/project/">CS230 project resources and GPU credits</a>
-- CS230 课程文档 AWS Setup Instructions（2026 秋季版，Ed 公告里给的 Google Doc）
+- 一份 AWS Setup Instructions 教程（EC2 + g4dn.xlarge + neural-style 示例）
 - <a href="https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier-plans.html">AWS account plans and promotional credits</a>
 - <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html">Amazon EC2 On-Demand quotas</a>
 - <a href="https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html">EC2 accelerated computing specifications</a>
@@ -35,31 +33,31 @@ desc: 斯坦福 CS230 官方 AWS 教程的中英双语精读版。从账号、�
 
 ## 0 先看全局：这一套东西在干嘛
 
-课程项目要训练神经网络，自己笔记本没有像样的 GPU，所以去 AWS 租一台带 GPU 的云服务器。整个流程就是：
+项目要训练神经网络，自己笔记本没有像样的 GPU，所以去 AWS 租一台带 GPU 的云服务器。整个流程就是：
 
-1. 有一个 AWS 账号，最好兑换课程发的抵扣金（credits）。
+1. 有一个 AWS 账号，有抵扣金（credits）的话先兑换。
 2. 申请 GPU 配额（quota）。新账号默认能开的 GPU 数量是 0，不申请根本开不了。
 3. 在 EC2 里用一个预装了显卡驱动的系统镜像（AMI）启动一台 g4dn.xlarge。
 4. 用 SSH 密钥从自己电脑登录上去，装 Python 环境，确认程序真的能用上 GPU。
 5. 训练用 tmux 挂着跑，断网也不怕；文件用 scp 来回拷；想用 Jupyter 就走 SSH 隧道。
 6. **用完一定要停机**，否则一直按小时扣钱。
 
-课程文档用的例子是 neural-style（风格迁移），跑通它就说明整条链路没问题，之后换成自己的项目代码即可。
+教程用的例子是 neural-style（风格迁移），跑通它就说明整条链路没问题，之后换成自己的项目代码即可。
 
 > [!INFO]+ 云服务器 / Cloud server
 > 就是别人机房里的一台电脑，你通过网络远程使用，按使用时长付钱。AWS（Amazon Web Services）是亚马逊的云平台，EC2 是其中"租虚拟机"的那项服务。
 > A computer in someone else's data center that you use over the network and pay for by the hour. AWS is Amazon's cloud platform; EC2 is its service for renting virtual machines.
 
 > [!NOTE]- English version
-> **0 The big picture.** The course project trains neural networks, and a laptop has no usable GPU, so we rent a GPU server on AWS. The whole flow is:
-> 1. Have an AWS account, and preferably redeem the course credits.
+> **0 The big picture.** The project trains neural networks, and a laptop has no usable GPU, so we rent a GPU server on AWS. The whole flow is:
+> 1. Have an AWS account, and redeem any credits you have.
 > 2. Request a GPU quota. A new account may run zero GPU instances by default, so without a request you cannot start one at all.
 > 3. In EC2, launch a g4dn.xlarge from a machine image (AMI) that already contains the NVIDIA driver.
 > 4. Log in from your computer with an SSH key, install the Python environment, and confirm that the program really uses the GPU.
 > 5. Run training inside tmux so a dropped connection does not kill it; copy files with scp; reach Jupyter through an SSH tunnel.
 > 6. **Always stop the instance when you are done**, otherwise it keeps charging by the hour.
 >
-> The course example is neural-style (style transfer). If it runs end to end, the setup works, and you can swap in your own project code.
+> The tutorial example is neural-style (style transfer). If it runs end to end, the setup works, and you can swap in your own project code.
 
 <br>
 
@@ -68,8 +66,8 @@ desc: 斯坦福 CS230 官方 AWS 教程的中英双语精读版。从账号、�
 ### 1.1 账号与 credits
 
 - 注册或登录 <a href="https://aws.amazon.com/">AWS 账号</a>。
-- 按当期 CS230 Ed 公告申请课程 GPU credits，发不发、发多少由助教决定。
-- **兑换前先看账号计划（account plan）**：免费计划（Free plan）不接受其他促销抵扣金。如果课程发的是促销码，账号要切到付费计划（Paid plan）才能兑换。
+- 如果学校或公司发 GPU credits（抵扣金），按他们的说明申请。
+- **兑换前先看账号计划（account plan）**：免费计划（Free plan）不接受其他促销抵扣金。如果拿到的是促销码，账号要切到付费计划（Paid plan）才能兑换。
 - 在 **Billing and Cost Management → Credits** 里兑换，并看清余额、过期时间、覆盖哪些服务。
 - 定期看账单，设一个预算提醒。
 
@@ -86,18 +84,18 @@ desc: 斯坦福 CS230 官方 AWS 教程的中英双语精读版。从账号、�
 
 ### 1.2 我们组的实际情况
 
-我们用的不是个人账号，而是课程分配的"AWS 项目"账号：从 `settings.aws.com/projects/...` 这个门户用 Stanford 邮箱登录（底层是 IAM Identity Center，也就是常说的 SSO），点 "AWS 管理控制台" 进去。这个角色看不到账单页面，所以 credits 余额要找项目负责人确认。
+我们用的不是个人账号，而是分配给我们的"AWS 项目"账号：从 `settings.aws.com/projects/...` 这个门户用学校邮箱登录（底层是 IAM Identity Center，也就是常说的 SSO），点 "AWS 管理控制台" 进去。这个角色看不到账单页面，所以 credits 余额要找项目负责人确认。
 
 > [!INFO]+ IAM / SSO
 > IAM（Identity and Access Management）管"谁能在 AWS 里做什么"。SSO（单点登录，AWS 里叫 IAM Identity Center）让你用学校账号登录，然后扮演一个预先配好权限的角色。
 > IAM controls who can do what in AWS. SSO (IAM Identity Center) lets you sign in with your school account and then act as a role with preset permissions.
 
 > [!NOTE]- English version
-> **1.1 Account and credits.** Create or sign in to your AWS account. Request the course GPU credits as described in the current CS230 Ed announcement; course staff decide eligibility and amounts. Before redeeming a code, check the account plan: a Free plan account does not accept other promotional credits, so a promotional code needs the Paid plan. Redeem it under Billing and Cost Management → Credits and check the balance, expiry date and covered services. Check the bill regularly and set a budget alert.
+> **1.1 Account and credits.** Create or sign in to your AWS account. If your school or employer provides GPU credits, request them as they describe. Before redeeming a code, check the account plan: a Free plan account does not accept other promotional credits, so a promotional code needs the Paid plan. Redeem it under Billing and Cost Management → Credits and check the balance, expiry date and covered services. Check the bill regularly and set a budget alert.
 >
 > Credits are not the same as free usage. After they run out or expire, normal charges apply, and services outside their coverage are charged as usual. A budget alert only sends email; it does not stop anything.
 >
-> **1.2 What our team actually had.** We did not use a personal account but a course "AWS project" account: sign in at the `settings.aws.com/projects/...` portal with the Stanford email (IAM Identity Center underneath, i.e. SSO), then click "AWS Management Console". This role cannot open the billing pages, so the credit balance has to be confirmed with the project owner.
+> **1.2 What our team actually had.** We did not use a personal account but an "AWS project" account assigned to us: sign in at the `settings.aws.com/projects/...` portal with the school email (IAM Identity Center underneath, i.e. SSO), then click "AWS Management Console". This role cannot open the billing pages, so the credit balance has to be confirmed with the project owner.
 
 <br>
 
@@ -109,15 +107,15 @@ AWS 给每个账号的每个区域设了上限，防止新账号一上来就开�
 
 ### 2.2 怎么申请
 
-1. 右上角区域选 **US West (Oregon)，即 us-west-2**（课程文档的选择；我们组的项目账号固定在 us-east-2）。
+1. 右上角区域选 **US West (Oregon)，即 us-west-2**（教程的选择；我们的项目账号固定在 us-east-2）。
 2. 打开 **Service Quotas → Amazon EC2**。
 3. 搜 **Running On-Demand G and VT instances**。
 4. 申请总额 **至少 4 vCPU**，够开一台 g4dn.xlarge（前提是没有别的实例占用这项配额）。
 
-申请说明可以直接用课程给的：
+申请说明写清楚用途和机型即可，比如：
 
 ```text
-Training neural networks for the Stanford CS230 deep learning class. I need one g4dn.xlarge instance in us-west-2, which requires 4 vCPUs.
+Training neural networks for a deep learning project. I need one g4dn.xlarge instance in us-west-2, which requires 4 vCPUs.
 ```
 
 > [!WARNING]+ 配额批了也不代表一定有机器
@@ -132,8 +130,8 @@ Training neural networks for the Stanford CS230 deep learning class. I need one 
 > A virtual CPU, usually one hyper-thread of a physical core, so 4 vCPUs is about 2 physical cores. The GPU quota is counted in vCPUs: a g4dn.xlarge has 4, so you need at least 4.
 
 > [!INFO]+ On-Demand 与 Spot
-> On-Demand（按需）：随开随用，按秒计费，不会被收回，价格固定。Spot（竞价）：用机房的空闲机器，便宜很多，但 AWS 需要时会提前 2 分钟通知后收回。课程用 On-Demand，省心。"G and VT" 里的 G 是带 GPU 的图形/计算机型，VT 是视频转码机型，它们共用这一项配额。
-> On-Demand: start any time, billed per second, never taken away, fixed price. Spot: spare capacity, much cheaper, but AWS can reclaim it after a 2-minute notice. The course uses On-Demand. In "G and VT", G is the GPU family and VT is the video-transcoding family; they share this quota.
+> On-Demand（按需）：随开随用，按秒计费，不会被收回，价格固定。Spot（竞价）：用机房的空闲机器，便宜很多，但 AWS 需要时会提前 2 分钟通知后收回。教程用 On-Demand，省心。"G and VT" 里的 G 是带 GPU 的图形/计算机型，VT 是视频转码机型，它们共用这一项配额。
+> On-Demand: start any time, billed per second, never taken away, fixed price. Spot: spare capacity, much cheaper, but AWS can reclaim it after a 2-minute notice. The tutorial uses On-Demand. In "G and VT", G is the GPU family and VT is the video-transcoding family; they share this quota.
 
 ### 2.3 我们组踩的坑
 
@@ -142,7 +140,7 @@ Training neural networks for the Stanford CS230 deep learning class. I need one 
 > [!NOTE]- English version
 > **2.1 Why a quota is needed.** AWS caps each account per region so a new account cannot start many expensive machines at once. GPU instances fall under **Running On-Demand G and VT instances**, and the unit is **vCPUs, not machines**. For a new account it is usually 0.
 >
-> **2.2 How to request it.** Select US West (Oregon), us-west-2 (the course choice; our project account is fixed to us-east-2). Open Service Quotas → Amazon EC2, find Running On-Demand G and VT instances, and request a total of at least 4 vCPUs, enough for one g4dn.xlarge if nothing else uses this quota. The request text above comes from the course.
+> **2.2 How to request it.** Select US West (Oregon), us-west-2 (the tutorial's choice; our project account is fixed to us-east-2). Open Service Quotas → Amazon EC2, find Running On-Demand G and VT instances, and request a total of at least 4 vCPUs, enough for one g4dn.xlarge if nothing else uses this quota. The request text above is only an example.
 >
 > An approved quota only permits usage. It gives no credits and reserves no GPU; if the data center has no free T4 at that moment, the launch still fails (see Insufficient capacity in section 9).
 >
@@ -173,13 +171,13 @@ AWS 控制台里选 us-west-2，打开 **EC2 → Launch instance**，按下表�
 
 | 设置 / Setting | 填什么 / Value | 为什么 / Why |
 | :--- | :--- | :--- |
-| Name | CS230 Project Instance | 只是个标签，方便认 |
+| Name | GPU Project Instance | 只是个标签，方便认 |
 | Amazon Machine Image | Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 24.04)，选最新日期版本 | 自带 NVIDIA 驱动，省掉最难装的那一步 |
 | Image publisher | Amazon | 防止选到别人上传的同名镜像 |
 | Architecture | x86_64 | 和镜像、驱动、TensorFlow 轮子匹配 |
-| Instance type | g4dn.xlarge | 1 块 T4，课程够用且便宜 |
+| Instance type | g4dn.xlarge | 1 块 T4，入门够用且便宜 |
 | Purchase option | On-Demand | 不会被中途收回 |
-| Key pair | 新建 RSA 密钥对，名字 cs230，下载 .pem | 登录凭证，只能下载这一次 |
+| Key pair | 新建 RSA 密钥对，名字 gpu-key，下载 .pem | 登录凭证，只能下载这一次 |
 | Network | 默认 VPC + 带 internet gateway 的公有子网 | 机器要能上网、能被你连上 |
 | Auto-assign public IP | Enable | 没公网 IP 就连不上 |
 | Security group | 入站只开 SSH，TCP 22，来源 My IP | 只有你的 IP 能敲门 |
@@ -207,8 +205,8 @@ g4dn.xlarge：4 vCPU，16 GiB 内存，1 块 NVIDIA T4（16 GiB 显存）。镜�
 | g5.2xlarge | A10G | 24 GiB | 8 | 32 GiB | 450 GB | 1.21 美元 |
 
 > [!INFO]+ 显存 vs 内存 / GPU memory vs system memory
-> 显存在显卡上，模型参数、激活值、batch 都要放得下，决定能训多大的模型和多大的 batch。内存在主板上，决定数据预处理、DataLoader 能放多少东西。T4 的 16 GiB 显存够课程级别的 CNN；我们组的推荐模型要对 92 万个商品打分，选了 24 GiB 的 A10G。
-> GPU memory sits on the card and must hold parameters, activations and the batch, so it limits model and batch size. System memory limits data preprocessing and loaders. A T4's 16 GiB suits course-scale CNNs; our recommender scores 920k items, so we chose the 24 GiB A10G.
+> 显存在显卡上，模型参数、激活值、batch 都要放得下，决定能训多大的模型和多大的 batch。内存在主板上，决定数据预处理、DataLoader 能放多少东西。T4 的 16 GiB 显存够一般规模的 CNN；我们的推荐模型要对 92 万个商品打分，选了 24 GiB 的 A10G。
+> GPU memory sits on the card and must hold parameters, activations and the batch, so it limits model and batch size. System memory limits data preprocessing and loaders. A T4's 16 GiB suits moderate CNNs; our recommender scores 920k items, so we chose the 24 GiB A10G.
 
 > [!INFO]+ AMI / 系统镜像
 > Amazon Machine Image，相当于"装好系统和软件的硬盘模板"，每台新机器都从它复制出根盘。**Deep Learning Base OSS Nvidia Driver GPU AMI** 拆开读：Deep Learning（AWS 官方深度学习镜像）+ Base（基础版：有驱动、CUDA、cuDNN、NCCL、Docker，但**不预装** PyTorch/TensorFlow）+ OSS Nvidia Driver（用 NVIDIA 开源内核模块版驱动）+ GPU + Ubuntu 24.04。选 publisher 是 Amazon、架构 x86_64 的那个。官方镜像页面还给了一条查当前区域最新 AMI ID 的命令。
@@ -235,7 +233,7 @@ g4dn.xlarge：4 vCPU，16 GiB 内存，1 块 NVIDIA T4（16 GiB 显存）。镜�
 - 按上面的 AMI 名字搜索，确认 publisher 是 Amazon、架构是 x86_64。
 - SSH 只允许你当前的公网 IP。**8888 端口保持关闭**，Jupyter 走 SSH 隧道（第 8 节）。
 - 换了网络（比如从宿舍到图书馆），公网 IP 会变，要回安全组更新 SSH 来源。
-- 账号没有默认 VPC 或公有子网的话，按课程或账号管理员的网络说明来。
+- 账号没有默认 VPC 或公有子网的话，按账号管理员的网络说明来。
 - 看一眼预估费用，启动 **一台**。
 - 等实例变成 **Running** 并且状态检查（status checks）通过，打开实例详情 → **Connect → SSH client**，那里有当前的公网 DNS 和建议的 SSH 命令。
 - **.pem 私钥自己收好，AWS 不会让你再下载一次同一把私钥。** 丢了只能换新密钥。
@@ -245,11 +243,11 @@ g4dn.xlarge：4 vCPU，16 GiB 内存，1 块 NVIDIA T4（16 GiB 显存）。镜�
 > A mathematically matched pair: the public key goes on the server (AWS writes it into the `ubuntu` user's `~/.ssh/authorized_keys` on first boot) and the private key stays with you (the .pem file). At login the server issues a challenge that only the private-key holder can sign, so no password is needed. RSA is the key algorithm. The private key is the key itself: never share it or push it to GitHub.
 
 > [!NOTE]- English version
-> **4 Launch the GPU instance.** In the console, select us-west-2, open EC2 and choose Launch instance, then fill in the table above. The "Why" column explains each choice: the Deep Learning Base AMI already has the NVIDIA driver; publisher Amazon avoids look-alike images; x86_64 matches the driver and TensorFlow wheels; g4dn.xlarge gives one T4 at a low price; On-Demand is never reclaimed; the RSA key pair named cs230 is your login credential and can be downloaded only once; a public subnet with an internet gateway plus an auto-assigned public IP makes the instance reachable; the security group allows only SSH on TCP 22 from My IP; the root EBS volume stays at default size or larger, gp3 where offered. A g4dn.xlarge has 4 vCPUs, 16 GiB of memory and one NVIDIA T4 with 16 GiB. The image provides only the driver; you install the Python environment yourself.
+> **4 Launch the GPU instance.** In the console, select us-west-2, open EC2 and choose Launch instance, then fill in the table above. The "Why" column explains each choice: the Deep Learning Base AMI already has the NVIDIA driver; publisher Amazon avoids look-alike images; x86_64 matches the driver and TensorFlow wheels; g4dn.xlarge gives one T4 at a low price; On-Demand is never reclaimed; the RSA key pair named gpu-key is your login credential and can be downloaded only once; a public subnet with an internet gateway plus an auto-assigned public IP makes the instance reachable; the security group allows only SSH on TCP 22 from My IP; the root EBS volume stays at default size or larger, gp3 where offered. A g4dn.xlarge has 4 vCPUs, 16 GiB of memory and one NVIDIA T4 with 16 GiB. The image provides only the driver; you install the Python environment yourself.
 >
 > The cards above explain the instance name, GPU vs system memory, AMI, x86_64 vs arm64, EBS / gp3 / instance store, VPC / subnet / internet gateway / public IP / public DNS, security groups, and key pairs.
 >
-> **4.1 Select the official image, check access, launch.** Search for the AMI name and confirm publisher Amazon and x86_64. Allow SSH only from your current public IP and keep port 8888 closed, since Jupyter goes through an SSH tunnel (section 8). When your network or public IP changes, update the SSH source in the security group. Without a default VPC or public subnet, follow your course or administrator's networking instructions. Review the estimated charges and launch one instance. Wait for Running and passed status checks, then open the instance details, Connect → SSH client, for the current public DNS and the suggested SSH command. Keep the .pem file private; AWS never offers the same private key for download again, and a lost key means creating a new one.
+> **4.1 Select the official image, check access, launch.** Search for the AMI name and confirm publisher Amazon and x86_64. Allow SSH only from your current public IP and keep port 8888 closed, since Jupyter goes through an SSH tunnel (section 8). When your network or public IP changes, update the SSH source in the security group. Without a default VPC or public subnet, follow your administrator's networking instructions. Review the estimated charges and launch one instance. Wait for Running and passed status checks, then open the instance details, Connect → SSH client, for the current public DNS and the suggested SSH command. Keep the .pem file private; AWS never offers the same private key for download again, and a lost key means creating a new one.
 
 <br>
 
@@ -257,17 +255,17 @@ g4dn.xlarge：4 vCPU，16 GiB 内存，1 块 NVIDIA T4（16 GiB 显存）。镜�
 
 ### 5.1 在自己电脑上（local computer）
 
-假设下载的私钥叫 `cs230.pem`：
+假设下载的私钥叫 `gpu-key.pem`：
 
 ```bash
 mkdir -p "$HOME/.ssh"
 
-mv "$HOME/Downloads/cs230.pem" "$HOME/.ssh/cs230.pem"
+mv "$HOME/Downloads/gpu-key.pem" "$HOME/.ssh/gpu-key.pem"
 
 chmod 700 "$HOME/.ssh"
-chmod 400 "$HOME/.ssh/cs230.pem"
+chmod 400 "$HOME/.ssh/gpu-key.pem"
 
-ssh -i "$HOME/.ssh/cs230.pem" ubuntu@PUBLIC_DNS
+ssh -i "$HOME/.ssh/gpu-key.pem" ubuntu@PUBLIC_DNS
 ```
 
 - 浏览器存到别处了就改 Downloads 路径；WSL 里 Windows 的下载目录是 `/mnt/c/Users/YOUR_WINDOWS_USER/Downloads`。
@@ -280,8 +278,8 @@ ssh -i "$HOME/.ssh/cs230.pem" ubuntu@PUBLIC_DNS
 
 > [!INFO]+ Windows 原生 PowerShell 怎么设私钥权限
 > Windows 没有 chmod，用 icacls 去掉继承权限，只给自己读：
-> `icacls $env:USERPROFILE\.ssh\cs230.pem /inheritance:r /grant:r "$($env:USERNAME):(R)"`
-> 然后同样 `ssh -i $env:USERPROFILE\.ssh\cs230.pem ubuntu@PUBLIC_DNS`。
+> `icacls $env:USERPROFILE\.ssh\gpu-key.pem /inheritance:r /grant:r "$($env:USERNAME):(R)"`
+> 然后同样 `ssh -i $env:USERPROFILE\.ssh\gpu-key.pem ubuntu@PUBLIC_DNS`。
 > Windows has no chmod; use icacls to remove inherited permissions and grant only yourself read access (command above), then run the same ssh command.
 
 > [!INFO]+ 服务器指纹 / Host key fingerprint
@@ -289,14 +287,14 @@ ssh -i "$HOME/.ssh/cs230.pem" ubuntu@PUBLIC_DNS
 > The server has its own key pair; the fingerprint is a digest of its public key. Checking it on first connect proves you reached your own machine and not an impostor in the middle. Once trusted it is stored in `~/.ssh/known_hosts`, and ssh warns loudly if it changes later. The AWS docs explain how to read it from the console.
 
 > [!EXAMPLE]+ 小技巧：写进 ~/.ssh/config
-> 每次敲一长串很烦，可以在 `~/.ssh/config` 里写一个别名，之后 `ssh cs230` 就行。停机重开公网 DNS 变了，只改 HostName 这一行。
+> 每次敲一长串很烦，可以在 `~/.ssh/config` 里写一个别名，之后 `ssh gpu` 就行。停机重开公网 DNS 变了，只改 HostName 这一行。
 > ```
-> Host cs230
+> Host gpu
 >   HostName PUBLIC_DNS
 >   User ubuntu
->   IdentityFile ~/.ssh/cs230.pem
+>   IdentityFile ~/.ssh/gpu-key.pem
 > ```
-> Tip: put an alias in `~/.ssh/config` and connect with `ssh cs230`. When the public DNS changes after a restart, edit only the HostName line.
+> Tip: put an alias in `~/.ssh/config` and connect with `ssh gpu`. When the public DNS changes after a restart, edit only the HostName line.
 
 ### 5.2 在 AWS 机器上（AWS instance）
 
@@ -350,7 +348,7 @@ uv --version
 再跑一遍 SSH 命令，用机器**当前的**地址。停机再开机，AWS 通常会换一个新的公网 IPv4，`PUBLIC_DNS` 要跟着更新。
 
 > [!NOTE]- English version
-> **5.1 On your local computer.** With the key named `cs230.pem`, run the commands above: create `~/.ssh`, move the key there, set `chmod 700` on the folder and `chmod 400` on the key, and connect as `ubuntu@PUBLIC_DNS`. Adjust the Downloads path if needed (in WSL it is usually `/mnt/c/Users/YOUR_WINDOWS_USER/Downloads`). The login name for this Ubuntu image is ubuntu. Verify the server fingerprint before accepting the first connection. The cards explain the permission digits (OpenSSH refuses a key others can read), the Windows icacls equivalent, the host fingerprint, and an `~/.ssh/config` alias.
+> **5.1 On your local computer.** With the key named `gpu-key.pem`, run the commands above: create `~/.ssh`, move the key there, set `chmod 700` on the folder and `chmod 400` on the key, and connect as `ubuntu@PUBLIC_DNS`. Adjust the Downloads path if needed (in WSL it is usually `/mnt/c/Users/YOUR_WINDOWS_USER/Downloads`). The login name for this Ubuntu image is ubuntu. Verify the server fingerprint before accepting the first connection. The cards explain the permission digits (OpenSSH refuses a key others can read), the Windows icacls equivalent, the host fingerprint, and an `~/.ssh/config` alias.
 >
 > **5.2 On the AWS instance.** Your terminal now runs commands on the remote machine. Check that the driver sees the GPU with `nvidia-smi` and check free space with `df -h /`. Keep roughly 20 GiB free for downloads, the environment, caches and weights; larger projects need more. Install git, curl and tmux with apt-get.
 >
@@ -471,7 +469,7 @@ abdb57167f82a2a1fbab1e1c16ad9373411883f262a1a37ee5db2e6fb0044695
 tmux 能让终端会话在 SSH 断开后继续活着。**但停机、重启、终止实例之后，里面的任务一样会没。**
 
 ```bash
-tmux new -s cs230
+tmux new -s train
 
 cd "$HOME/neural-style"
 
@@ -491,7 +489,7 @@ cd "$HOME/neural-style"
 ```bash
 tmux ls
 
-tmux attach -t cs230
+tmux attach -t train
 ```
 
 需要中断正在跑的命令就按 `Ctrl+c`；任务结束后在空闲的 tmux 里输入 `exit` 关掉会话。更多 tmux 操作见旧笔记 [Remote-SSH窗口关闭/网络断开解决方法](../remotessh持续实验)。
@@ -501,7 +499,7 @@ tmux attach -t cs230
 > When SSH drops, the server sends SIGHUP to the processes of that login session, and their default reaction is to exit. tmux runs its own background server; your job is its child, outside the SSH session, so it never gets that SIGHUP. Reconnecting just reattaches the still-running terminal. nohup instead makes a process ignore SIGHUP, but you cannot reattach to it.
 
 > [!NOTE]- English version
-> **7 Run the full model with tmux.** tmux keeps a terminal session alive when SSH disconnects, but it does not keep a job alive if you stop, reboot or terminate the instance. Start a session with `tmux new -s cs230`, go to `~/neural-style`, and run the 1000-iteration example; `output.jpg` appears in `~/neural-style`. To detach, press Ctrl+b, release both keys, then press d; you can then close SSH while the job continues. After reconnecting, `tmux ls` lists sessions and `tmux attach -t cs230` returns to yours. Ctrl+c interrupts a running command; type `exit` to close an idle tmux shell when the job is done. The card explains why a dropped SSH connection kills a job (SIGHUP) and why tmux avoids it.
+> **7 Run the full model with tmux.** tmux keeps a terminal session alive when SSH disconnects, but it does not keep a job alive if you stop, reboot or terminate the instance. Start a session with `tmux new -s train`, go to `~/neural-style`, and run the 1000-iteration example; `output.jpg` appears in `~/neural-style`. To detach, press Ctrl+b, release both keys, then press d; you can then close SSH while the job continues. After reconnecting, `tmux ls` lists sessions and `tmux attach -t train` returns to yours. Ctrl+c interrupts a running command; type `exit` to close an idle tmux shell when the job is done. The card explains why a dropped SSH connection kills a job (SIGHUP) and why tmux avoids it.
 
 <br>
 
@@ -512,7 +510,7 @@ tmux attach -t cs230
 下载生成的图片：
 
 ```bash
-scp -i "$HOME/.ssh/cs230.pem" \
+scp -i "$HOME/.ssh/gpu-key.pem" \
   ubuntu@PUBLIC_DNS:~/neural-style/output.jpg \
   "$HOME/Downloads/"
 ```
@@ -520,7 +518,7 @@ scp -i "$HOME/.ssh/cs230.pem" \
 下载一个文件夹：
 
 ```bash
-scp -i "$HOME/.ssh/cs230.pem" -r \
+scp -i "$HOME/.ssh/gpu-key.pem" -r \
   ubuntu@PUBLIC_DNS:~/neural-style/examples \
   "$HOME/Downloads/"
 ```
@@ -528,7 +526,7 @@ scp -i "$HOME/.ssh/cs230.pem" -r \
 上传一个文件：
 
 ```bash
-scp -i "$HOME/.ssh/cs230.pem" \
+scp -i "$HOME/.ssh/gpu-key.pem" \
   "$HOME/Downloads/my-image.jpg" \
   ubuntu@PUBLIC_DNS:~/neural-style/
 ```
@@ -536,7 +534,7 @@ scp -i "$HOME/.ssh/cs230.pem" \
 上传一个文件夹：
 
 ```bash
-scp -i "$HOME/.ssh/cs230.pem" -r \
+scp -i "$HOME/.ssh/gpu-key.pem" -r \
   ./my-project \
   ubuntu@PUBLIC_DNS:~/
 ```
@@ -569,8 +567,8 @@ uv pip install --python .venv/bin/python \
   ipykernel
 
 .venv/bin/python -m ipykernel install --user \
-  --name cs230-neural-style \
-  --display-name "CS230 neural style"
+  --name neural-style-env \
+  --display-name "neural style"
 
 .venv/bin/python -m jupyterlab \
   --no-browser \
@@ -586,12 +584,12 @@ uv pip install --python .venv/bin/python \
 另开一个本地终端：
 
 ```bash
-ssh -i "$HOME/.ssh/cs230.pem" -N \
+ssh -i "$HOME/.ssh/gpu-key.pem" -N \
   -L 127.0.0.1:8888:127.0.0.1:8888 \
   ubuntu@PUBLIC_DNS
 ```
 
-用 Jupyter 期间这个隧道一直开着。浏览器打开 `http://localhost:8888/lab`，粘贴 AWS 终端里打印的 token（或者直接打开 Jupyter 打印的那个带 token 的链接），选 **CS230 neural style** 内核。
+用 Jupyter 期间这个隧道一直开着。浏览器打开 `http://localhost:8888/lab`，粘贴 AWS 终端里打印的 token（或者直接打开 Jupyter 打印的那个带 token 的链接），选 **neural style** 内核。
 
 ### 9.3 检查 notebook 内核
 
@@ -611,7 +609,7 @@ assert gpus, "The selected notebook kernel cannot see a GPU."
 本地换成 8889：
 
 ```bash
-ssh -i "$HOME/.ssh/cs230.pem" -N \
+ssh -i "$HOME/.ssh/gpu-key.pem" -N \
   -L 127.0.0.1:8889:127.0.0.1:8888 \
   ubuntu@PUBLIC_DNS
 ```
@@ -630,15 +628,15 @@ ssh -i "$HOME/.ssh/cs230.pem" -N \
 > `-L 127.0.0.1:8888:127.0.0.1:8888` means: forward my computer's 127.0.0.1:8888 to 127.0.0.1:8888 as seen by the remote machine. Browser traffic to local 8888 enters the encrypted SSH connection and is delivered to Jupyter on the remote side. Jupyter listens only on the remote loopback, so it is unreachable from the internet and port 8888 never needs opening. `-N` builds the tunnel without running a remote command. The token is Jupyter's own password.
 
 > [!INFO]+ ipykernel 内核注册
-> Jupyter 用"内核"决定 notebook 里的代码交给哪个 Python 执行。`ipykernel install --user --name ...` 把 `.venv` 这个环境注册成一个名叫 "CS230 neural style" 的内核，选了它，notebook 才和命令行用的是同一套包。
-> A kernel decides which Python runs the notebook code. Registering `.venv` as "CS230 neural style" makes the notebook use the same packages as the command line.
+> Jupyter 用"内核"决定 notebook 里的代码交给哪个 Python 执行。`ipykernel install --user --name ...` 把 `.venv` 这个环境注册成一个名叫 "neural style" 的内核，选了它，notebook 才和命令行用的是同一套包。
+> A kernel decides which Python runs the notebook code. Registering `.venv` as "neural style" makes the notebook use the same packages as the command line.
 
 > [!NOTE]- English version
 > **9 Optional: Jupyter through an SSH tunnel.** JupyterLab runs on AWS and opens through localhost on your computer. Keep port 8888 closed in the security group; SSH on port 22 carries the connection.
 >
-> **9.1** On the instance, install JupyterLab and ipykernel into the same `.venv` (with the TensorFlow CUDA extra), register the kernel "CS230 neural style", and start JupyterLab on 127.0.0.1:8888 without a browser. Keep that terminal open or run it in tmux. Leave token authentication on and keep the printed token private.
+> **9.1** On the instance, install JupyterLab and ipykernel into the same `.venv` (with the TensorFlow CUDA extra), register the kernel "neural style", and start JupyterLab on 127.0.0.1:8888 without a browser. Keep that terminal open or run it in tmux. Leave token authentication on and keep the printed token private.
 >
-> **9.2** In another local terminal, open the tunnel shown above and keep it running. Browse to `http://localhost:8888/lab`, paste the token (or open the printed localhost link), and select the CS230 neural style kernel.
+> **9.2** In another local terminal, open the tunnel shown above and keep it running. Browse to `http://localhost:8888/lab`, paste the token (or open the printed localhost link), and select the neural style kernel.
 >
 > **9.3** Run the GPU check cell before any GPU work.
 >
@@ -674,8 +672,8 @@ ssh -i "$HOME/.ssh/cs230.pem" -N \
 > Stop is like shutting down: the instance and disk remain and hourly compute charges end. Terminate is like ending the lease: the instance is gone and the root disk is deleted by default. An Elastic IP is a fixed public address that survives restarts but is charged even when idle.
 
 > [!EXAMPLE]+ 我怎么防止自己忘记关机
-> 课程文档没写，但很实用：EC2 可以建一个 CloudWatch 告警，"CPU 利用率连续 N 分钟低于某个值就执行 Stop this instance"，相当于闲置自动关机。我们组在 SageMaker 上写了一个看门狗脚本，连续 30 分钟没有训练进程、GPU 利用率也低于 5%，就自动关掉机器（第 11.6 节）。
-> Not in the course doc but useful: a CloudWatch alarm on EC2 can run "Stop this instance" when CPU utilization stays below a threshold for N minutes, i.e. an idle auto-stop. On SageMaker our team wrote a watchdog that stops the machine after 30 minutes with no training process and GPU utilization under 5% (section 11.6).
+> 教程里没写，但很实用：EC2 可以建一个 CloudWatch 告警，"CPU 利用率连续 N 分钟低于某个值就执行 Stop this instance"，相当于闲置自动关机。我们组在 SageMaker 上写了一个看门狗脚本，连续 30 分钟没有训练进程、GPU 利用率也低于 5%，就自动关掉机器（第 11.6 节）。
+> Not in the tutorial but useful: a CloudWatch alarm on EC2 can run "Stop this instance" when CPU utilization stays below a threshold for N minutes, i.e. an idle auto-stop. On SageMaker our team wrote a watchdog that stops the machine after 30 minutes with no training process and GPU utilization under 5% (section 11.6).
 
 > [!NOTE]- English version
 > **10 Stop the instance when finished (the most important step).** Save your work and back up important results. In the EC2 console select the instance, choose Instance state → Stop instance, and wait for Stopped. Closing SSH, detaching tmux or shutting down Jupyter does not stop EC2 compute charges. Stopping keeps the EBS disks, ends running processes, erases RAM and instance-store data, and usually changes the auto-assigned public IP on restart. EBS storage is still charged while stopped, and retained Elastic IPs are charged too. Use Terminate only when you are completely done and have backed up everything; it is permanent, and volumes set to delete on termination go with it. The cards explain Stop / Terminate / Elastic IP and two ways to avoid forgetting: a CloudWatch idle alarm on EC2, and our 30-minute watchdog on SageMaker.
@@ -684,7 +682,7 @@ ssh -i "$HOME/.ssh/cs230.pem" -N \
 
 ## 11 我们组实际走的路：SageMaker Studio
 
-EC2 的 GPU 配额一直是 0，但我们在 Service Quotas 里翻 SageMaker 的配额时发现：项目账号里每种 g5 机型都已经有 1 台的 Studio 配额。这就是助教说的"可以直接用"。
+EC2 的 GPU 配额一直是 0，但我们在 Service Quotas 里翻 SageMaker 的配额时发现：项目账号里每种 g5 机型都已经有 1 台的 Studio 配额。原来"可以直接用"指的是这个。
 
 ### 11.1 SageMaker 和 EC2 的区别
 
@@ -706,7 +704,7 @@ EC2 的 GPU 配额一直是 0，但我们在 Service Quotas 里翻 SageMaker 的
 
 1. 控制台 → **Amazon SageMaker AI → 域 → 创建域 → 针对单个用户设置（快速设置）**。会出现一个 `ValidationException ... servicecatalog:ListAcceptedPortfolioShares` 报错，可以忽略，只影响项目模板功能，域照样建好。
 2. 域 → 用户配置文件 → **打开 Studio**（会弹新标签页）。
-3. Studio 左侧 **JupyterLab → Create JupyterLab space**，名字 `cs230-gpu-shared`，Sharing 选 **Share with my domain**（全组可用）。
+3. Studio 左侧 **JupyterLab → Create JupyterLab space**，名字 `gpu-shared`，Sharing 选 **Share with my domain**（全组可用）。
 4. 机型选 **ml.g5.2xlarge**（1 块 A10G 24 GiB，8 vCPU，32 GiB 内存），硬盘填大小。
 5. 点 **Run space** 才开始计费，等 Running 后 **Open JupyterLab**，File → New → Terminal。
 
@@ -735,16 +733,16 @@ EC2 的 GPU 配额一直是 0，但我们在 Service Quotas 里翻 SageMaker 的
 ```powershell
 winget install --id Amazon.AWSCLI -e
 winget install --id Amazon.SessionManagerPlugin -e
-aws login --profile cs230 --region us-east-2
-aws sts get-caller-identity --profile cs230
+aws login --profile myproj --region us-east-2
+aws sts get-caller-identity --profile myproj
 ```
 
 - 我们是从"AWS 项目"门户登录的，标准的 `aws sso login` 会报 `User not authorized for this Identity Center instance`，拿不到账户权限。改用新版 AWS CLI 的 **`aws login`**：它把浏览器里的控制台登录换成命令行临时凭证，会自动续期。
 - 空间要打开 **Remote Access**（`update-space` 里设 `RemoteAccess: ENABLED`）。
-- `~/.ssh/config` 里加一个 Host，`ProxyCommand` 指向一个调用 `aws sagemaker start-session` 再交给 `session-manager-plugin` 的脚本（AWS 文档 "Connect from the terminal via SSH CLI" 里有现成的 PowerShell 版本），之后 `ssh cs230-gpu` 即可。空间必须在运行。
+- `~/.ssh/config` 里加一个 Host，`ProxyCommand` 指向一个调用 `aws sagemaker start-session` 再交给 `session-manager-plugin` 的脚本（AWS 文档 "Connect from the terminal via SSH CLI" 里有现成的 PowerShell 版本），之后 `ssh sm-gpu` 即可。空间必须在运行。
 
 > [!INFO]+ AWS CLI、profile、临时凭证
-> AWS CLI 是命令行版的控制台，`aws <服务> <操作>`。profile 是一组命名的登录配置，`--profile cs230` 表示用这一组。`aws login` / SSO 拿到的都是几小时有效的**临时凭证**，过期重新登录，比长期的 Access Key 安全得多。
+> AWS CLI 是命令行版的控制台，`aws <服务> <操作>`。profile 是一组命名的登录配置，`--profile myproj` 表示用这一组。`aws login` / SSO 拿到的都是几小时有效的**临时凭证**，过期重新登录，比长期的 Access Key 安全得多。
 > The AWS CLI is the console on the command line (`aws <service> <operation>`). A profile is a named set of login settings. `aws login` and SSO give temporary credentials valid for hours, far safer than long-lived access keys.
 
 ### 11.5 代码怎么在本机和 AWS 之间同步
@@ -769,7 +767,7 @@ tail -3 ~/autostop.log
 随时可以在本机查有没有机器在收费：
 
 ```powershell
-aws sagemaker list-apps --domain-id-equals <域ID> --profile cs230 --region us-east-2 --query "Apps[?Status=='InService']"
+aws sagemaker list-apps --domain-id-equals <域ID> --profile myproj --region us-east-2 --query "Apps[?Status=='InService']"
 ```
 
 返回 `[]` 就是没有。
@@ -790,11 +788,11 @@ aws sagemaker list-apps --domain-id-equals <域ID> --profile cs230 --region us-e
 >
 > **11.1 SageMaker vs EC2.** EC2 is a bare virtual machine you SSH into and set up yourself; SageMaker Studio is a web JupyterLab with terminal, file browser and notebooks preinstalled, started with Run space / Stop space. The same GPU costs about 20 to 40% more on SageMaker, and the two services have separate quotas (ours: EC2 0, SageMaker one of each g5). SageMaker was not better, it was simply the only option available. The card explains the four layers: Domain, User profile, Space (EBS home directory kept while stopped) and App plus instance (billed while running), and the `ml.` prefix.
 >
-> **11.2 Setup.** Create a domain with single-user quick setup (ignore the servicecatalog ValidationException), open Studio from the user profile, create a JupyterLab space `cs230-gpu-shared` with Share with my domain, choose ml.g5.2xlarge (one A10G 24 GiB, 8 vCPUs, 32 GiB), set the disk size, and click Run space (billing starts), then Open JupyterLab and a terminal. Lessons: sharing cannot be changed after creation; instance type and disk edited in the page are lost without Run, so persist them with `aws sagemaker update-space`; shared spaces have no Idle Shutdown field, so we wrote a 30-minute watchdog.
+> **11.2 Setup.** Create a domain with single-user quick setup (ignore the servicecatalog ValidationException), open Studio from the user profile, create a JupyterLab space `gpu-shared` with Share with my domain, choose ml.g5.2xlarge (one A10G 24 GiB, 8 vCPUs, 32 GiB), set the disk size, and click Run space (billing starts), then Open JupyterLab and a terminal. Lessons: sharing cannot be changed after creation; instance type and disk edited in the page are lost without Run, so persist them with `aws sagemaker update-space`; shared spaces have no Idle Shutdown field, so we wrote a 30-minute watchdog.
 >
 > **11.3 What survives.** Files in `/home/sagemaker-user` survive Stop / Run, auto-stop and instance changes (CPU to GPU); deleting the space deletes them; packages installed into the system environment and running processes are gone after a restart (keep environments in the home directory). So data is downloaded once, on a cheap CPU instance such as ml.t3.large, and training later switches the same space to a GPU type.
 >
-> **11.4 SSH into a SageMaker space.** Unlike EC2, nothing connects to port 22: an agent on the machine opens an outbound connection to AWS Systems Manager, your computer calls `StartSession`, and the Session Manager plugin carries SSH through that encrypted channel, with no public IP and no inbound port. On Windows install the AWS CLI and the Session Manager plugin, then sign in with `aws login --profile cs230` (from the projects portal, `aws sso login` fails with "User not authorized for this Identity Center instance"; `aws login` turns the browser console session into auto-refreshing temporary credentials). Turn on Remote Access for the space and add an `~/.ssh/config` Host whose ProxyCommand calls `aws sagemaker start-session` and hands the result to `session-manager-plugin` (the AWS doc "Connect from the terminal via SSH CLI" has a PowerShell version); then `ssh cs230-gpu` works while the space runs. The card explains the AWS CLI, profiles and temporary credentials.
+> **11.4 SSH into a SageMaker space.** Unlike EC2, nothing connects to port 22: an agent on the machine opens an outbound connection to AWS Systems Manager, your computer calls `StartSession`, and the Session Manager plugin carries SSH through that encrypted channel, with no public IP and no inbound port. On Windows install the AWS CLI and the Session Manager plugin, then sign in with `aws login --profile myproj` (from the projects portal, `aws sso login` fails with "User not authorized for this Identity Center instance"; `aws login` turns the browser console session into auto-refreshing temporary credentials). Turn on Remote Access for the space and add an `~/.ssh/config` Host whose ProxyCommand calls `aws sagemaker start-session` and hands the result to `session-manager-plugin` (the AWS doc "Connect from the terminal via SSH CLI" has a PowerShell version); then `ssh sm-gpu` works while the space runs. The card explains the AWS CLI, profiles and temporary credentials.
 >
 > **11.5 Keeping code in sync.** Code goes through GitHub: `git pull` before work, commit and push after. The shared space uses a fine-grained token limited to one repository, Contents read and write, expiring in 90 days, because everyone on the shared machine can use it. Data, features and weights stay on the space disk; small metrics, configs, curves and logs are committed after each run.
 >
@@ -818,12 +816,12 @@ aws sagemaker list-apps --domain-id-equals <域ID> --profile cs230 --region us-e
 | No space left on device | `df -h /`，清包缓存，必要时扩容 EBS 和文件系统。Run `df -h /`, clear caches, expand EBS and the filesystem. |
 | Jupyter 打不开 | 服务和隧道都在跑、端口对得上、token 正确。Server and tunnel running, ports match, correct token. |
 | （SageMaker）设置没保存 | 网页改了没点 Run；用 `aws sagemaker update-space` 写进空间。Edited without Run; persist with `update-space`. |
-| （SageMaker）`aws sso login` 后 Forbidden | 项目门户账号用 `aws login --profile cs230`。Projects-portal users should use `aws login`. |
+| （SageMaker）`aws sso login` 后 Forbidden | 项目门户账号用 `aws login --profile myproj`。Projects-portal users should use `aws login`. |
 
-找助教求助时附上：区域、AMI 名字、机型、完整报错、`nvidia-smi` 和 TensorFlow GPU 检查的输出。**永远不要贴私钥、AWS Access Key、密码、Jupyter token、GitHub token。**
+找人求助时附上：区域、AMI 名字、机型、完整报错、`nvidia-smi` 和 TensorFlow GPU 检查的输出。**永远不要贴私钥、AWS Access Key、密码、Jupyter token、GitHub token。**
 
 > [!NOTE]- English version
-> **12 Troubleshooting.** The table is bilingual. When asking course staff for help, include the region, AMI name, instance type, the exact error, and the output of `nvidia-smi` and the TensorFlow GPU check. Never post private keys, AWS access keys, passwords, Jupyter tokens or GitHub tokens.
+> **12 Troubleshooting.** The table is bilingual. When asking someone for help, include the region, AMI name, instance type, the exact error, and the output of `nvidia-smi` and the TensorFlow GPU check. Never post private keys, AWS access keys, passwords, Jupyter tokens or GitHub tokens.
 
 <br>
 
