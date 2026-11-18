@@ -35,7 +35,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 1. 总览：PREPARE 四步
+## 总览：PREPARE 四步
 - 目标：让演讲言之有情
 - 四个步骤
   1. 演讲稿：决定有稿还是无稿，并据此练习
@@ -46,13 +46,13 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 2. 准备 1：演讲稿
+## 准备 1：演讲稿
 原则：用舒适和自信的方式全情投入、专注内容。根本选择只有一个：写不写完整讲稿。
 
-### 2.1 有讲稿
+### 有讲稿
 写出全部演讲内容作完整讲稿，上台有两种用法。
 
-#### 2.1.1 两种用法
+#### 两种用法
 - 背诵后脱稿（主流）
   - 需要充足准备时间：例如 18 分钟演讲约需 5 至 6 小时记忆
   - 18 分钟是 TED 演讲的时长上限，足够严肃展开一个观点，又短到能保持注意力
@@ -61,19 +61,19 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
     - 例：詹姆斯·纳赫特韦（James Nachtwey，战地摄影师）的 TED 演讲，照片承担叙事，讲稿作为旁白
   - B. 观众知道自己是在聆听一篇伟大作家的作品（如作家朗读自己的文字）
 
-#### 2.1.2 优点
+#### 优点
 - 写出便于理解
 - 能承载复杂的解释
 - 方便修改
 
-#### 2.1.3 练习
+#### 练习
 1. 练习台词，理解感觉和意义
    - 标准：直到演讲时能同时完成另一件需花精力的事
    - 例：制造干扰，对着镜子背诵，有问题就重新开始
 2. 加上动作（可拿着稿子提醒自己）
 3. 脱稿，将意义和动作结合在一起
 
-#### 2.1.4 方法
+#### 方法
 1. 非常熟悉演讲内容，透彻理解，让人毫无背诵的感觉（脱稿更有力量）
    - 熟练度中间段最危险：背到一半时听起来最像背书，要么背到滚瓜烂熟，要么不背
 2. 如有需要，参阅讲稿，时时跟观众眼神交流，而非低头读稿
@@ -81,13 +81,13 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
    - Ex1：用录音先讲一遍，转写作为讲稿初稿，保证是口语而非书面语
    - Ex2：要点写在卡片上
 
-### 2.2 无讲稿
+### 无讲稿
 列出清晰的框架，根据每个要点即兴演讲。
 
-#### 2.2.1 优点
+#### 优点
 - 新鲜、生动、真实
 
-#### 2.2.2 常见问题与方法
+#### 常见问题与方法
 1. 找不到解释关键词的表达
    - 方法：多版本地讲述"旅行"中的每一步，直到确信记住
    - "旅行"指演讲的路径：每一段是从上一个要点走到下一个要点的一步
@@ -101,22 +101,22 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 3. 准备 2：视觉资料
+## 准备 2：视觉资料
 原则：无 PPT 优于糟糕的 PPT；先写讲稿，后做 PPT 设计。
 
-### 3.1 展示：很难描述的东西
+### 展示：很难描述的东西
 - 例：乔布斯 1984 年发布 Macintosh，产品本身比任何描述都有力
 - 策略
   - 全屏显示，或放在醒目位置
   - 图片上字体少用或不用
 
-### 3.2 解释：关键词或图片
+### 解释：关键词或图片
 - 突出、强化要揭示的重点
 - 减少解释性文字：满屏文字会导致观众兴趣下降，观众会去读字而不再听讲
 - 一次只聚焦一个概念
 - 例：用单个关键词 "Breakthrough" 一页呈现，优于一页密密麻麻的说明文字
 
-### 3.3 美学价值
+### 美学价值
 - 避免
   - 项目符号、下划线和斜体
   - 破折号放在文本开头
@@ -127,18 +127,18 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - 在 2 至 4 米外能看清图片
   - 强调内容用加粗
 
-### 3.4 其他事项
+### 其他事项
 - 提前发送文件：用 U 盘带上完整的演示文件和视频，备好演示文件中用到的字体
 - 不能把幻灯片作为演讲的全部支撑：设备故障时仍需能讲完
 
-### 3.5 制作工具
+### 制作工具
 
-#### 3.5.1 图形界面工具
+#### 图形界面工具
 - PowerPoint、Keynote、Google Slides
   - 适用：大多数场合；排版自由度最高，会场兼容性最好
   - 字体问题：换电脑放映时缺字体会回退，需嵌入字体或导出 PDF 备份
 
-#### 3.5.2 代码化幻灯片（slides as code）
+#### 代码化幻灯片（slides as code）
 内容用文本源码写成，可版本管理、可复用、可由脚本或大模型直接生成。
 - Beamer（LaTeX）
   - 适用：公式密集的学术报告；与论文共用 LaTeX 源码和参考文献
@@ -161,7 +161,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - 技术分享、现场写代码：Slidev
   - 需要网页交互、在线分享：reveal.js
 
-#### 3.5.3 AI 生成
+#### AI 生成
 - 主要类型
   - 专用生成器：Gamma、Beautiful.ai，从提示词或文档直接生成整套幻灯片
   - 办公套件内置：Microsoft 365 Copilot（PowerPoint）、Gemini（Google Slides），生成原生格式文件
@@ -169,22 +169,22 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - 通用大模型：Claude、ChatGPT 可直接生成幻灯片，或生成 Marp/Slidev/reveal.js 源码再渲染
   - 设计收尾：Canva，模板与品牌素材库
 - 已知局限
-  - 默认生成满屏项目符号，与 3.2、3.3 的原则相反，必须人工删字
+  - 默认生成满屏项目符号，与上文"解释""美学价值"两节的原则相反，必须人工删字
   - 事实和数据可能出错，需逐页核对
   - 导出 PPTX 常见字体替换、元素丢失，需在实际放映软件中检查
 - 推荐工作流：思考与设计分离
-  1. 先写讲稿（第 2 节），不让工具决定内容
+  1. 先写讲稿（见"准备 1：演讲稿"），不让工具决定内容
   2. 把讲稿拆成"每页一个观点"的大纲：每页一句话标题 + 需要的图或数据
   3. 交给 AI 生成初稿，或让大模型输出 Marp/Slidev 源码
-  4. 按 3.3 规则人工修改：删文字、换大图、统一字体字号
+  4. 按"美学价值"一节的规则人工修改：删文字、换大图、统一字体字号
   5. 在会场同款设备和软件上全程放映一遍，检查字体、视频、翻页
 
 <br>
 
-## 4. 准备 3：串词（彩排）
+## 准备 3：串词（彩排）
 原则：不断排练，并非纠结内容，而是锤炼演讲风格。
 
-### 4.1 自查清单
+### 自查清单
 - 内容
   1. 我的演讲一开始就能吸引你的注意力吗？
   2. 我的演讲是否成功向你传递了新的思想？
@@ -205,7 +205,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   13. 演讲的每一步都令人满意吗？
   14. 是否按时完成演讲？
 
-### 4.2 自查方式
+### 自查方式
 - 对着信任的人排练，或录像
 - 自省，或听取观众反馈
 - 录像回看时分轮检查：一轮只听声音，一轮静音只看肢体
@@ -213,12 +213,12 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 5. 准备 4：开头与结尾
+## 准备 4：开头与结尾
 
-### 5.1 四种好的开场方式
+### 四种好的开场方式
 开场的任务：在最初约一分钟内抓住注意力，并让观众知道这场演讲值得听。
 
-#### 5.1.1 加一点戏剧性的元素
+#### 加一点戏剧性的元素
 - 方法：试想电影、小说会怎样开始
 - 例：社会学家艾丽斯·戈夫曼（Alice Goffman）演讲的开头改稿
 
@@ -230,7 +230,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   > On the path that American children travel to adulthood, two institutions oversee the journey. The first is the one we hear a lot about: college. ... College has some shortcomings. It's expensive; it leaves young people in debt. But all in all, it's a pretty good path. ... Today I want to talk about the second institution overseeing the journey from childhood to adulthood in the United States. And that institution is prison.
 - 改稿的区别：原稿按时间顺序铺陈个人经历，迟迟不见主题；改稿先立"大学"这一熟悉框架，再以"监狱"形成反差，第一段就亮出核心论点
 
-#### 5.1.2 激发兴趣
+#### 激发兴趣
 - 方法：问一个有趣的问题
 - 例：迈克尔·桑德尔（Michael Sandel）
   - "有一个问题值得我们重新思考：在社会上，金钱和市场应该扮演什么样的角色？"
@@ -238,14 +238,14 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - 紧接着用具体反常事实把问题落地："If you're sentenced to a jail term in Santa Barbara, California, ... you can buy a prison cell upgrade."（每晚 82 美元）
 - 好问题的标准：观众此前没认真想过，但一听就想知道答案
 
-#### 5.1.3 展示抓人眼球的幻灯片、视频或实物
+#### 展示抓人眼球的幻灯片、视频或实物
 - 例："我要让你们开开眼"
 - 适用于视觉冲击本身就是论点的题目
 
-#### 5.1.4 留有悬念，不要和盘托出
+#### 留有悬念，不要和盘托出
 - 先抛出谜题或反常现象，答案留到后面揭晓，维持观众的好奇心
 
-#### 5.1.5 常用英文开场句式
+#### 常用英文开场句式
 - 戏剧性 / 场景：
   - "Imagine you're ..."
   - "On the night of ..., something happened that ..."
@@ -259,7 +259,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 - 避免：
   - "Hi, my name is ..., and today I'm going to talk about ..."（直接进入内容即可，主持人已介绍过）
 
-### 5.2 几种不可取的结尾方式
+### 几种不可取的结尾方式
 1. "嗯，时间到了，所以就此结束吧。"
    - 潜台词：还有很多想说的，但因为没计划好，所以没法讲给我们听
 2. "最后，我想感谢我优秀的团队成员，他们是戴维、乔安娜、加文、萨曼莎、李、阿卜杜勒和赫齐卡亚，还要感谢我所在的大学以及大会主办方。"
@@ -284,16 +284,16 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - "Sorry I didn't have time to cover ..."
   - "Together, we can change the world."
 
-### 5.3 七种有力的结尾方式
+### 七种有力的结尾方式
 
-#### 5.3.1 镜头回放（拉远视角）
+#### 镜头回放（拉远视角）
 - 做法：从具体论点拉远到更大的图景，展示这个想法的更广含义
 - 例：戴维·伊格曼（David Eagleman）
   > 想象一下一位宇航员能感觉到国际空间站的运转状况，或者，你能感觉到自己看不见的健康状况，如血糖和微生物菌群状况，或者拥有 360 度的视野，或者能看到红外线或紫外线。所以关键是，未来，我们将越来越能选择我们的外部设备，而不必等待自然目前根据她的日程表来给予我们感官馈赠。就像任何一位好母亲那样，自然已经给了我们所需要的工具，让我们走出去并选择我们自己的道路。现在的问题是，你想怎么走出去体验你的世界？
 
   > Just imagine an astronaut being able to feel the overall health of the International Space Station, or, for that matter, having you feel the invisible states of your own health, like your blood sugar and the state of your microbiome, or having 360-degree vision or seeing in infrared or ultraviolet. So the key is this: As we move into the future, we're going to increasingly be able to choose our own peripheral devices. We no longer have to wait for Mother Nature's sensory gifts on her timescales, but instead, like any good parent, she's given us the tools that we need to go out and define our own trajectory. So the question now is, how do you want to go out and experience your universe?
 
-#### 5.3.2 号召行动
+#### 号召行动
 - 做法：明确告诉观众接下来该做什么或不该做什么
 - 例 1：乔恩·龙森（Jon Ronson），关于网络公开羞辱
   > 社交媒体所做的最了不起的事情是，它赋予失语的人们以声音，但我们现在正在创造一个被监视的社会，在这里，最聪明的生存方式就是回到失语的状态。请不要这样做。
@@ -302,7 +302,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 - 例 2：艾丽斯·戈夫曼，结尾向年轻人发出号召
   > I want to end with a call to young people ... Both can be leaders in the work of reforming our criminal justice system. ... The mission for the generation of young people coming of age in this, a sea-change moment, potentially, is to end mass incarceration and build a new criminal justice system, emphasis on the word justice.
 
-#### 5.3.3 个人承诺
+#### 个人承诺
 - 做法：讲者公开立下自己的承诺，用自身行动为观点背书
 - 例：比尔·斯通（Bill Stone），人类返回月球的可能性
   > 最后我想在这里，在 TED 演讲的舞台上，向大家郑重承诺，我要领先开创这场空间探险之旅。
@@ -310,7 +310,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   > I would like to close here by putting a stake in the sand at TED. I intend to lead that expedition.
   - "put a stake in the sand"：立桩为界，即公开表态、立下承诺
 
-#### 5.3.4 价值和愿景
+#### 价值和愿景
 - 做法：把具体议题上升为值得追求的价值与未来图景
 - 例：丽塔·皮尔逊（Rita Pierson）
   > 教与学应该带来快乐。如果我们的孩子不畏艰难、大胆思考、都能获得冠军，那我们的世界将会多么强大？每一个孩子都能获得冠军，成年人永远都不要放弃他们，要懂得支持的力量，坚持认为他们会成为最好的自己。这项工作很艰巨吗？当然，毫无疑问。但我们是教育工作者，我们的天职就是重塑他人。非常感谢大家！
@@ -318,7 +318,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   > Teaching and learning should bring joy. How powerful would our world be if we had kids who were not afraid to take risks, who were not afraid to think, and who had a champion? Every child deserves a champion, an adult who will never give up on them, who understands the power of connection, and insists that they become the best that they can possibly be. Is this job tough? You betcha. Oh God, you betcha. But it is not impossible. We can do this. We're educators. We're born to make a difference. Thank you so much.
   - 中译"都能获得冠军"系误译：champion 此处指"支持者、守护者"，即每个孩子都需要一位永不放弃他的大人
 
-#### 5.3.5 重新审视
+#### 重新审视
 - 做法：给出看待问题的新框架，让观众换一个角度理解全部内容
 - 例 1：埃丝特·佩瑞尔（Esther Perel）
   > 我从双重的视角看待出轨行为：一方面是伤害与背叛，另一方面是成长与自我发现，它对你有什么影响，它对我又意味着什么。当一对夫妻在出轨暴露而余波未平之际来到这里时，我常常会告诉他们：今天在西方，大多数人会有两三段亲密关系或婚姻，有些人会与同一人经历着两三段亲密关系或婚姻。你们的第一段婚姻已经结束，想不想一起创造第二段婚姻呢？
@@ -332,16 +332,16 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 - 例 3：迈克尔·桑德尔，结尾把经济问题重构为共同生活问题
   > And so, in the end, the question of markets is not mainly an economic question. It's really a question of how we want to live together. Do we want a society where everything is up for sale, or are there certain moral and civic goods that markets do not honor and money cannot buy?
 
-#### 5.3.6 叙述对称
+#### 叙述对称
 - 做法：结尾呼应开头的意象、故事或问题，让演讲形成闭环
 - 例 1：乔恩·龙森
-  - 开场讲社交媒体让弱者发声，结尾回到"失语"（voiceless）这一意象，首尾对称（原文见 5.3.2）
+  - 开场讲社交媒体让弱者发声，结尾回到"失语"（voiceless）这一意象，首尾对称（原文见"号召行动"）
 - 例 2：布莱恩·史蒂文森（Bryan Stevenson）
-  - 演讲中段讲到法庭上一位老人对他说 "Keep your eyes on the prize, hold on"，结尾原样复述这句话作为收束（原文见 5.3.7）
+  - 演讲中段讲到法庭上一位老人对他说 "Keep your eyes on the prize, hold on"，结尾原样复述这句话作为收束（原文见"诗意的激励"）
 - 例 3：艾丽斯·戈夫曼
-  - 开场以"大学与监狱两条成年之路"立框架，结尾再次面向这两条路上的年轻人（原文见 5.3.2）
+  - 开场以"大学与监狱两条成年之路"立框架，结尾再次面向这两条路上的年轻人（原文见"号召行动"）
 
-#### 5.3.7 诗意的激励
+#### 诗意的激励
 - 做法：用富有节奏和意象的语言收尾，激发情感
 - 例：布莱恩·史蒂文森，人权律师，关于美国司法体制中的不公
   > 我来到 TED，是因为我相信你们中有许多人都明白，尽管这个世界的道德弧线很长，但永远都向着公正的一面倾斜。如果我们不开始关心人权和基本尊严，我们就无法真正完成进化。我们的生存和每一个人的生存都分不开，科技和设计、娱乐和创造的未来，必须与人性、慈善和公正的未来相结合。最重要的是，对于每个执着于此的人，我只想说，往前看，往好处看，永不放弃。
@@ -351,7 +351,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - "keep your eyes on the prize, hold on"：民权运动歌曲歌词，意为"盯住目标，坚持下去"；中译"往前看，往好处看，永不放弃"为意译
   - 节奏来自排比：连续四个 that 从句递进
 
-### 5.4 最好的结尾
+### 最好的结尾
 - 最好结尾 = 一段精炼结束语 + 简单说一句"谢谢"
 - 英文收尾常用句式
   - 拉远视角："So the question now is, ...?"
@@ -362,10 +362,10 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 6. 学术演讲
+## 学术演讲
 课程项目汇报、组会、会议报告的听众动机强、专业背景接近，但时间短、注意力有限；结构比 TED 演讲更固定，重点是讲清一个核心贡献。
 
-### 6.1 通用结构
+### 通用结构
 1. Motivation（动机）
    - What is the project? Why does it matter?
    - 先给出要解决的问题和一个具体例子，再给出贡献
@@ -379,7 +379,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 5. Conclusion（结论）
    - 快速总结刚才讲了什么：问题、方法、主要发现
 
-### 6.2 讲述要点
+### 讲述要点
 - Why story：最重要的是回答"为什么有人要关心"
   - 先回答 why 类问题：为什么重要？为什么有价值？为什么是现在（why now）？
 - 清晰表达：说清楚、说慢一点
@@ -397,7 +397,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
   - 目标不是完美结果，而是讲清发生了什么、发现了什么
   - 从"没成功"的部分能学到的，与从"成功"的部分一样多
 
-### 6.3 补充
+### 补充
 - 一场报告只讲一个核心思想
   - 报告是论文的"广告"，目的是让听众想去读论文，而不是把论文念一遍
   - 不要覆盖全部结果，把一个关键结果讲透
@@ -432,7 +432,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 7. 文中引用的原始 TED 演讲
+## 文中引用的原始 TED 演讲
 - <a href="https://www.ted.com/talks/james_nachtwey_my_wish_let_my_photographs_bear_witness">James Nachtwey: My wish: Let my photographs bear witness</a>（TED Prize 2007）
   - 朗读讲稿的例子：照片承担叙事
 - <a href="https://www.ted.com/talks/alice_goffman_how_we_re_priming_some_kids_for_college_and_others_for_prison">Alice Goffman: How we're priming some kids for college — and others for prison</a>（TED2015）
@@ -456,7 +456,7 @@ desc: 《TED 演讲的力量》准备部分笔记：有稿与无稿、视觉资�
 
 <br>
 
-## 8. 幻灯片工具文档
+## 幻灯片工具文档
 - <a href="https://ctan.org/pkg/beamer">Beamer</a>（CTAN）
   - 用户手册：主题、overlay 逐步显示
 - <a href="https://marp.app/">Marp</a>
