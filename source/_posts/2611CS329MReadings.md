@@ -1,5 +1,5 @@
 ---
-title: 机器编程（Machine Programming）：Stanford CS329M 文献精读
+title: CS329M Readings：机器编程（Machine Programming）文献精读
 date: 2026-11-17
 categories:
   - 学AI/DS
@@ -73,11 +73,10 @@ desc: Stanford CS329M（2026 秋）全部 20 篇阅读文献的精读与梳理�
 ### 阅读方式
 - 20 篇文献每篇都按同一结构精读：元信息与 5C、研究问题、相关研究、作者思考路径重建、核心 intuition、方法细节、理论、实验、take-aways、局限、攻击、一周最小复现、follow-up
   - 5C：Category（研究类型）、Context（相关工作）、Correctness（假设与逻辑）、Contributions（真实贡献）、Clarity（表达）
-- 信息分四类标注
+- 信息分三类标注
   - 【原文】论文明确声称，附位置（Sec./Table/Fig./Eq.）
   - 【文献】相关文献中的已有结论
   - 【推断】基于证据的合理推断
-  - 【猜测】仍不确定的判断
 
 <br>
 
@@ -388,7 +387,7 @@ $$
   - "Data"作为底座，与三支柱的关系没有被形式化；它是第四根支柱还是横切关注点？
   - 案例只有一个（verified lifting，而且是作者 Solar-Lezama 自己的工作），存在选择偏差。
   - 结论"everyone programs computers on human terms"是愿景式表述，没有可证伪内容。
-- 反例设计：取 2018 至 2025 年 PLDI / ICSE / NeurIPS 中 100 篇 ML-for-code 论文，让三名标注者独立按三支柱归类，计算 Fleiss' kappa。预期：kappa 偏低（例如 < 0.5），尤其在 code translation、repair、learned optimization 类工作上分歧大，因为它们天然跨支柱。若结果如此，说明框架更像视角而非分类法。【猜测】
+- 反例设计：取 2018 至 2025 年 PLDI / ICSE / NeurIPS 中 100 篇 ML-for-code 论文，让三名标注者独立按三支柱归类，计算 Fleiss' kappa，检验三支柱作为分类法的可操作性。
 
 #### 一周最小复现
 
@@ -1652,7 +1651,6 @@ $2 \:(Int, Int)->(Int, Int) (a2, a3) {(a3, a2)}
   - 全连接网络，为 AllTrue、AllFalse、Mixed 三个值学 embedding
   - 目标：预测每个 pool element 在程序中出现的次数
   - 层数、宽度、损失函数、优化器未给出（推给开源代码）【推断】
-  - 合理的损失为对出现次数的回归（如 MSE 或 Poisson）【猜测】
 - 推理（如何引导搜索）【原文】(Sec. 4.1)
   - 86 个 pool element 全部启用会内存不足且太慢，因此随机采样包含较少 pool element 的 configuration
   - 多个 configuration 发往分布式合成服务器并行尝试
@@ -1874,7 +1872,7 @@ $$
 
 - 标题：AI Programmer: Autonomously Creating Software Programs Using Genetic Algorithms
 - 作者与机构：Kory Becker（Bloomberg LP）、Justin Gottschlich（Intel Labs）
-- 发表：本次阅读的 PDF 是 arXiv:1709.05703v1（2017-09-17，11 页，含参考文献）；课程标注的正式版本为 GECCO 2021（Genetic and Evolutionary Computation Conference 的 companion/poster 形式）【猜测：GECCO 版本篇幅与 arXiv v1 可能不同，本笔记所有数字以 arXiv v1 为准】
+- 发表：本次阅读的 PDF 是 arXiv:1709.05703v1（2017-09-17，11 页，含参考文献）；课程标注的正式版本为 GECCO 2021；本笔记所有数字以 arXiv v1 为准
 - 链接：https://arxiv.org/abs/1709.05703
 - 代码：论文未给出仓库地址。Kory Becker 个人项目 primaryobjects/AI-Programmer 在 GitHub 公开（C# 实现）【文献：作者邮箱域名为 primaryobjects.com，与该仓库一致；论文本身未写链接】
 - 5C：
@@ -1904,7 +1902,6 @@ $$
   - 没有与 PushGP（Spector 的 Push 语言，正是为进化设计的语言，比本文的 MLPL 观点早十几年）对比，也没有引用。
   - 没有与 DeepCoder（2017 ICLR）、RobustFill（2017）等同期神经程序合成对比。
   - 没有与枚举式合成（例如对同一八指令语言做 BFS/随机搜索）对比，因此无法判断 GA 是否真的比随机搜索更好。
-  - 没有引用已有的 Brainfuck 进化实验（这一类业余项目在 2000 年代已有不少）【猜测】。
 
 #### 重建作者的思考路径
 
@@ -2102,7 +2099,6 @@ $$
 - 如何读这张表：
   - 最难的是 "I love all humans"（17 字符，36,000 秒约 10 小时，6,057,200 代），最容易的是 "Warning countdown"（48 秒，900 代）和 "Reverse string"（49 秒，2,600 代）。
   - 时间与目标长度并不单调：3 字符的 "Hi!" 用了 7,644 秒、121 万代，比 11 字符的 "hello world"（7,702 秒、58 万代）代数还多；21 字符的 "Keep Calm Keep Coding" 只用 944 秒、2.1 万代。这说明单次运行的随机性很大，或者不同任务的 fitness/扩展指令设置不同；论文没有说明哪些程序用了扩展指令集（只说 Fibonacci 用了）。【推断】
-  - "XML to JSON"、"CSV parse" 名字听起来复杂，但论文没有给出规约，推测只是针对固定输入的简化版本。【猜测】
   - 代数与时间的比值差异很大（Keep Calm 约 22.7 代/秒；Fibonacci 约 6.9 代/秒；If/then 约 5.6 代/秒），反映不同任务每代评估成本不同（基因组长度、训练样例数）。【推断】
 
 ##### 逐个核心实验："问题 → 实验 → 答案"
@@ -2349,7 +2345,7 @@ $$P_a \equiv_S P_b \iff P_a(I_j) = P_b(I_j) = O_j,\quad 1 \le j \le m$$
   6. 死代码消除（DCE）：交叉与变异可能产生死代码（某语句输出从未被使用）。NetSyn 跟踪语句间的输入输出依赖，删除输出未被用到的语句；若产生死代码，就重复交叉或变异直到得到无死代码的基因，保证有效长度不小于目标长度【原文 Sec. 4.2】。
   7. 停滞检测通过则做邻域搜索（5.6），否则回到第 2 步。
 - 超参数（App. B）：种群 100，每代保留 5 个，最大 30,000 代，crossover 40%，mutation 30%【原文 App. B】。100 × 30,000 = 3,000,000，恰好等于搜索空间上限【推断】。
-- 40% + 30% = 70%，加上 5% 保留，剩下约 25% 如何产生未说明（可能是直接复制 Roulette Wheel 选中的个体）【猜测】。
+- 40% + 30% = 70%，加上 5% 保留，剩下约 25% 如何产生未说明。
 
 ##### 学习 fitness function（Sec. 4.2.1）
 
@@ -2724,7 +2720,7 @@ return Not found
 - 作者与机构：Fangke Ye（Intel Labs 与 Georgia Tech，共同一作）、Shengtian Zhou（Intel Labs，共同一作）、Anand Venkat、Ryan Marcus（Intel Labs 与 MIT）、Nesime Tatbul（Intel Labs 与 MIT）、Jesmin Jahan Tithi、Niranjan Hasabnis、Paul Petersen、Timothy Mattson、Tim Kraska（MIT）、Pradeep Dubey、Vivek Sarkar（Georgia Tech）、Justin Gottschlich（Intel Labs 与 UPenn）
 - 发表：arXiv 2006.05265，本笔记依据 v6（2021-06-02），标注 "Preprint. Under review."，正文脚注提到 NeurIPS 投稿
 - 链接：https://arxiv.org/pdf/2006.05265
-- 代码：论文正文与附录未给出代码仓库地址【原文】；是否有官方开源实现需另行核实【猜测】
+- 代码：论文正文与附录未给出代码仓库地址【原文】
 - 5C：
   - Category：新方法加系统。提出一种代码结构表示（CASS）和一个可替换神经网络后端的相似度学习框架，并做对比实验
   - Context：code2vec / code2seq（AST 路径）、NCC（基于 LLVM IR 的 XFG 与 inst2vec）、Aroma（SPT 加人工特征加点积）；训练范式借自度量学习（FaceNet、triplet loss、Circle loss）
@@ -3168,7 +3164,6 @@ Figure 6（固定某一维选项，其余维度变化时 mean of AP 的分布）
 作者没写的问题：
 - "相似"的标签是"同一题目"，这比语义等价宽松得多：同一题的错误解和正确解也被标为相似（POJ-104 不保证全部正确）。模型学到的可能是"题目相似"而非"行为等价"【推断】
 - 语义等价的定义基于 I/O 行为，但整个系统没有任何执行信息，所有特征都是静态结构。两段 I/O 等价但算法完全不同的程序（例如快排和归并排序）在结构上可能相距很远【推断】
-- 测试集题目与训练集不重叠，但同一竞赛的题目可能共享输入输出格式，模型可能利用 I/O 样板代码（如读取格式）作为捷径【猜测】
 - GAT 节点在图中没有边（若按公式理解），其信息只能通过 pooling 进入 code vector【推断】
 - 没有报告计算开销、推理延迟，而"实时 IDE"是 CASS 无需编译的主要动机【推断】
 
@@ -3205,7 +3200,7 @@ Reviewer 追问：
   - 指标：MAP@R（主）、AP
   - 预期：SPT-BoF 约 74.4，CASS-BoF 约 74.9
   - 判定：若 CASS 相对 SPT 的差异小于种子间标准差的 2 倍，则"表示贡献"不成立；若 AST-BoF 显著低于两者，则"擦除标识符"的作用成立
-  - 算力：BoF 在单块 GPU 上每次训练约 1 小时以内【猜测】，全部实验 1–2 天可完成
+  - 算力：单块 GPU
 
 #### 进一步思考与 follow-up
 
@@ -3782,7 +3777,7 @@ Reviewer 追问：
   - Daikon 默认只在方法入口、出口和类/对象字段上生成 invariant，不支持循环 invariant【原文 App. B】。
   - 作者在每个循环体顶部插入一个空函数调用，签名格式为 `public static void check_<class name>_<method>_<loop line number>(<accessible variables>)`，行号从 0 计数，指循环起始行【原文 App. B】。
   - `<accessible variables>` 包含所有在每条控制流路径上其定义都能到达循环入口的变量（类字段、函数参数、局部变量）。这本质上是一次 reaching definitions 数据流分析【原文 App. B；"本质上是 reaching definitions" 为【推断】】。
-  - 例：Listing 8 中 `check_test_main_9(p, m, n);` 表示内层循环的 program point，只含 p、m、n；变量 in、t 不在其中【原文 App. B】。（in 和 t 在外层确实可见，作者没解释为何排除，可能是只取循环体内被引用或被修改的变量【猜测】。）
+  - 例：Listing 8 中 `check_test_main_9(p, m, n);` 表示内层循环的 program point，只含 p、m、n；变量 in、t 不在其中【原文 App. B】。
   - dummy 函数定义追加在类末尾，固定为 public static、无返回值；然后用 Daikon 编译插桩后的代码【原文 App. B】。
   - 这一步的妙处：Daikon 天然在函数入口生成 precondition，所以"循环顶部的 loop invariant"被转化成"dummy 函数的入口 invariant"，复用 Daikon 已有能力，不需改 Daikon【推断】。
 - Step 2 执行
@@ -4023,7 +4018,6 @@ $$P(P_1,\dots,P_\ell \mid S, 1..\ell) = \prod_{i=1}^{\ell} P(P_i \mid S, 1..\ell
 - 作者没写的【推断】
   - 无 soundness：预测出的 invariant 没有经过 verifier（如 OpenJML、KeY、Dafny 风格工具）或至少在更多随机输入上检验；作为验证用的 loop invariant，必须 inductive，而论文没有测 inductiveness。
   - 领域单一：Code Contests 的 Java 程序短、单文件、输入格式高度模式化（第一行读 t 组测试），invariant 很多来自输入约束（t >= 0、m >= 1）。对工业代码（对象、堆、并发、I/O）的泛化未知。
-  - 数据泄漏风险：按题目划分能防止同题泄漏，但预训练语料（GitHub 代码）可能包含 Codeforces 题解；模型可能记得题面约束【猜测】。
   - 指标偏差：字符串精确匹配会惩罚语义等价但写法不同的 invariant；也不区分重要的 invariant 和平凡的 invariant（`args has only one value`）。
   - 没有按 18 类 invariant 拆分的准确率，无法知道 LM 在 arith、cond 等复杂类型上表现如何。
   - 规模效应混杂了参数量与预训练数据量。
@@ -4055,7 +4049,7 @@ $$P(P_1,\dots,P_\ell \mid S, 1..\ell) = \prod_{i=1}^{\ell} P(P_i \mid S, 1..\ell
 
 ##### 设计反例
 
-- 反例 1：语义保持变换。对测试程序做变量重命名、把 while 改成 for、插入无关死代码、交换 if 分支并取反条件。若 LM 真在推理，invariant 应保持不变（除变量名）；预计 F1 明显下降，因为模型依赖表面模式（如 `t--` 循环 → `t >= 0`）【猜测】。
+- 反例 1：语义保持变换。对测试程序做变量重命名、把 while 改成 for、插入无关死代码、交换 if 分支并取反条件。若 LM 真在推理，invariant 应保持不变（除变量名）。
 - 反例 2：反事实输入约束。把 `int t = in.nextInt()` 后面加一句 `t = t - 100;`，`t >= 0` 不再成立。模型若仍输出 `t >= 0`，说明它记住了竞赛题模式而非推理。
 - 反例 3：需要多次迭代 fixed point 的循环 invariant，如 `x = 0; y = 0; while (*) { x += 1; y += 2; }` 的 `y == 2x`。单遍 scratchpad 没有迭代过程，预计表现差（Listing 7 的线性关系失败是旁证）。
 - 反例 4：领域外代码（Apache Commons、带泛型容器和继承的 Java 类），invariant 主要是 object invariant 和 nullness，预计 precision 大幅下降。
@@ -7508,7 +7502,7 @@ $$
 - 发现前沿推理模型几乎不提澄清问题（o3 约 3%），对话更短、得分更高；可能是对协作任务的错误优化方向
 - 局限：多数题目不澄清也能答对，削弱了"交互评测"的定位；评分器与用户模拟都用 GPT-4o
 
-> 阅读说明：全文 12 页（正文 1 至 11 页，参考文献第 12 页）已完整读完。PDF 文本经 pypdf 抽取；Figure 1 至 Figure 7 为位图，已逐张提取查看（Fig. 5、6、7 的数值为读图估计，标注为约值）。论文正文提到 "Appendix ??" 列出模型与 checkpoint，但该 PDF 中不含附录（交叉引用未解析），因此模型版本细节无法核对。标注约定：【原文】论文明确声称（附位置）；【文献】其他文献已有结论；【推断】基于证据的推断；【猜测】不确定的猜测。
+> 阅读说明：全文 12 页（正文 1 至 11 页，参考文献第 12 页）已完整读完。PDF 文本经 pypdf 抽取；Figure 1 至 Figure 7 为位图，已逐张提取查看（Fig. 5、6、7 的数值为读图估计，标注为约值）。论文正文提到 "Appendix ??" 列出模型与 checkpoint，但该 PDF 中不含附录（交叉引用未解析），因此模型版本细节无法核对。标注约定：【原文】论文明确声称（附位置）；【文献】其他文献已有结论；【推断】基于证据的推断。
 
 #### 元信息与 5C
 
@@ -8431,7 +8425,7 @@ $$
 - 学习表现差异不显著，唯一显著的正面结果是自评与实测的一致性（元认知校准）
 - 精读发现的统计问题：SD 与 SE 混用、部分显著结果未过作者自设的 Bonferroni 阈值、观测不独立
 
-> 阅读说明：全文 19 页（正文 1 至 16 页，参考文献 16 至 19 页）已完整读完。PDF 文本经 pypdf 抽取，Figure 2、Figure 4、Figure 5 为位图，已单独提取后逐张查看；Figure 1、Figure 3、Figure 6 依据图注与正文描述。标注约定：【原文】论文明确声称（附位置）；【文献】其他文献已有结论；【推断】基于证据的推断；【猜测】不确定的猜测。
+> 阅读说明：全文 19 页（正文 1 至 16 页，参考文献 16 至 19 页）已完整读完。PDF 文本经 pypdf 抽取，Figure 2、Figure 4、Figure 5 为位图，已单独提取后逐张查看；Figure 1、Figure 3、Figure 6 依据图注与正文描述。标注约定：【原文】论文明确声称（附位置）；【文献】其他文献已有结论；【推断】基于证据的推断。
 
 #### 元信息与 5C
 
@@ -9088,7 +9082,7 @@ $$
 
 #### 攻击这篇论文
 
-- 最脆弱的假设：AI 研究的增长挤出了可靠性等方向的研究（替代效应），而非在一个整体扩张的研究共同体中新增。若 SE 会议的总论文数同期大幅增长（ICSE 投稿量近年确实在增长【猜测】，需核实具体数字），非 AI 论文的绝对数可能持平甚至增加，则"abandoned"不成立，论点退化为"AI 占比高"这一中性事实。
+- 最脆弱的假设：AI 研究的增长挤出了可靠性等方向的研究（替代效应），而非在一个整体扩张的研究共同体中新增。若 SE 会议的总论文数同期大幅增长，非 AI 论文的绝对数可能持平甚至增加，则"abandoned"不成立，论点退化为"AI 占比高"这一中性事实。
 - Reviewer 追问
   - "涉及 AI" 如何定义？由谁统计？ICSE '25 数据的来源只是会议日程页面
   - 有没有可靠性、运行时监控、测试方向论文数的时间序列？
@@ -9108,7 +9102,6 @@ $$
   - 分类：先用关键词规则（AI/ML/LLM/neural/deep learning/language model 等）标注"涉及 AI"，再用 LLM 做主题分类（reliability、testing、monitoring、formal methods、education、HCI、empirical 等），人工抽查 200 篇计算一致性（Cohen's κ）
   - 指标：每年每主题的绝对论文数与占比；非 AI 论文绝对数的年增长率；AI 论文中以可靠性/测试为研究对象的比例
   - 对照：总论文数增长曲线
-- 预期结果【猜测】：AI 占比从约 10% 升至 30% 以上；非 AI 论文绝对数大致持平或小幅下降；AI 论文中有相当比例研究测试与修复
 - 判定：若非 AI 主题绝对数下降超过 20% 且可靠性/监控类下降显著，支持挤出论点；若持平或上升，则论点主要是占比稀释
 - 算力：无需 GPU；LLM API 分类约 1 万至 2 万篇摘要，成本可控；一人一周可完成
 
