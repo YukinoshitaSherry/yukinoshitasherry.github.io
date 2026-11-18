@@ -8,7 +8,7 @@ tags:
   - GPU
   - SSH
   - Linux
-desc: 做 CS230 课程项目时遇到的。一份 AWS GPU 官方教程的中英双语精读版。从账号、额度、配额讲到 g4dn.xlarge 是什么、AMI、EBS、安全组、SSH 密钥、uv、tmux、scp、Jupyter 隧道和停机计费，每个名词都有解释。后半部分记录 EC2 配额一直是 0 之后改走 SageMaker Studio 的全过程，包括共享空间、SSH 远程连接和 30 分钟自动关机。
+desc: 做 CS230 课程项目时遇到的。一份 AWS GPU 官方教程的中英双语精读版。从账号、额度、配额讲到 g4dn.xlarge 是什么、AMI、EBS、安全组、SSH 密钥、uv、tmux、scp、Jupyter 隧道和停机计费，每个名词都有解释。后半部分记录 EC2 配额一直是 0 之后改走 SageMaker Studio 的全过程，包括共享空间、SSH 远程连接和 30 分钟自动关机；以及配额批下来后搬回 EC2、全组每人一把密钥共用一台机器的做法（公钥名单、安全组、IP 变化、共用规矩）。
 ---
 
 本文主要参考：
@@ -802,14 +802,164 @@ aws sagemaker list-apps --domain-id-equals <域ID> --profile myproj --region us-
 
 <br>
 
-## 12 排错表
+## 12 后来拿到了 EC2：一台机器，全组用 SSH 共用
+
+两天后 EC2 的 GPU 配额批下来了（us-east-2，8 vCPU），我们就从 SageMaker 搬到了一台 **g5.2xlarge**（1 块 A10G 24 GiB，8 vCPU，32 GiB 内存）。同样的卡，EC2 约 1.2 美元 / 小时，比 SageMaker 便宜两三成。训练放在 tmux 里无人值守地跑，开机自启一个 30 分钟空闲自动停机的看门狗（判断逻辑和 11.6 一样；停机方式是在机器里执行 `sudo shutdown -h now`，前提是启动实例时把 **Shutdown behavior 设为 Stop**，默认就是 Stop。如果设成了 Terminate，系统关机就等于删除实例连同硬盘，一定要核对）。
+
+问题随之而来：**一台机器，三个人，怎么都能登录，又不互相发私钥？**
+
+### 12.1 原理：两把锁
+
+登录 EC2 要同时过两关：
+
+| 关卡 | 管什么 | 放在哪 |
+| :--- | :--- | :--- |
+| 安全组（防火墙） | **从哪来**：只有名单上的 IP 能连 22 端口 | AWS 控制台 / CLI |
+| `authorized_keys`（公钥名单） | **你是谁**：只有私钥和名单上某个公钥配对的人能登录 | 机器上 `~ubuntu/.ssh/authorized_keys`，一行一个公钥 |
+
+所以给组员开权限 = 把她的**公钥**加进 `authorized_keys` + 把她的 **IP** 加进安全组。私钥从头到尾只在她自己电脑上。
+
+> [!INFO]+ authorized_keys
+> 服务器上的一个纯文本文件，每行一个公钥，格式是 `算法 公钥内容 备注`，比如 `ssh-ed25519 AAAA... alice-cs230`。登录时服务器拿你声称的公钥出题，你用对应私钥签名，对得上就放行。AWS 启动实例时会把创建时选的那把密钥对的公钥写进第一行；之后再加人就是往后追加行，删人就是删掉那一行。行尾备注写上名字和日期，以后好查。
+> A plain-text file on the server with one public key per line (`algorithm key comment`). At login the server challenges you with a listed public key and you sign with the matching private key. AWS writes the launch key pair's public key as the first line; adding a person appends a line, removing them deletes it. Put a name and date in the comment.
+
+> [!WARNING]+ 为什么不能把 .pem 发给组员
+> 最省事的做法是把创建实例时下载的 `.pem` 发到群里，大家都用它登录。**不要这样做**：私钥一旦发出去就收不回来，聊天记录、网盘、邮件里都会留一份；谁泄露的也查不出来；有人退出项目也没法单独收回他的权限，只能换掉所有人的钥匙。每人一对密钥，公钥交上来，私钥自己留着，以上问题都没有。
+> Sending the launch `.pem` to the group chat is the shortcut to avoid: a shared private key cannot be taken back, copies stay in chats and drives, leaks cannot be traced, and one person cannot be removed without re-keying everyone. One key pair per person, public half handed in, private half kept.
+
+### 12.2 组员：生成自己的密钥（只做一次）
+
+Mac 的终端、Linux、Windows 的 PowerShell 都自带 OpenSSH，命令一样：
+
+```bash
+ssh-keygen -t ed25519 -C "yourname-cs230" -f ~/.ssh/cs230_ec2_me
+```
+
+- 提示输入密码（passphrase）时可以直接回车不设，也可以设一个只有自己知道的。**输入时屏幕上什么都不显示，是正常的。**
+- 生成两个文件：`~/.ssh/cs230_ec2_me` 是**私钥，留在自己电脑上**；`~/.ssh/cs230_ec2_me.pub` 是公钥，可以发。
+- 把 `.pub` 的内容发给负责人（一行，以 `ssh-ed25519` 开头），再附上自己的**公网 IP**：
+
+```bash
+cat ~/.ssh/cs230_ec2_me.pub
+curl https://checkip.amazonaws.com
+```
+
+`curl` 那行返回的一串数字就是公网 IP；也可以用浏览器打开同一个网址。
+
+> [!INFO]+ ed25519、-C、-f
+> `-t ed25519` 选算法：比老的 RSA 更短更快，安全性相当，现在是 OpenSSH 推荐的默认。`-C` 是写在公钥末尾的备注，只为好认，不影响安全。`-f` 指定文件名；不写的话默认是 `~/.ssh/id_ed25519`，容易和别的项目的钥匙混在一起，所以给这个项目单独起名。
+> `-t ed25519` picks the algorithm (shorter and faster than RSA, OpenSSH's recommended default). `-C` is a comment at the end of the public key, for recognition only. `-f` sets the file name; the default `~/.ssh/id_ed25519` mixes with other projects, so give this one its own name.
+
+> [!INFO]+ 公网 IP 和内网 IP
+> 电脑"设置 → 网络"里看到的 `192.168.x.x`、`10.x.x.x` 是**内网 IP**，只在你家路由器或学校网络里有意义。AWS 安全组看到的是你出了路由器之后的**公网 IP**，只能从外面的网站查（比如上面那个 AWS 自己的地址）。发错成内网 IP 是最常见的错误之一。
+> The `192.168.x.x` / `10.x.x.x` address in your network settings is private and only meaningful inside your router or campus network. The security group sees your public IP, which only an outside site can tell you. Sending the private one is a classic mistake.
+
+### 12.3 负责人：给组员开权限
+
+在负责人自己的电脑上（已经能登录实例，AWS CLI 已登录）。`INSTANCE_IP` 是实例当前的公网地址，`TEAMMATE_IP` 是组员发来的 IP，`SG_ID` 是实例的安全组 ID：
+
+```bash
+# 1) 把组员的公钥追加到实例上（已存在就不重复加），行尾备注名字和日期
+KEY="$(awk '{print $1" "$2}' alice.pub) alice-added-$(date +%F)"
+ssh -i ~/.ssh/my-key.pem ubuntu@INSTANCE_IP \
+  "grep -qF '$(awk '{print $2}' alice.pub)' ~/.ssh/authorized_keys || echo '$KEY' >> ~/.ssh/authorized_keys"
+
+# 2) 安全组放行组员的 IP（/32 = 只放这一个地址）
+aws ec2 authorize-security-group-ingress --profile myproj --region us-east-2 \
+  --group-id SG_ID \
+  --ip-permissions "IpProtocol=tcp,FromPort=22,ToPort=22,IpRanges=[{CidrIp=TEAMMATE_IP/32,Description=alice-2026-11-17}]"
+```
+
+我们把这两步写成了一个小脚本 `add_teammate_key.sh <公钥文件> <IP> <名字>`，脚本里先检查文件确实是公钥（以 `ssh-ed25519` / `ssh-rsa` 开头），里面如果出现 `PRIVATE KEY` 字样就拒绝，防止组员把私钥误发过来。
+
+收回权限：删掉实例上 `~/.ssh/authorized_keys` 里带她名字的那一行，再删掉安全组里对应的规则（控制台或 `aws ec2 revoke-security-group-ingress`）。
+
+> [!INFO]+ 安全组规则的 Description
+> 每条入站规则可以写一段说明。写上"谁、哪天"，过一个月再看规则列表时，才知道哪个 IP 是谁的、还要不要留。不写的话只剩一排数字。
+> Each inbound rule has a description field. "Who, which day" is what lets you tell, a month later, whose IP each rule is and whether it can go.
+
+### 12.4 组员：登录和看进度
+
+```bash
+ssh -i ~/.ssh/cs230_ec2_me ubuntu@INSTANCE_IP
+```
+
+- Windows PowerShell 里路径也可以写成 `$HOME\.ssh\cs230_ec2_me`。`-i` 后面跟的是**私钥**（没有 `.pub` 的那个）。
+- 第一次会问 `Are you sure you want to continue connecting (yes/no)?`，输入 `yes` 回车（指纹的含义见 5.1 的卡片）。
+- 看到 `ubuntu@ip-...` 开头的提示符就是进去了。只想看看进度的话：
+
+```bash
+tail -5 ~/CS-230/runs/logs/<日志文件>.log   # 训练日志最后几行
+nvidia-smi                                  # GPU 在不在忙
+tmux attach -r -t cs230                     # 只读方式看正在跑的 tmux 会话
+exit                                        # 退出登录，训练不受影响
+```
+
+`tmux attach -r` 里的 `-r` 是只读：能看不能输入，误按键盘也不会影响训练。从 tmux 里出来：先按 `Ctrl-b`，松开，再按 `d`。
+
+### 12.5 IP 会变：最常见的"连不上"
+
+**现象**：昨天还好好的，今天 `ssh: connect to host ... port 22: Operation timed out`。
+
+**原因**：安全组只认名单上的 IP，而你的公网 IP 经常变：
+
+- 换了网络：宿舍 → 图书馆 → 家里 → 手机热点，每个网络出口不同。
+- 同一个网络也会变：学校和宽带运营商会从一段地址池里轮流分配，我们组有人半小时内就从 `x.x.x.22` 变成了 `x.x.x.77`。
+- 开着 VPN：出口是 VPN 服务器的 IP，换节点就换 IP。
+
+**办法**：
+
+1. 先排除实例没开机：控制台里实例是 Running 吗？负责人自己能连上吗？
+2. 组员重新运行 `curl https://checkip.amazonaws.com`，把新 IP 发给负责人加上。
+3. 同一个网络反复变，可以放行整段地址，比如 `x.x.x.0/24`（256 个地址）。登录仍然需要私钥，风险不大，但范围变宽了，由负责人决定。**永远不要放行 `0.0.0.0/0`**（全世界），那样 22 端口会被扫描器整天敲门。
+4. 关掉 VPN 再查 IP、再连。
+
+**另一种 IP 变化**：实例本身停机再开机，它的公网 IP 也会变（见 5.4），所有人都要换成新地址。想固定，可以给实例绑一个 Elastic IP；注意 2024 年 2 月起 AWS 对每个公网 IPv4 地址按小时收费（约 0.005 美元 / 小时），绑着但实例停机时也收。
+
+> [!INFO]+ CIDR：/32 和 /24
+> `a.b.c.d/32` 表示前 32 位都固定，也就是**只有这一个地址**；`a.b.c.0/24` 表示前 24 位固定、最后一段 0 到 255 都算，共 256 个地址；`0.0.0.0/0` 表示所有地址。斜杠后面的数字越小，范围越大。
+> `/32` fixes all 32 bits, i.e. exactly one address; `/24` fixes the first 24 bits, so the last number may be 0 to 255 (256 addresses); `/0` means every address. The smaller the number after the slash, the wider the range.
+
+### 12.6 共用一台机器的规矩
+
+> [!WARNING]+ 大家都是同一个 ubuntu 用户
+> 所有人登录进来都是 `ubuntu`，权限完全一样：能看到、也能删掉、杀掉别人的文件和进程。所以靠约定：
+> 1. **只有负责人开机、关机**。GPU 按小时收费，开机前在组里说一声；关机用 **Stop，不要 Terminate**（Terminate 会连硬盘一起删）。
+> 2. **训练在 tmux 里跑**，其他人用 `tmux attach -r` 只读查看，不要在训练窗口里按 `Ctrl-c`。
+> 3. **不要另外占用 GPU**。一块卡上同时跑两个训练，两个都会变慢，计时和显存也会互相干扰。
+> 4. **不删别人的目录**，自己的试验放在自己名字的子目录里。
+> 5. **有人退出项目，当天收回**他的公钥和 IP 规则。
+> 6. 自动停机看门狗一直开着：没有训练进程、GPU 空闲 30 分钟就停机，忘了关也最多多花半小时的钱。
+> Everyone logs in as the same `ubuntu` user with identical rights, so the rules are social: only the lead starts and stops the instance (Stop, never Terminate); training runs in tmux and others watch read-only; nobody starts a second GPU job; nobody deletes others' directories; remove a leaving member's key and IP rule the same day; the 30-minute idle watchdog stays on.
+
+> [!NOTE]- English version
+> **12 We got EC2 after all: one machine, shared over SSH.** Two days later the EC2 GPU quota was approved (us-east-2, 8 vCPUs) and we moved from SageMaker to a g5.2xlarge (one A10G 24 GiB, 8 vCPUs, 32 GiB), about 1.2 USD per hour, 20 to 30% cheaper than SageMaker for the same GPU. Training runs unattended in tmux, and a 30-minute idle watchdog (same logic as 11.6) starts at boot; it runs `sudo shutdown -h now`, which only stops the instance if its shutdown behavior is Stop (the default). With Terminate, an OS shutdown deletes the instance and its disk, so check it. The question: how can three people log in without passing private keys around?
+>
+> **12.1 Two locks.** The security group decides where you may connect from (listed IPs on port 22); `authorized_keys` on the machine decides who you are (only someone holding a private key that matches a listed public key). Giving a teammate access means adding her public key to `authorized_keys` and her IP to the security group; her private key never leaves her computer. The cards explain `authorized_keys` and why the launch `.pem` must not be shared.
+>
+> **12.2 Teammate: make your own key, once.** `ssh-keygen -t ed25519 -C "yourname-cs230" -f ~/.ssh/cs230_ec2_me` works in macOS Terminal, Linux and Windows PowerShell. A passphrase is optional and is typed invisibly. Keep the private file; send the one-line `.pub` content and your public IP from `curl https://checkip.amazonaws.com`. The cards explain ed25519, `-C`, `-f`, and public vs private IP addresses.
+>
+> **12.3 Lead: grant access.** Append the teammate's public key to `~/.ssh/authorized_keys` on the instance with a name and date comment, then allow `TEAMMATE_IP/32` on port 22 in the security group with a description. Our script checks the file really is a public key and refuses anything containing `PRIVATE KEY`. To revoke, delete her line from `authorized_keys` and the rule from the security group.
+>
+> **12.4 Teammate: log in and watch.** `ssh -i ~/.ssh/cs230_ec2_me ubuntu@INSTANCE_IP` (on Windows the path may be `$HOME\.ssh\cs230_ec2_me`; `-i` takes the private key). Answer `yes` on first connect. Then `tail` the log, `nvidia-smi`, or `tmux attach -r -t cs230` to watch read-only (leave with Ctrl-b then d), and `exit` to log out.
+>
+> **12.5 Changing IPs, the usual "cannot connect".** A timeout usually means your public IP changed: a different network, an ISP or campus address pool, or a VPN. Check the instance is running and the lead can connect, then send the new IP. If it keeps changing within one network, the lead may allow the whole `/24`; never allow `0.0.0.0/0`. The instance's own IP also changes after stop and start; an Elastic IP fixes it, but every public IPv4 address has been billed hourly since February 2024, even while the instance is stopped. The card explains `/32`, `/24` and `/0`.
+>
+> **12.6 House rules for a shared machine.** Everyone is the same `ubuntu` user, so: only the lead starts and stops the instance, and only with Stop; training runs in tmux and others attach read-only; no second GPU job; no deleting others' directories; revoke a leaving member the same day; keep the idle watchdog on.
+
+<br>
+
+## 13 排错表
 
 | 问题 / Problem | 检查什么 / What to check |
 | :--- | :--- |
 | vCPU limit exceeded | 看 us-west-2 里 Running On-Demand G and VT instances 的**已应用**配额值，一台 g4dn.xlarge 需要 4 个空闲 vCPU。Check the applied quota in us-west-2; one g4dn.xlarge needs 4 free vCPUs. |
 | Insufficient capacity | 换同区域的另一个可用区，或者过一会再试，配额批了不代表有货。Try another AZ in the same region or retry later; quota does not guarantee capacity. |
 | SSH 超时 / SSH times out | 实例状态、状态检查、当前公网地址、公有子网路由、安全组是否允许你**当前** IP 的入站 SSH。Instance state, status checks, current address, public subnet route, inbound SSH from your current IP. |
-| Permission denied (publickey) | 用户名用 ubuntu，私钥要配对；macOS / Linux / WSL 检查 `chmod 400`。Use ubuntu and the matching .pem; check `chmod 400`. |
+| Permission denied (publickey) | 用户名用 ubuntu，私钥要配对；macOS / Linux / WSL 检查 `chmod 400`。组员：公钥是否已加进 `authorized_keys`，`-i` 后面是不是误用了 `.pub`。Use ubuntu and the matching key; check `chmod 400`. Teammates: is your public key in `authorized_keys`, and did you pass the private key (not `.pub`) to `-i`? |
+| 昨天能连、今天超时 / Worked yesterday, times out today | 多半是你的公网 IP 变了（换网络、地址池轮换、VPN），`curl https://checkip.amazonaws.com` 查新 IP 交给负责人加进安全组（12.5）。Your public IP probably changed; send the new one to the lead (12.5). |
+| `Load key ...: error in libcrypto`（Windows） | 私钥被存成了 Windows 换行（CRLF），在 Git Bash 里 `sed -i 's/$//' 私钥文件`。The key file got CRLF line endings; strip them. |
+| `REMOTE HOST IDENTIFICATION HAS CHANGED` | 同一个 IP 换了一台新实例，指纹变了。确认是自己的新机器后 `ssh-keygen -R INSTANCE_IP` 删掉旧记录。A new instance reuses the address; after confirming, remove the old entry with `ssh-keygen -R`. |
 | nvidia-smi 失败 / fails | 确认机型带 GPU、用的是指定的 NVIDIA 驱动 AMI。先修驱动，再动 Python 包。Confirm a GPU instance and the intended driver AMI; fix the driver before touching Python packages. |
 | TensorFlow 看不到 GPU | 用 `.venv/bin/python` 跑检查，重装 `tensorflow[and-cuda]`，再看 TensorFlow 官方 GPU 排错。Run the check with `.venv/bin/python`, reinstall the CUDA extra, then see TensorFlow's troubleshooting. |
 | Import / 依赖错误 | 检查固定的仓库版本和 Python 3.12 环境，不要把 SciPy 降到 1.1。Check the pinned revision and Python 3.12; do not downgrade SciPy to 1.1. |
@@ -821,11 +971,11 @@ aws sagemaker list-apps --domain-id-equals <域ID> --profile myproj --region us-
 找人求助时附上：区域、AMI 名字、机型、完整报错、`nvidia-smi` 和 TensorFlow GPU 检查的输出。**永远不要贴私钥、AWS Access Key、密码、Jupyter token、GitHub token。**
 
 > [!NOTE]- English version
-> **12 Troubleshooting.** The table is bilingual. When asking someone for help, include the region, AMI name, instance type, the exact error, and the output of `nvidia-smi` and the TensorFlow GPU check. Never post private keys, AWS access keys, passwords, Jupyter tokens or GitHub tokens.
+> **13 Troubleshooting.** The table is bilingual. When asking someone for help, include the region, AMI name, instance type, the exact error, and the output of `nvidia-smi` and the TensorFlow GPU check. Never post private keys, AWS access keys, passwords, Jupyter tokens or GitHub tokens.
 
 <br>
 
-## 13 一页纸清单 / One-page checklist
+## 14 一页纸清单 / One-page checklist
 
 - [ ] credits 兑换了，余额和过期时间看过了，预算提醒设了 / Credits redeemed, balance and expiry checked, budget alert set
 - [ ] 区域没选错，GPU 配额已应用 ≥ 4 vCPU / Right region, applied GPU quota ≥ 4 vCPUs
@@ -835,4 +985,6 @@ aws sagemaker list-apps --domain-id-equals <域ID> --profile myproj --region us-
 - [ ] `nvidia-smi` 正常，TensorFlow GPU 列表非空 / `nvidia-smi` works, TensorFlow sees the GPU
 - [ ] 训练在 tmux 里 / Training runs in tmux
 - [ ] 结果拷回本地或推到 GitHub / Results copied back or pushed
+- [ ] （多人共用）每人一对密钥，只收公钥；安全组规则写了名字和日期；没有 `0.0.0.0/0` / (Shared) one key pair per person, public keys only; rules carry name and date; no `0.0.0.0/0`
+- [ ] （多人共用）Shutdown behavior 是 Stop，空闲看门狗在运行 / (Shared) shutdown behavior is Stop, idle watchdog running
 - [ ] **实例已 Stop，控制台显示 Stopped** / **Instance stopped and shown as Stopped**
